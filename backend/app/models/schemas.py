@@ -19,11 +19,41 @@ class ConfigUpdateRequest(BaseModel):
     api_key: Optional[str] = None
     model: Optional[str] = None
     temperature: Optional[float] = Field(default=None, ge=0, le=2)
+    top_p: Optional[float] = Field(default=None, ge=0, le=1)
     max_tokens: Optional[int] = Field(default=None, ge=1, le=128000)
 
 
 class ConfigResponse(AppConfig):
     api_key_configured: bool = False
+
+
+class ConfigProbeRequest(BaseModel):
+    """Optional overrides for test/list before saving config."""
+
+    api_base: Optional[str] = None
+    api_key: Optional[str] = None
+    model: Optional[str] = None
+
+
+class ConfigTestResponse(BaseModel):
+    ok: bool
+    message: str
+    model: str = ""
+    models_count: Optional[int] = None
+    models: list[str] = Field(default_factory=list)
+    preview: Optional[str] = None
+
+
+class ModelInfo(BaseModel):
+    id: str
+    owned_by: str = ""
+    created: Optional[int] = None
+
+
+class ConfigModelsResponse(BaseModel):
+    models: list[ModelInfo] = Field(default_factory=list)
+    selected: str = ""
+    count: int = 0
 
 
 class OutlineChapter(BaseModel):

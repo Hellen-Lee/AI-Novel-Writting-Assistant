@@ -18,6 +18,7 @@ class AppConfig(BaseModel):
     api_key: str = ""
     model: str = "gpt-4o-mini"
     temperature: float = Field(default=0.7, ge=0, le=2)
+    top_p: float = Field(default=0.9, ge=0, le=1)
     max_tokens: int = Field(default=2048, ge=1, le=128000)
 
     @field_validator("api_base")
