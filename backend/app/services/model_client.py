@@ -1,7 +1,9 @@
-"""OpenAI-compatible model client."""
+"""OpenAI-compatible model client with streaming support."""
 
 from __future__ import annotations
 
+import json
+from collections.abc import Iterator
 from typing import Any, Optional
 
 import httpx
@@ -36,6 +38,25 @@ def _extract_error_message(response: httpx.Response) -> str:
     if text:
         return f"API 错误 ({response.status_code}): {text[:300]}"
     return f"API 错误 ({response.status_code})"
+
+
+def _extract_error_from_bytes(content: bytes, status_code: int) -> str:
+    text = content.decode("utf-8", errors="replace").strip()
+    if not text:
+        return f"API 错误 ({status_code})"
+    try:
+        data = json.loads(text)
+        if isinstance(data, dict):
+            err = data.get("error")
+            if isinstance(err, dict) and err.get("message"):
+                return f"API 错误 ({status_code}): {err['message']}"
+            if isinstance(err, str):
+                return f"API 错误 ({status_code}): {err}"
+            if data.get("message"):
+                return f"API 错误 ({status_code}): {data['message']}"
+    except json.JSONDecodeError:
+        pass
+    return f"API 错误 ({status_code}): {text[:300]}"
 
 
 def resolve_runtime_config(overrides: Optional[dict[str, Any]] = None) -> dict[str, Any]:
@@ -108,6 +129,46 @@ class ModelClient:
             return response.json()
         except ValueError as exc:
             raise ModelClientError("API 响应不是合法 JSON") from exc
+
+    def _build_messages(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, str]]] = None,
+    ) -> list[dict[str, str]]:
+        chat_messages: list[dict[str, str]] = []
+        if system:
+            chat_messages.append({"role": "system", "content": system})
+        if messages:
+            chat_messages.extend(messages)
+        if not chat_messages:
+            raise ModelClientError("messages 不能为空")
+        return chat_messages
+
+    def _build_chat_payload(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, str]]] = None,
+        params: Optional[dict[str, Any]] = None,
+        *,
+        stream: bool = False,
+    ) -> dict[str, Any]:
+        params = params or {}
+        if not self.config.get("api_key"):
+            raise ModelClientError("API Key 未配置，请先在模型配置页填写")
+
+        payload: dict[str, Any] = {
+            "model": params.get("model") or self.config["model"],
+            "messages": self._build_messages(system, messages),
+            "temperature": params.get(
+                "temperature", self.config.get("temperature", 0.7)
+            ),
+            "top_p": params.get("top_p", self.config.get("top_p", 0.9)),
+            "max_tokens": params.get(
+                "max_tokens", self.config.get("max_tokens", 2048)
+            ),
+            "stream": stream,
+        }
+        return payload
 
     def list_models(self) -> list[dict[str, Any]]:
         """Fetch available models from OpenAI-compatible GET /models."""
@@ -203,37 +264,9 @@ class ModelClient:
         params: Optional[dict[str, Any]] = None,
     ) -> str:
         """
-        Call OpenAI-compatible chat completions.
-
-        Args:
-            system: Optional system prompt, prepended as a system message.
-            messages: Chat messages as [{role, content}, ...].
-            params: Optional overrides for model / temperature / top_p / max_tokens.
+        Non-streaming chat completion. Prefer generate_stream for UI generation.
         """
-        params = params or {}
-        if not self.config.get("api_key"):
-            raise ModelClientError("API Key 未配置，请先在模型配置页填写")
-
-        chat_messages: list[dict[str, str]] = []
-        if system:
-            chat_messages.append({"role": "system", "content": system})
-        if messages:
-            chat_messages.extend(messages)
-        if not chat_messages:
-            raise ModelClientError("messages 不能为空")
-
-        payload = {
-            "model": params.get("model") or self.config["model"],
-            "messages": chat_messages,
-            "temperature": params.get(
-                "temperature", self.config.get("temperature", 0.7)
-            ),
-            "top_p": params.get("top_p", self.config.get("top_p", 0.9)),
-            "max_tokens": params.get(
-                "max_tokens", self.config.get("max_tokens", 2048)
-            ),
-        }
-
+        payload = self._build_chat_payload(system, messages, params, stream=False)
         data = self._request(
             "POST",
             "/chat/completions",
@@ -244,6 +277,101 @@ class ModelClient:
             return data["choices"][0]["message"]["content"]
         except (KeyError, IndexError, TypeError) as exc:
             raise ModelClientError("模型响应格式无效，未找到生成内容") from exc
+
+    def generate_stream(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, str]]] = None,
+        params: Optional[dict[str, Any]] = None,
+    ) -> Iterator[str]:
+        """
+        Streaming chat completion. Yields plain text content deltas.
+
+        Uses OpenAI-compatible SSE: data: {choices:[{delta:{content}}]} / [DONE]
+        """
+        payload = self._build_chat_payload(system, messages, params, stream=True)
+        url = f"{self.base_url}/chat/completions"
+        timeout = httpx.Timeout(120.0, connect=30.0)
+
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                with client.stream(
+                    "POST",
+                    url,
+                    headers=self._headers(),
+                    json=payload,
+                ) as response:
+                    if response.status_code >= 400:
+                        body = response.read()
+                        raise ModelClientError(
+                            _extract_error_from_bytes(body, response.status_code),
+                            status_code=response.status_code,
+                        )
+
+                    yield from self._iter_content_deltas(response)
+        except ModelClientError:
+            raise
+        except httpx.TimeoutException as exc:
+            raise ModelClientError("请求超时，请检查 API 地址或网络连接") from exc
+        except httpx.RequestError as exc:
+            raise ModelClientError(f"无法连接 API：{exc}") from exc
+
+    def iter_sse(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, str]]] = None,
+        params: Optional[dict[str, Any]] = None,
+    ) -> Iterator[str]:
+        """
+        Yield SSE frames for FastAPI StreamingResponse.
+
+        Protocol:
+          data: {"content":"..."}\n\n
+          data: {"error":"..."}\n\n   (on mid-stream failure)
+          data: [DONE]\n\n
+        """
+        try:
+            for chunk in self.generate_stream(system, messages, params):
+                yield f"data: {json.dumps({'content': chunk}, ensure_ascii=False)}\n\n"
+            yield "data: [DONE]\n\n"
+        except ModelClientError as exc:
+            yield f"data: {json.dumps({'error': exc.message}, ensure_ascii=False)}\n\n"
+            yield "data: [DONE]\n\n"
+
+    @staticmethod
+    def _iter_content_deltas(response: httpx.Response) -> Iterator[str]:
+        for line in response.iter_lines():
+            if not line:
+                continue
+            text = line.strip()
+            if not text.startswith("data:"):
+                continue
+            data = text[5:].strip()
+            if not data or data == "[DONE]":
+                break
+            try:
+                chunk = json.loads(data)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(chunk, dict):
+                continue
+
+            err = chunk.get("error")
+            if err:
+                if isinstance(err, dict):
+                    message = str(err.get("message") or err)
+                else:
+                    message = str(err)
+                raise ModelClientError(f"API 错误: {message}")
+
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            choice = choices[0] if isinstance(choices[0], dict) else {}
+            delta = choice.get("delta") or {}
+            content = delta.get("content")
+            if content:
+                yield str(content)
 
 
 def build_client(overrides: Optional[dict[str, Any]] = None) -> ModelClient:

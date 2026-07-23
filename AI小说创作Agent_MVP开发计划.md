@@ -5,65 +5,65 @@
 
 ---
 
-## 一、项目初始化（第 1 天）
+## 一、项目初始化（第 1 天）✅ 已完成
 
-### 1.1 目录与工程初始化
+### 1.1 目录与工程初始化 ✅
 
-- [ ] 创建 `frontend/` 目录，初始化 React 18 + Vite 项目
-- [ ] 创建 `backend/` 目录，初始化 FastAPI 项目
-- [ ] 创建 `data/` 与 `.gitignore`（忽略 `data/` 与依赖目录）
-- [ ] 安装基础依赖
+- [x] 创建 `frontend/` 目录，初始化 React 18 + Vite 项目
+- [x] 创建 `backend/` 目录，初始化 FastAPI 项目
+- [x] 创建 `data/` 与 `.gitignore`（忽略 `data/` 与依赖目录）
+- [x] 安装基础依赖
   - 前端：`react`, `react-dom`, `react-router-dom`, `axios`
   - 后端：`fastapi`, `uvicorn`, `pydantic`, `python-dotenv`, `httpx`
 
-### 1.2 基础启动脚本
+### 1.2 基础启动脚本 ✅
 
-- [ ] 后端 `backend/run.py` 启动 FastAPI 服务
-- [ ] 前端 `npm run dev` 可访问页面
-- [ ] 前端配置 Vite 代理到 `localhost:8000`
-- [ ] 测试前后端连通（Hello World 接口）
+- [x] 后端 `backend/run.py` 启动 FastAPI 服务
+- [x] 前端 `npm run dev` 可访问页面
+- [x] 前端配置 Vite 代理到 `localhost:8000`
+- [x] 测试前后端连通（Hello World 接口）
 
-### 1.3 设计本地数据结构
+### 1.3 设计本地数据结构 ✅
 
-- [ ] 确定项目目录结构（`data/projects/{project_id}/...`）
-- [ ] 设计 `meta.json`、`settings.json`、`memory.json`、`outline.json` 字段
-- [ ] 设计章节正文存储方式（Markdown 文件）
+- [x] 确定项目目录结构（`data/projects/{project_id}/...`）
+- [x] 设计 `meta.json`、`settings.json`、`memory.json`、`outline.json` 字段
+- [x] 设计章节正文存储方式（Markdown 文件）
 
 ---
 
-## 二、后端基础模块（第 1–2 天）
+## 二、后端基础模块（第 1–2 天）✅ 已完成
 
-### 2.1 本地配置模块（config.py）
+### 2.1 本地配置模块（config.py）✅
 
-- [ ] 读写 `data/config.json`（API 地址、密钥、默认模型、参数）
-- [ ] 提供默认值与配置校验
+- [x] 读写 `data/config.json`（API 地址、密钥、默认模型、参数）
+- [x] 提供默认值与配置校验
 
-### 2.2 项目文件管理
+### 2.2 项目文件管理 ✅
 
-- [ ] 实现项目 CRUD 接口
+- [x] 实现项目 CRUD 接口
   - `GET /api/projects`
   - `POST /api/projects`
   - `GET /api/projects/{id}`
-- [ ] 实现章节 CRUD 接口
+- [x] 实现章节 CRUD 接口
   - `GET /api/projects/{id}/chapters`
   - `POST /api/projects/{id}/chapters`
   - `GET /api/projects/{id}/chapters/{cid}`
-- [ ] 封装项目目录读写工具函数
+- [x] 封装项目目录读写工具函数
 
-### 2.3 记忆管理（memory_store）
+### 2.3 记忆管理（memory_store）✅
 
-- [ ] 实现 `memory.json` 读写
-- [ ] 分类结构：世界观、人物、物品、剧情要点
-- [ ] 提供接口：
+- [x] 实现 `memory.json` 读写
+- [x] 分类结构：世界观、人物、物品、剧情要点
+- [x] 提供接口：
   - `GET /api/projects/{id}/memory`
   - `PUT /api/projects/{id}/memory`
 
-### 2.4 模型调用（model_client）
+### 2.4 模型调用（model_client）✅
 
-- [ ] 封装 OpenAI 兼容接口调用
-- [ ] 从 `config.json` 读取配置
-- [ ] 实现流式返回（可选，MVP 可先非流式）
-- [ ] 接口：`POST /api/config/test` 测试连接
+- [x] 封装 OpenAI 兼容接口调用
+- [x] 从 `config.json` 读取配置
+- [x] 实现流式返回（`generate_stream` / `iter_sse`；非流式 `generate` 保留给连接测试等）
+- [x] 接口：`POST /api/config/test` 测试连接（另含 `/api/config/models` 模型列表）
 
 ---
 
@@ -212,7 +212,7 @@
 
 | 风险 | 应对 |
 | --- | --- |
-| 大模型 API 响应慢 | 增加 loading 与中断机制；MVP 使用非流式简化 |
+| 大模型 API 响应慢 | 增加 loading 与中断机制；MVP 使用流式返回提升体感 |
 | 长上下文超出 token 限制 | 记忆与上下文做截断；优先注入高相关信息 |
 | 生成内容不符合预期 | 提示词迭代优化；提供丢弃/重试功能 |
 | 本地文件损坏或丢失 | 数据目录结构简单，用户可手动备份 |
@@ -223,7 +223,6 @@
 ## 九、MVP 后可选方向
 
 - 打包为桌面 EXE（Electron / Tauri）
-- 流式生成输出
 - 记忆进化节点自动提示
 - 单章临时规则
 - 用户自定义 SKILL.md 前端管理界面

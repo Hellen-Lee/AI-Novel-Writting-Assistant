@@ -117,7 +117,8 @@ AINovel/
 
 - 统一封装 OpenAI 兼容接口的 HTTP 请求。
 - 从本地 `data/config.json` 读取 API 地址、密钥、模型、参数。
-- 提供 `generate(system, messages, params)` 方法供上层调用。
+- 提供 `generate(system, messages, params)`（非流式）与 `generate_stream` / `iter_sse`（流式）供上层调用。
+- MVP 生成任务默认走流式；连接测试等可用非流式。
 - MVP 只支持单一默认模型配置。
 
 ### 5.2 提示词组装（prompt_builder）
