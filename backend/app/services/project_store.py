@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 from app.config import PROJECTS_DIR, ensure_data_dir
-from app.services.memory_store import DEFAULT_MEMORY, save_memory
+from app.services.memory_store import empty_memory, save_memory
 
 CHAPTER_ID_RE = re.compile(r"^chapter_(\d+)$")
 
@@ -233,7 +233,7 @@ def create_project(
     save_meta(project_id, meta)
     save_settings(project_id, settings)
     save_outline(project_id, outline)
-    save_memory(project_id, DEFAULT_MEMORY.copy())
+    save_memory(project_id, empty_memory(), touch_meta=False)
     write_chapter_content(project_id, filename, "")
 
     return get_project_detail(project_id)

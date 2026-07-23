@@ -117,3 +117,32 @@ class ChapterDetail(BaseModel):
     filename: str
     content: str
     word_count: int = 0
+
+
+class MemoryEntry(BaseModel):
+    id: str = ""
+    name: str = Field(min_length=1)
+    content: str = ""
+    tags: list[str] = Field(default_factory=list)
+    created_at: str = ""
+    updated_at: str = ""
+
+
+class ProjectMemory(BaseModel):
+    worldview: list[MemoryEntry] = Field(default_factory=list)
+    characters: list[MemoryEntry] = Field(default_factory=list)
+    items: list[MemoryEntry] = Field(default_factory=list)
+    plot_points: list[MemoryEntry] = Field(default_factory=list)
+    relationships: list[MemoryEntry] = Field(default_factory=list)
+
+
+class MemoryEntryCreateRequest(BaseModel):
+    name: str = Field(min_length=1)
+    content: str = ""
+    tags: list[str] = Field(default_factory=list)
+
+
+class MemoryEntryUpdateRequest(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1)
+    content: Optional[str] = None
+    tags: Optional[list[str]] = None
