@@ -67,30 +67,36 @@
 
 ---
 
-## 三、SKILL.md 体系（第 2–3 天）
+## 三、SKILL.md 体系（第 2–3 天）✅ 已完成
 
-### 3.1 SKILL.md 文件设计
+> 约定：用 `kind: quick_action | skill` 显式区分。  
+> - `quick_action`（continue/polish/expand/generate_setting）：保留 `system` 槽位，按钮或 `/name` 手动调用。  
+> - `skill`（其他内置或 `custom/`）：无 `system`，调用时 system 固定为空；含 `disable-model-invocation`；可 `/name` 手动调用。  
+> MVP 不做模型自动选用，但开关字段落地。
 
-- [ ] 设计 SKILL.md 格式规范（YAML frontmatter + Markdown body）
-- [ ] 创建内置 SKILL.md：
+### 3.1 SKILL.md 文件设计 ✅
+
+- [x] 设计 SKILL.md 格式规范（YAML frontmatter + Markdown body；`kind` 分流）
+- [x] 创建内置 quick_action：
   - `backend/app/skills/continue.md`
   - `backend/app/skills/polish.md`
   - `backend/app/skills/expand.md`
   - `backend/app/skills/generate_setting.md`
-- [ ] 预留 `backend/app/skills/custom/` 用户自定义目录
+- [x] 预留 `backend/app/skills/custom/`，并放 1 个 `kind: skill` 示例（`scene-beat.md`）
 
-### 3.2 技能加载器（skill_loader）
+### 3.2 技能加载器（skill_loader） ✅
 
-- [ ] 启动时扫描 `skills/` 和 `skills/custom/`
-- [ ] 解析 name、description、system、user_template
-- [ ] 校验必填字段
-- [ ] 按名称提供给 `prompt_builder`
+- [x] 启动时扫描 `skills/` 和 `skills/custom/`（custom 同名覆盖）
+- [x] 解析 name、description、kind、system（仅 quick_action）、disable-model-invocation、正文
+- [x] 按 kind 校验必填/禁止字段
+- [x] 提供列表与按名称查询；挂 `GET /api/skills`、`GET /api/skills/{name}`
 
-### 3.3 提示词组装（prompt_builder）
+### 3.3 提示词组装（prompt_builder） ✅
 
-- [ ] 根据 skill 名称加载对应 SKILL.md
-- [ ] 注入变量：规则、记忆、最近 3 章、当前内容、用户输入
-- [ ] 输出 `{system, user}` 给 model_client
+- [x] 根据 skill 名称加载对应 SKILL.md
+- [x] 注入变量：规则、记忆、最近 3 章、当前内容、选中文本、用户输入
+- [x] quick_action → system=skill.system；skill → system=""
+- [x] 输出 `{system, user}` 给 model_client
 
 ---
 

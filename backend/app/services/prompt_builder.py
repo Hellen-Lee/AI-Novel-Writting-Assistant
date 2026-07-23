@@ -1,17 +1,176 @@
 """Assemble prompts from SKILL.md templates and project context."""
 
+from __future__ import annotations
+
 from string import Template
+from typing import Any, Optional
 
-from app.services import memory_store, skill_loader
+from app.services import memory_store, project_store, skill_loader
+from app.services.skill_loader import KIND_QUICK_ACTION, KIND_SKILL
 
 
-def build(skill_name: str, context: dict) -> tuple[str, str]:
-    """Return (system_prompt, user_prompt) for a skill."""
+def _format_memory_entries(entries: list[dict[str, Any]]) -> str:
+    if not entries:
+        return "（无）"
+    lines: list[str] = []
+    for entry in entries:
+        name = str(entry.get("name") or "").strip() or "未命名"
+        content = str(entry.get("content") or "").strip()
+        tags = entry.get("tags") or []
+        tag_text = ""
+        if isinstance(tags, list) and tags:
+            tag_text = " [" + ", ".join(str(t) for t in tags) + "]"
+        if content:
+            lines.append(f"- {name}{tag_text}：{content}")
+        else:
+            lines.append(f"- {name}{tag_text}")
+    return "\n".join(lines)
+
+
+def _format_previous_chapters(
+    project_id: str,
+    *,
+    chapter_id: Optional[str] = None,
+    limit: int = 3,
+) -> str:
+    chapters = project_store.list_chapters(project_id)
+    if not chapters:
+        return "（无）"
+
+    if chapter_id:
+        before = [c for c in chapters if c["order"] < _chapter_order(chapters, chapter_id)]
+        selected = before[-limit:]
+    else:
+        selected = chapters[-limit:]
+
+    if not selected:
+        return "（无）"
+
+    blocks: list[str] = []
+    for chapter in selected:
+        content = project_store.read_chapter_content(project_id, chapter["filename"])
+        title = chapter.get("title") or chapter["id"]
+        blocks.append(f"### {title}\n{content.strip() or '（空）'}")
+    return "\n\n".join(blocks)
+
+
+def _chapter_order(chapters: list[dict[str, Any]], chapter_id: str) -> int:
+    for chapter in chapters:
+        if chapter["id"] == chapter_id:
+            return int(chapter["order"])
+    return 10**9
+
+
+def build_context(
+    project_id: Optional[str] = None,
+    *,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    selected_text: str = "",
+    user_input: str = "",
+    chapter_rules: str = "",
+    extra: Optional[dict[str, Any]] = None,
+) -> dict[str, str]:
+    """Build string template variables for skill rendering."""
+    global_rules = ""
+    style_preference = ""
+    worldview = "（无）"
+    characters = "（无）"
+    items = "（无）"
+    plot_points = "（无）"
+    relationships = "（无）"
+    previous_chapters = "（无）"
+
+    if project_id and project_store.project_exists(project_id):
+        settings = project_store.load_settings(project_id)
+        global_rules = str(settings.get("global_rules") or "")
+        style_preference = str(settings.get("style_preference") or "")
+
+        memory = memory_store.load_memory(project_id)
+        worldview = _format_memory_entries(memory.get("worldview") or [])
+        characters = _format_memory_entries(memory.get("characters") or [])
+        items = _format_memory_entries(memory.get("items") or [])
+        plot_points = _format_memory_entries(memory.get("plot_points") or [])
+        relationships = _format_memory_entries(memory.get("relationships") or [])
+        previous_chapters = _format_previous_chapters(
+            project_id, chapter_id=chapter_id, limit=3
+        )
+
+        if not current_content and chapter_id:
+            try:
+                chapter = project_store.get_chapter(project_id, chapter_id)
+                current_content = str(chapter.get("content") or "")
+            except FileNotFoundError:
+                pass
+
+    context: dict[str, str] = {
+        "global_rules": global_rules or "（无）",
+        "style_preference": style_preference or "（无）",
+        "chapter_rules": chapter_rules or "（无）",
+        "worldview": worldview,
+        "characters": characters,
+        "items": items,
+        "plot_points": plot_points,
+        "relationships": relationships,
+        "previous_chapters": previous_chapters,
+        "current_content": current_content or "（无）",
+        "selected_text": selected_text or "（无）",
+        "user_input": user_input or "（无）",
+    }
+
+    if extra:
+        for key, value in extra.items():
+            context[str(key)] = "" if value is None else str(value)
+
+    return context
+
+
+def render_user_template(template: str, context: dict[str, str]) -> str:
+    return Template(template).safe_substitute(context)
+
+
+def build(skill_name: str, context: dict[str, Any]) -> tuple[str, str]:
+    """Return (system_prompt, user_prompt) for a skill name + variable map."""
     skill = skill_loader.get_skill(skill_name)
     if skill is None:
         raise ValueError(f"Skill not found: {skill_name}")
 
-    system = skill.get("system", "")
-    user_template = Template(skill.get("user_template", ""))
-    user = user_template.safe_substitute(context)
+    str_context = {k: ("" if v is None else str(v)) for k, v in context.items()}
+    user = render_user_template(skill["user_template"], str_context)
+
+    kind = skill["kind"]
+    if kind == KIND_QUICK_ACTION:
+        system = skill.get("system") or ""
+    elif kind == KIND_SKILL:
+        system = ""
+    else:
+        raise ValueError(f"Unknown skill kind: {kind}")
+
     return system, user
+
+
+def build_from_project(
+    skill_name: str,
+    project_id: str,
+    *,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    selected_text: str = "",
+    user_input: str = "",
+    chapter_rules: str = "",
+    extra: Optional[dict[str, Any]] = None,
+) -> tuple[str, str]:
+    """Load project context, then build (system, user) for the skill."""
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    context = build_context(
+        project_id,
+        chapter_id=chapter_id,
+        current_content=current_content,
+        selected_text=selected_text,
+        user_input=user_input,
+        chapter_rules=chapter_rules,
+        extra=extra,
+    )
+    return build(skill_name, context)

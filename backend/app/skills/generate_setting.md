@@ -1,6 +1,8 @@
 ---
 name: generate_setting
-description: 根据输入生成人物、物品或世界观设定
+description: 根据输入生成人物、物品或世界观设定。手动调用：/generate_setting
+kind: quick_action
+disable-model-invocation: true
 system: |
   你是一位设定设计师。根据用户输入生成结构化的设定条目。
   输出格式为 JSON，包含以下字段：
@@ -14,6 +16,12 @@ $worldview
 
 已有角色：
 $characters
+
+已有物品：
+$items
+
+已有剧情要点：
+$plot_points
 
 用户输入：
 $user_input

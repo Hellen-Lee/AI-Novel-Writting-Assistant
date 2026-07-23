@@ -66,11 +66,11 @@ AINovel/
 │   │   │   ├── memory_store.py
 │   │   │   └── skill_loader.py
 │   │   └── skills/           # SKILL.md 文件目录
-│   │       ├── continue.md
+│   │       ├── continue.md          # kind: quick_action
 │   │       ├── polish.md
 │   │       ├── expand.md
 │   │       ├── generate_setting.md
-│   │       └── custom/       # 用户自定义 SKILL.md
+│   │       └── custom/              # 用户自定义（kind: skill）
 │   │   └── models/           # Pydantic 数据模型
 │   │       └── schemas.py
 │   ├── requirements.txt
@@ -123,12 +123,11 @@ AINovel/
 
 ### 5.2 提示词组装（prompt_builder）
 
-- 根据任务类型（续写、润色、生成设定等）选择提示词模板。
-- 注入以下内容：
-  - 全局规则 + 单章规则
-  - 长期记忆（人物、物品、世界观等）
-  - 最近 3 章正文
-  - 当前章节已有内容
+- 按 skill `name` 加载对应 SKILL.md，渲染正文中的 `$变量`。
+- 可注入：全局/单章规则、长期记忆、最近 3 章、当前章节内容、选中文本、用户输入等。
+- 按 `kind` 组装发给模型的消息：
+  - `quick_action`：`system` = frontmatter 中的 `system`，`user` = 渲染后正文。
+  - `skill`：`system` 固定为空字符串，`user` = 渲染后正文。
 - 输出 `{system, user}` 供 model_client 调用。
 
 ### 5.3 记忆管理（memory_store）
@@ -141,29 +140,70 @@ AINovel/
 ### 5.4 快捷指令（Quick Actions）
 
 - 编辑页上的一组功能按钮，用户点击即可触发 AI 生成。
-- MVP 内置四个快捷指令：
+- MVP 内置四个快捷指令（均为 `kind: quick_action`）：
   - **续写（Continue）**：基于上下文续写下一段正文。
   - **润色（Polish）**：优化当前选中的段落。
   - **扩写（Expand）**：将简短描述扩写成完整场景或段落。
   - **生成设定（Generate Setting）**：根据输入生成人物、物品或世界观设定。
-- 每个快捷指令对应后端一个 SKILL.md 文件，通过 `skill_loader` 读取并渲染为提示词。
-- 前端按钮只负责传递指令类型和上下文，不直接维护提示词内容。
+- 每个快捷指令对应后端一个 SKILL.md；前端只传 `name` 与上下文，不维护提示词正文。
+- 也支持手动调用：`/continue`、`/polish` 等（与按钮等价）。
 
 ### 5.5 SKILL.md 体系
 
-- SKILL.md 是 Agent 可调用的提示词文件，统一放在 `backend/app/skills/` 目录下。
-- 内置 SKILL.md：
-  - `continue.md`
-  - `polish.md`
-  - `expand.md`
-  - `generate_setting.md`
-- 用户可在 `backend/app/skills/custom/` 目录下创建自己的 SKILL.md，系统启动时自动加载。
-- 每个 SKILL.md 包含：
-  - `name`：技能名称
-  - `description`：功能说明
-  - `system`：系统提示词
-  - `user_template`：用户提示词模板（支持变量注入）
-- `skill_loader` 负责扫描目录、读取解析、校验格式，并按名称提供给 `prompt_builder` 使用。
+SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录。启动时由 `skill_loader` 扫描加载（同名时 `custom/` 覆盖内置）。
+
+格式：YAML frontmatter + Markdown 正文（正文即 user 侧模板，支持 `$变量`）。
+
+用 `kind` **显式区分**两类技能：
+
+| kind | 用途 | system | 正文 | `disable-model-invocation` | 调用方式 |
+| --- | --- | --- | --- | --- | --- |
+| `quick_action` | 四个快捷按钮 | **必填**（frontmatter） | 必填 | 可选，默认 `true` | 按钮或 `/name` |
+| `skill` | 其他内置 / 用户自建 | **禁止**（调用时固定为空） | 必填 | 可选，默认 `true` | `/name` 或技能列表 |
+
+字段说明：
+
+- `name`：唯一标识（小写字母/数字/下划线或连字符），亦为 `/` 调用名。
+- `description`：功能说明；供列表展示，并为后续「模型自动选用」预留。
+- `kind`：`quick_action` \| `skill`。
+- `system`：仅 `quick_action` 使用。
+- `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（MVP 不做自动选用，但字段落地并校验；两种 kind 均可手动调用）。
+- 正文：用户消息模板；常见变量如 `$worldview`、`$characters`、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules` 等。
+
+示例（quick_action）：
+
+```markdown
+---
+name: continue
+description: 基于上下文续写下一段正文
+kind: quick_action
+disable-model-invocation: true
+system: |
+  你是一位专业小说作者……
+---
+当前章节已有内容：
+$current_content
+
+请续写……
+```
+
+示例（skill）：
+
+```markdown
+---
+name: scene-beat
+description: 根据情节点列出场景节拍。手动调用：/scene-beat
+kind: skill
+disable-model-invocation: true
+---
+当前章节：
+$current_content
+
+用户补充：
+$user_input
+```
+
+`skill_loader` 负责扫描、解析、校验并按名称提供给 `prompt_builder`。
 
 ### 5.6 项目文件管理
 
@@ -189,6 +229,8 @@ AINovel/
 | `GET /api/projects/{id}/memory` | 获取记忆 |
 | `PUT /api/projects/{id}/memory` | 更新记忆 |
 | `POST /api/projects/{id}/generate` | AI 生成（续写/润色等） |
+| `GET /api/skills` | 技能列表（可按 kind 过滤） |
+| `GET /api/skills/{name}` | 技能详情 |
 | `GET /api/config` | 读取模型配置 |
 | `POST /api/config` | 保存模型配置 |
 | `POST /api/config/test` | 测试模型连接 |

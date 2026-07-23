@@ -176,3 +176,24 @@ class MemoryEntryUpdateRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1)
     content: Optional[str] = None
     tags: Optional[list[str]] = None
+
+
+class SkillSummary(BaseModel):
+    name: str
+    description: str
+    kind: str
+    disable_model_invocation: bool = True
+    source: str = "builtin"
+    slash_command: str = ""
+
+
+class SkillDetail(SkillSummary):
+    system: str = ""
+    user_template: str = ""
+    path: str = ""
+
+
+class SkillListResponse(BaseModel):
+    skills: list[SkillSummary] = Field(default_factory=list)
+    count: int = 0
+    load_errors: list[str] = Field(default_factory=list)
