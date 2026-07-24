@@ -1,6 +1,446 @@
 {
-  "version": "2.13",
+  "version": "2.14",
   "children": [
+    {
+      "type": "frame",
+      "id": "rNGlE",
+      "x": 4140,
+      "y": -727,
+      "name": "Panel/Skills",
+      "width": 340,
+      "height": 870,
+      "fill": "#F3F5F3",
+      "stroke": "#D5DED9",
+      "strokeWidth": {
+        "left": 1
+      },
+      "layout": "vertical",
+      "gap": 14,
+      "padding": 16,
+      "children": [
+        {
+          "type": "frame",
+          "id": "wgGRq",
+          "name": "Tabs",
+          "width": "fill_container",
+          "fill": "#ECF0ED",
+          "cornerRadius": 8,
+          "gap": 4,
+          "padding": 4,
+          "children": [
+            {
+              "type": "frame",
+              "id": "JWbg9",
+              "name": "T/功能",
+              "width": "fill_container",
+              "fill": "#FFFFFF00",
+              "cornerRadius": 6,
+              "padding": [
+                8,
+                0
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "AO0oe",
+                  "name": "TL",
+                  "fill": "$color/text/secondary",
+                  "content": "功能",
+                  "fontFamily": "Geist",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "X3w2TD",
+              "name": "T/技能",
+              "width": "fill_container",
+              "fill": "$color/bg/surface",
+              "cornerRadius": 6,
+              "padding": [
+                8,
+                0
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GyR2X",
+                  "name": "TL",
+                  "fill": "$color/text/primary",
+                  "content": "技能",
+                  "fontFamily": "Geist",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "r3cG8E",
+              "name": "T/规则",
+              "width": "fill_container",
+              "fill": "#FFFFFF00",
+              "cornerRadius": 6,
+              "padding": [
+                8,
+                0
+              ],
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "jheg3",
+                  "name": "TL",
+                  "fill": "$color/text/secondary",
+                  "content": "规则",
+                  "fontFamily": "Geist",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "V4DiV",
+          "name": "Hint",
+          "fill": "$color/text/muted",
+          "textGrowth": "fixed-width",
+          "width": "fill_container",
+          "content": "点击技能即可调用（等价 /name）。编辑与新建请进入技能库。",
+          "lineHeight": 1.4,
+          "fontFamily": "Geist",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        },
+        {
+          "type": "frame",
+          "id": "We74O",
+          "name": "SkillList",
+          "width": "fill_container",
+          "height": 660,
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Nwv03",
+              "name": "Skill/scene-beat",
+              "width": "fill_container",
+              "fill": "$color/bg/surface",
+              "cornerRadius": "$radius/md",
+              "stroke": "$color/primary",
+              "strokeWidth": 1.5,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "U2ozt",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "UEVqk",
+                      "name": "Left",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "y9FAM",
+                          "name": "Title",
+                          "fill": "$color/text/primary",
+                          "content": "场景节拍",
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "U6PrA",
+                          "name": "KindBadge",
+                          "fill": "$color/accent/soft",
+                          "cornerRadius": 4,
+                          "padding": [
+                            3,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "d6xjIu",
+                              "name": "Kind",
+                              "fill": "$color/accent",
+                              "content": "skill",
+                              "fontFamily": "Geist",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "qgnbW",
+                      "name": "Slash",
+                      "fill": "$color/text/muted",
+                      "content": "/scene-beat",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "h77J53",
+                  "name": "Desc",
+                  "fill": "$color/text/secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "根据当前章节与补充，列出 3–5 个场景节拍",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "uvAwW",
+              "name": "Skill/dialogue-voice",
+              "width": "fill_container",
+              "fill": "$color/bg/surface",
+              "cornerRadius": "$radius/md",
+              "stroke": "$color/border/default",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ghp5t",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ip4si",
+                      "name": "Left",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "AuZqT",
+                          "name": "Title",
+                          "fill": "$color/text/primary",
+                          "content": "角色声口",
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "SVtZT",
+                          "name": "KindBadge",
+                          "fill": "$color/accent/soft",
+                          "cornerRadius": 4,
+                          "padding": [
+                            3,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "YeFOC",
+                              "name": "Kind",
+                              "fill": "$color/accent",
+                              "content": "skill",
+                              "fontFamily": "Geist",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pWIAO",
+                      "name": "Slash",
+                      "fill": "$color/text/muted",
+                      "content": "/dialogue-voice",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "opi0w",
+                  "name": "Desc",
+                  "fill": "$color/text/secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "按人物设定重写对白，保持声口一致",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ZFgB7",
+              "name": "Skill/pacing-check",
+              "width": "fill_container",
+              "fill": "$color/bg/surface",
+              "cornerRadius": "$radius/md",
+              "stroke": "$color/border/default",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "gxjJY",
+                  "name": "Top",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "R78DHv",
+                      "name": "Left",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "V6HNh",
+                          "name": "Title",
+                          "fill": "$color/text/primary",
+                          "content": "节奏检视",
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "t2RUQ",
+                          "name": "KindBadge",
+                          "fill": "$color/accent/soft",
+                          "cornerRadius": 4,
+                          "padding": [
+                            3,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "DJmn1",
+                              "name": "Kind",
+                              "fill": "$color/accent",
+                              "content": "skill",
+                              "fontFamily": "Geist",
+                              "fontSize": 10,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "OGhBe",
+                      "name": "Slash",
+                      "fill": "$color/text/muted",
+                      "content": "/pacing-check",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "X1010p",
+                  "name": "Desc",
+                  "fill": "$color/text/secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "检查本章节奏松紧，给出调整建议",
+                  "lineHeight": 1.4,
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ajw5d",
+          "name": "Footer",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "children": [
+            {
+              "id": "V8psD",
+              "type": "ref",
+              "ref": "U4MdO",
+              "name": "BtnManage",
+              "width": "fill_container",
+              "descendants": {
+                "W5Qvm": {
+                  "content": "管理技能库",
+                  "fill": "$color/primary",
+                  "fontSize": 13
+                }
+              }
+            },
+            {
+              "type": "text",
+              "id": "I4NEvU",
+              "name": "FooterHint",
+              "fill": "$color/text/muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "打开全屏面板：编辑 frontmatter 与正文模板",
+              "textAlign": "center",
+              "fontFamily": "Geist",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "frame",
       "id": "kGoLw",
@@ -3347,7 +3787,8 @@
                       "fill": "#5a6e66",
                       "content": "记忆",
                       "fontFamily": "Geist",
-                      "fontSize": 12
+                      "fontSize": 12,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -7795,7 +8236,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：编辑页右侧「功能」区底部「Agent Skills」；或设定页侧栏「Agent Skills」",
+              "content": "入口：编辑页右侧「技能」Tab 底部「管理技能库」；可编辑 SKILL.md 的 frontmatter 与正文模板",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -7852,7 +8293,7 @@
                   "id": "IhwTh",
                   "name": "Sub",
                   "fill": "#8A9A93",
-                  "content": "SKILL.md · 供模型按需调用",
+                  "content": "SKILL.md · kind: quick_action | skill",
                   "fontFamily": "Geist",
                   "fontSize": 12,
                   "fontWeight": "normal"
@@ -7901,19 +8342,491 @@
                   "id": "Neixv",
                   "name": "LT",
                   "fill": "#8A9A93",
-                  "content": "技能库",
+                  "content": "全部技能",
                   "fontFamily": "Geist",
                   "fontSize": 12,
                   "fontWeight": "600"
                 },
                 {
+                  "type": "text",
+                  "id": "M6ZwX",
+                  "name": "Sec/quick_action",
+                  "fill": "$color/text/muted",
+                  "content": "quick_action · 快捷指令",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                },
+                {
                   "type": "frame",
-                  "id": "fLqRB",
-                  "name": "Skill/伏笔回收",
+                  "id": "Y7e8f4",
+                  "name": "Skill/continue",
                   "width": "fill_container",
-                  "fill": "#FFFFFF",
+                  "fill": "$color/bg/surface",
                   "cornerRadius": 10,
-                  "stroke": "#2D5A4A",
+                  "stroke": "$color/border/default",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "v8C5yV",
+                      "name": "Top",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "aevln",
+                          "name": "Badges",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "vP5vI",
+                              "name": "KindBadge",
+                              "fill": "$color/primary/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "mBH7g",
+                                  "name": "KT",
+                                  "fill": "$color/primary",
+                                  "content": "quick_action",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "m45X7",
+                              "name": "SrcBadge",
+                              "fill": "$color/bg/sidebar",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "CEOWx",
+                                  "name": "ST",
+                                  "fill": "$color/text/secondary",
+                                  "content": "内置",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "QqT9Y",
+                          "name": "Slash",
+                          "fill": "$color/text/muted",
+                          "content": "/continue",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "th24e",
+                      "name": "Name",
+                      "fill": "$color/text/primary",
+                      "content": "continue",
+                      "fontFamily": "Geist",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nUFQ4",
+                      "name": "Desc",
+                      "fill": "$color/text/secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "基于上下文续写下一段正文",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qfUUp",
+                  "name": "Skill/polish",
+                  "width": "fill_container",
+                  "fill": "$color/bg/surface",
+                  "cornerRadius": 10,
+                  "stroke": "$color/border/default",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "i3jCo",
+                      "name": "Top",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "w2uQeQ",
+                          "name": "Badges",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "dckl5",
+                              "name": "KindBadge",
+                              "fill": "$color/primary/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "j7PUxY",
+                                  "name": "KT",
+                                  "fill": "$color/primary",
+                                  "content": "quick_action",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "IAXkQ",
+                              "name": "SrcBadge",
+                              "fill": "$color/bg/sidebar",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "o3sSX",
+                                  "name": "ST",
+                                  "fill": "$color/text/secondary",
+                                  "content": "内置",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "EHVsl",
+                          "name": "Slash",
+                          "fill": "$color/text/muted",
+                          "content": "/polish",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "TwNJE",
+                      "name": "Name",
+                      "fill": "$color/text/primary",
+                      "content": "polish",
+                      "fontFamily": "Geist",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "gkhi9",
+                      "name": "Desc",
+                      "fill": "$color/text/secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "润色优化选中的段落",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PT5Ko",
+                  "name": "Skill/expand",
+                  "width": "fill_container",
+                  "fill": "$color/bg/surface",
+                  "cornerRadius": 10,
+                  "stroke": "$color/border/default",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "Yb7Eb",
+                      "name": "Top",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "twjhk",
+                          "name": "Badges",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "ztbOy",
+                              "name": "KindBadge",
+                              "fill": "$color/primary/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "k8AJP",
+                                  "name": "KT",
+                                  "fill": "$color/primary",
+                                  "content": "quick_action",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Fi87S",
+                              "name": "SrcBadge",
+                              "fill": "$color/bg/sidebar",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "QixkH",
+                                  "name": "ST",
+                                  "fill": "$color/text/secondary",
+                                  "content": "内置",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "iMGCz",
+                          "name": "Slash",
+                          "fill": "$color/text/muted",
+                          "content": "/expand",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "pN9K7",
+                      "name": "Name",
+                      "fill": "$color/text/primary",
+                      "content": "expand",
+                      "fontFamily": "Geist",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "D2qWmh",
+                      "name": "Desc",
+                      "fill": "$color/text/secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "将简短描述扩写成完整场景",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NIZrH",
+                  "name": "Skill/generate_setting",
+                  "width": "fill_container",
+                  "fill": "$color/bg/surface",
+                  "cornerRadius": 10,
+                  "stroke": "$color/border/default",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 8,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "RIjfv",
+                      "name": "Top",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "plDAC",
+                          "name": "Badges",
+                          "gap": 6,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "qPrfx",
+                              "name": "KindBadge",
+                              "fill": "$color/primary/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "sSDCz",
+                                  "name": "KT",
+                                  "fill": "$color/primary",
+                                  "content": "quick_action",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "qjiIX",
+                              "name": "SrcBadge",
+                              "fill": "$color/bg/sidebar",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LMn2q",
+                                  "name": "ST",
+                                  "fill": "$color/text/secondary",
+                                  "content": "内置",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "text",
+                          "id": "k4bXZ",
+                          "name": "Slash",
+                          "fill": "$color/text/muted",
+                          "content": "/generate_setting",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "yuoK9",
+                      "name": "Name",
+                      "fill": "$color/text/primary",
+                      "content": "generate_setting",
+                      "fontFamily": "Geist",
+                      "fontSize": 14,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "dncO6",
+                      "name": "Desc",
+                      "fill": "$color/text/secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "根据输入生成人物/物品/世界观设定",
+                      "lineHeight": 1.4,
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "W8sVV",
+                  "name": "Sec/skill",
+                  "fill": "$color/text/muted",
+                  "content": "skill · 可 /name 调用",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "CSvSM",
+                  "name": "Skill/scene-beat",
+                  "width": "fill_container",
+                  "fill": "$color/bg/surface",
+                  "cornerRadius": 10,
+                  "stroke": "$color/primary",
                   "strokeWidth": 1.5,
                   "layout": "vertical",
                   "gap": 8,
@@ -7921,7 +8834,7 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "Zim2z",
+                      "id": "VN66H",
                       "name": "Top",
                       "width": "fill_container",
                       "justifyContent": "space_between",
@@ -7929,34 +8842,66 @@
                       "children": [
                         {
                           "type": "frame",
-                          "id": "bqLuk",
-                          "name": "Badge",
-                          "fill": "#E4EFE9",
-                          "cornerRadius": 4,
-                          "padding": [
-                            3,
-                            8
-                          ],
+                          "id": "gJIeh",
+                          "name": "Badges",
+                          "gap": 6,
+                          "alignItems": "center",
                           "children": [
                             {
-                              "type": "text",
-                              "id": "V7ua6w",
-                              "name": "BT",
-                              "fill": "#2D5A4A",
-                              "content": "内置",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
+                              "type": "frame",
+                              "id": "rpDFN",
+                              "name": "KindBadge",
+                              "fill": "$color/accent/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WeNCn",
+                                  "name": "KT",
+                                  "fill": "$color/accent",
+                                  "content": "skill",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "bbZXG",
+                              "name": "SrcBadge",
+                              "fill": "$color/accent/soft",
+                              "cornerRadius": 4,
+                              "padding": [
+                                3,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "M8JKJ",
+                                  "name": "ST",
+                                  "fill": "$color/accent",
+                                  "content": "自定义",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
                             }
                           ]
                         },
                         {
                           "type": "text",
-                          "id": "SV4es",
-                          "name": "On",
-                          "fill": "#2D7A4F",
-                          "content": "已启用",
-                          "fontFamily": "Geist",
+                          "id": "oVe9u",
+                          "name": "Slash",
+                          "fill": "$color/text/muted",
+                          "content": "/scene-beat",
+                          "fontFamily": "Geist Mono",
                           "fontSize": 11,
                           "fontWeight": "normal"
                         }
@@ -7964,265 +8909,22 @@
                     },
                     {
                       "type": "text",
-                      "id": "xlqp7",
+                      "id": "eFYL0",
                       "name": "Name",
-                      "fill": "#1A2E28",
-                      "content": "伏笔回收",
+                      "fill": "$color/text/primary",
+                      "content": "scene-beat",
                       "fontFamily": "Geist",
                       "fontSize": 14,
                       "fontWeight": "600"
                     },
                     {
                       "type": "text",
-                      "id": "OAbMU",
+                      "id": "U8JjT",
                       "name": "Desc",
-                      "fill": "#5A6E66",
+                      "fill": "$color/text/secondary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "追踪已埋伏笔并在适当时机提醒回收",
-                      "lineHeight": 1.4,
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "uWoRO",
-                  "name": "Skill/对话优化",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 10,
-                  "stroke": "#D5DED9",
-                  "strokeWidth": 1,
-                  "layout": "vertical",
-                  "gap": 8,
-                  "padding": 14,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "BzPhg",
-                      "name": "Top",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "WjQpj",
-                          "name": "Badge",
-                          "fill": "#E4EFE9",
-                          "cornerRadius": 4,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "niIzn",
-                              "name": "BT",
-                              "fill": "#2D5A4A",
-                              "content": "内置",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "SbSP2",
-                          "name": "On",
-                          "fill": "#2D7A4F",
-                          "content": "已启用",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "uO3my",
-                      "name": "Name",
-                      "fill": "#1A2E28",
-                      "content": "对话优化",
-                      "fontFamily": "Geist",
-                      "fontSize": 14,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "text",
-                      "id": "ba5Af",
-                      "name": "Desc",
-                      "fill": "#5A6E66",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "按角色声口重写对白，保持人设一致",
-                      "lineHeight": 1.4,
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "HJYz0",
-                  "name": "Skill/战斗场景",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 10,
-                  "stroke": "#D5DED9",
-                  "strokeWidth": 1,
-                  "layout": "vertical",
-                  "gap": 8,
-                  "padding": 14,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "k14IH",
-                      "name": "Top",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "v8JPIr",
-                          "name": "Badge",
-                          "fill": "#E4EFE9",
-                          "cornerRadius": 4,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "d8WzW",
-                              "name": "BT",
-                              "fill": "#2D5A4A",
-                              "content": "内置",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "cs1Et",
-                          "name": "On",
-                          "fill": "#8A9A93",
-                          "content": "已停用",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "DN24z",
-                      "name": "Name",
-                      "fill": "#1A2E28",
-                      "content": "战斗场景",
-                      "fontFamily": "Geist",
-                      "fontSize": 14,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "text",
-                      "id": "ZF2p7",
-                      "name": "Desc",
-                      "fill": "#5A6E66",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "强化节奏与招式描写，绑定功法设定",
-                      "lineHeight": 1.4,
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "Nqk7s",
-                  "name": "Skill/我的文风-冷峻",
-                  "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "cornerRadius": 10,
-                  "stroke": "#D5DED9",
-                  "strokeWidth": 1,
-                  "layout": "vertical",
-                  "gap": 8,
-                  "padding": 14,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "gAZt5",
-                      "name": "Top",
-                      "width": "fill_container",
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "TZ1IQ",
-                          "name": "Badge",
-                          "fill": "#F8EDE3",
-                          "cornerRadius": 4,
-                          "padding": [
-                            3,
-                            8
-                          ],
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "YyV4g",
-                              "name": "BT",
-                              "fill": "#C4783A",
-                              "content": "自建",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "idoZq",
-                          "name": "On",
-                          "fill": "#2D7A4F",
-                          "content": "已启用",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "fPNJQ",
-                      "name": "Name",
-                      "fill": "#1A2E28",
-                      "content": "我的文风-冷峻",
-                      "fontFamily": "Geist",
-                      "fontSize": 14,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "text",
-                      "id": "JoZBO",
-                      "name": "Desc",
-                      "fill": "#5A6E66",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "用户自定义：短句、少形容词、克制情绪",
+                      "content": "根据当前章节与补充，列出 3–5 个场景节拍",
                       "lineHeight": 1.4,
                       "fontFamily": "Geist",
                       "fontSize": 12,
@@ -8256,7 +8958,7 @@
                       "id": "fFDqe",
                       "name": "ET2",
                       "fill": "#1A2E28",
-                      "content": "伏笔回收 · SKILL.md",
+                      "content": "scene-beat · SKILL.md",
                       "fontFamily": "Newsreader",
                       "fontSize": 22,
                       "fontWeight": "600"
@@ -8274,7 +8976,7 @@
                           "name": "BtnDis",
                           "descendants": {
                             "xv6j5": {
-                              "content": "停用",
+                              "content": "删除",
                               "fill": "#5A6E66",
                               "fontSize": 14
                             }
@@ -8298,18 +9000,104 @@
                   ]
                 },
                 {
+                  "type": "text",
+                  "id": "TeQtr",
+                  "name": "FMLabel",
+                  "fill": "$color/text/primary",
+                  "content": "Frontmatter",
+                  "fontFamily": "Geist",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
                   "type": "frame",
                   "id": "FRnSz",
-                  "name": "Meta",
+                  "name": "Frontmatter",
                   "width": "fill_container",
+                  "layout": "vertical",
                   "gap": 12,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "BwxkW",
-                      "name": "M/触发",
+                      "id": "Qr5qf",
+                      "name": "Row1",
                       "width": "fill_container",
-                      "fill": "#F3F5F3",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "qwnpv",
+                          "name": "Field/name",
+                          "width": "fill_container",
+                          "fill": "$color/bg/page",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "oT73s",
+                              "name": "Label",
+                              "fill": "$color/text/muted",
+                              "content": "name",
+                              "fontFamily": "Geist",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "EIyGY",
+                              "name": "Value",
+                              "fill": "$color/text/primary",
+                              "content": "scene-beat",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "e5szQ3",
+                          "name": "Field/kind",
+                          "width": "fill_container",
+                          "fill": "$color/bg/page",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "FkUt6",
+                              "name": "Label",
+                              "fill": "$color/text/muted",
+                              "content": "kind",
+                              "fontFamily": "Geist",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ohHG3",
+                              "name": "Value",
+                              "fill": "$color/text/primary",
+                              "content": "skill",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "gwkI8",
+                      "name": "Field/description",
+                      "width": "fill_container",
+                      "fill": "$color/bg/page",
                       "cornerRadius": 8,
                       "layout": "vertical",
                       "gap": 4,
@@ -8317,20 +9105,23 @@
                       "children": [
                         {
                           "type": "text",
-                          "id": "YL7vt",
-                          "name": "MK",
-                          "fill": "#8A9A93",
-                          "content": "触发",
+                          "id": "BztAr",
+                          "name": "Label",
+                          "fill": "$color/text/muted",
+                          "content": "description",
                           "fontFamily": "Geist",
                           "fontSize": 11,
                           "fontWeight": "normal"
                         },
                         {
                           "type": "text",
-                          "id": "tHxGL",
-                          "name": "MV",
-                          "fill": "#1A2E28",
-                          "content": "模型按任务自动匹配",
+                          "id": "ONJVq",
+                          "name": "Value",
+                          "fill": "$color/text/primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "根据当前章节与用户补充，列出 3-5 个场景节拍。手动调用：/scene-beat",
+                          "lineHeight": 1.45,
                           "fontFamily": "Geist",
                           "fontSize": 13,
                           "fontWeight": "500"
@@ -8339,67 +9130,109 @@
                     },
                     {
                       "type": "frame",
-                      "id": "a2hSlN",
-                      "name": "M/文件",
+                      "id": "V0etUU",
+                      "name": "Row3",
                       "width": "fill_container",
-                      "fill": "#F3F5F3",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": 12,
+                      "gap": 12,
                       "children": [
                         {
-                          "type": "text",
-                          "id": "eogtE",
-                          "name": "MK",
-                          "fill": "#8A9A93",
-                          "content": "文件",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "wz0sO",
+                          "name": "Field/disable-model-invocation",
+                          "width": "fill_container",
+                          "fill": "$color/bg/page",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "U3gEsn",
+                              "name": "Label",
+                              "fill": "$color/text/muted",
+                              "content": "disable-model-invocation",
+                              "fontFamily": "Geist",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "NmI8R",
+                              "name": "ToggleRow",
+                              "width": "fill_container",
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "v0IMA",
+                                  "name": "Value",
+                                  "fill": "$color/text/primary",
+                                  "content": "true（MVP 默认，禁止模型自动选用）",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 13,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "bv3tY",
+                                  "name": "Toggle",
+                                  "width": 36,
+                                  "height": 20,
+                                  "fill": "$color/primary",
+                                  "cornerRadius": 10,
+                                  "padding": 2,
+                                  "justifyContent": "end",
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "nPWKZ",
+                                      "name": "Knob",
+                                      "width": 16,
+                                      "height": 16,
+                                      "fill": "$color/bg/surface",
+                                      "cornerRadius": 8
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
                         },
                         {
-                          "type": "text",
-                          "id": "MXN9v",
-                          "name": "MV",
-                          "fill": "#1A2E28",
-                          "content": "skills/foreshadow.md",
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "A3Sjb",
-                      "name": "M/范围",
-                      "width": "fill_container",
-                      "fill": "#F3F5F3",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": 12,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "FVSDD",
-                          "name": "MK",
-                          "fill": "#8A9A93",
-                          "content": "范围",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "GSru7",
-                          "name": "MV",
-                          "fill": "#1A2E28",
-                          "content": "当前项目",
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "500"
+                          "type": "frame",
+                          "id": "KmWA4",
+                          "name": "Field/system",
+                          "width": "fill_container",
+                          "fill": "$color/bg/page",
+                          "cornerRadius": 8,
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "y7kXD",
+                              "name": "Label",
+                              "fill": "$color/text/muted",
+                              "content": "system",
+                              "fontFamily": "Geist",
+                              "fontSize": 11,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "text",
+                              "id": "t2ZvdC",
+                              "name": "Value",
+                              "fill": "$color/text/muted",
+                              "content": "— 不适用（仅 quick_action 必填）",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            }
+                          ]
                         }
                       ]
                     }
@@ -8410,10 +9243,48 @@
                   "id": "Sfzk3",
                   "name": "MDLabel",
                   "fill": "#1A2E28",
-                  "content": "SKILL.md 内容",
+                  "content": "正文模板（user message）",
                   "fontFamily": "Geist",
                   "fontSize": 13,
                   "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "qdnJj",
+                  "name": "VarHint",
+                  "width": "fill_container",
+                  "fill": "$color/primary/soft",
+                  "cornerRadius": 8,
+                  "gap": 8,
+                  "padding": [
+                    10,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "EQ7B7",
+                      "name": "VI",
+                      "width": 14,
+                      "height": 14,
+                      "icon": "braces",
+                      "library": "lucide",
+                      "fill": "$color/primary"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YYn7C",
+                      "name": "VT",
+                      "fill": "$color/primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "可用变量：$global_rules · $worldview · $characters · $current_content · $user_input · $previous_chapters · $selected_text",
+                      "fontFamily": "Geist",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
                 },
                 {
                   "type": "frame",
@@ -8429,22 +9300,25 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "G0MaM",
+                      "id": "xN8G8",
                       "name": "MD1",
-                      "fill": "#2D5A4A",
-                      "content": "# 伏笔回收",
+                      "fill": "$color/text/primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "请根据以下信息，列出 3-5 个场景节拍（每条一行，简洁，不要写完整正文）。",
+                      "lineHeight": 1.65,
                       "fontFamily": "Geist Mono",
-                      "fontSize": 13,
-                      "fontWeight": "600"
+                      "fontSize": 12,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "text",
-                      "id": "wA4hj",
+                      "id": "ol6og",
                       "name": "MD2",
-                      "fill": "#1A2E28",
+                      "fill": "$color/primary",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "当正文出现已记录的伏笔关键词时，提示是否在本段或下一段回收。\n\n## 约束\n- 必须引用 memory.json 中的伏笔条目\n- 不得提前剧透未解锁信息\n- 回收方式需符合全局文风规则",
+                      "content": "全局规则：\n$global_rules\n\n世界观：\n$worldview\n\n人物：\n$characters\n\n当前章节内容：\n$current_content\n\n用户补充：\n$user_input",
                       "lineHeight": 1.65,
                       "fontFamily": "Geist Mono",
                       "fontSize": 12,
@@ -9731,5 +10605,6 @@
       "type": "number",
       "value": 18
     }
-  }
+  },
+  "fileToken": "fc86812d-9db8-49f9-abb3-e4c1ef5f0a29"
 }
