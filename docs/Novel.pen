@@ -2403,30 +2403,6 @@
                       "fontWeight": "normal"
                     }
                   ]
-                },
-                {
-                  "type": "frame",
-                  "id": "VZAVI",
-                  "name": "Tab/记忆",
-                  "fill": "#FFFFFF00",
-                  "cornerRadius": "$radius/sm",
-                  "padding": [
-                    6,
-                    14
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "UfAah",
-                      "name": "T",
-                      "fill": "#5A6E66",
-                      "content": "记忆",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
                 }
               ]
             },
@@ -2442,7 +2418,7 @@
                 {
                   "type": "frame",
                   "id": "rdfUp",
-                  "name": "BtnSettings",
+                  "name": "Btn/项目设置",
                   "fill": "#FFFFFF",
                   "cornerRadius": 8,
                   "stroke": "#D5DED9",
@@ -2469,7 +2445,7 @@
                       "id": "BObgN",
                       "name": "SetLabel",
                       "fill": "#1A2E28",
-                      "content": "设置",
+                      "content": "项目设置",
                       "fontFamily": "Geist",
                       "fontSize": 13,
                       "fontWeight": "500"
@@ -3455,7 +3431,7 @@
                       "fill": "#1A2E28",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "检测到新角色「青灯人」与地点「星渊牌坊」。确认后写入长期记忆库。",
+                      "content": "检测到新角色「青灯人」与地点「星渊牌坊」。确认后写入设定库（memory.json）。",
                       "lineHeight": 1.45,
                       "fontFamily": "Geist",
                       "fontSize": 12,
@@ -8204,7 +8180,7 @@
       "id": "C88ki",
       "x": 3040,
       "y": 326,
-      "name": "Review/Screen/Editor-Rules",
+      "name": "Review/Screen/Editor-项目设置",
       "clip": true,
       "width": 1440,
       "height": 960,
@@ -8241,7 +8217,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：编辑页右侧 Tab「规则」；全局规则也可在设定页「全局规则」中编辑",
+              "content": "入口：编辑页右侧 Tab「规则」或顶栏「项目设置」· 全局规则与文风写入 settings.json；不进设定库（memory.json）",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -8271,7 +8247,7 @@
               "id": "iq2hf",
               "name": "Proj",
               "fill": "#1A2E28",
-              "content": "星渊剑主 · 规则面板",
+              "content": "星渊剑主 · 项目设置 / 规则",
               "fontFamily": "Newsreader",
               "fontSize": 16,
               "fontWeight": "600"
@@ -8471,7 +8447,55 @@
                           "fill": "#1A2E28",
                           "textGrowth": "fixed-width",
                           "width": "fill_container",
-                          "content": "· 第三人称有限视角，贴着陆沉\n· 文风克制，少用感叹号\n· 禁忌：现代网络梗、无铺垫战力崩",
+                          "content": "· 第三人称有限视角，贴着陆沉\n· 禁忌：现代网络梗、无铺垫战力崩\n· 节奏：悬念优先，少旁白解释",
+                          "lineHeight": 1.55,
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rr1wc",
+                  "name": "StylePref",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "noz4p",
+                      "name": "GT",
+                      "fill": "#8A9A93",
+                      "content": "文风偏好",
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "jru4f",
+                      "name": "GBox",
+                      "width": "fill_container",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": "#D5DED9",
+                      "strokeWidth": 1,
+                      "layout": "vertical",
+                      "gap": 6,
+                      "padding": 12,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "w1yyBF",
+                          "name": "GV",
+                          "fill": "#1A2E28",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "克制冷峻 · 少比喻堆叠 · 对话短促有力 · 忌网络梗",
                           "lineHeight": 1.55,
                           "fontFamily": "Geist",
                           "fontSize": 12,
@@ -8551,15 +8575,72 @@
                   ]
                 },
                 {
+                  "type": "frame",
+                  "id": "H5BA24",
+                  "name": "SettingsHint",
+                  "width": "fill_container",
+                  "fill": "$color/primary/soft",
+                  "cornerRadius": "$radius/md",
+                  "stroke": "$color/primary",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 10,
+                  "padding": 14,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "nZrXX",
+                      "name": "MHead",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "HC4fQ",
+                          "name": "MIcon",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "file-json",
+                          "library": "lucide",
+                          "fill": "$color/primary"
+                        },
+                        {
+                          "type": "text",
+                          "id": "oHTNJ",
+                          "name": "MTitle",
+                          "fill": "$color/primary",
+                          "content": "settings.json",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "BD7DY",
+                      "name": "MBody",
+                      "fill": "$color/text/primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "全局规则与文风偏好保存在 settings.json；设定条目仍走设定库 memory.json，勿混为一谈。",
+                      "lineHeight": 1.45,
+                      "fontFamily": "Geist",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
                   "id": "s8ktV",
                   "type": "ref",
                   "ref": "byhBc",
                   "name": "Save",
                   "descendants": {
                     "E5lmi": {
-                      "content": "保存规则",
+                      "content": "保存到 settings.json",
                       "fill": "#FFFFFF",
-                      "fontSize": 14
+                      "fontSize": 13
                     }
                   }
                 }
@@ -8613,7 +8694,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：编辑页写作达字数/章节节点时自动弹出（MVP 后置）；确认后写入对应 category",
+              "content": "入口：编辑页写作达字数/章节节点时自动弹出（MVP 后置）；确认后写入设定库对应 category，勿另建第三套「设定库」",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -9224,19 +9305,19 @@
     },
     {
       "type": "frame",
-      "id": "delFV",
-      "x": 4560,
+      "id": "ZdykQ",
+      "x": 10640,
       "y": 326,
-      "name": "Review/Screen/Memory",
+      "name": "Review/Screen/设定库",
       "clip": true,
       "width": 1440,
       "height": 960,
-      "fill": "#F3F5F3",
+      "fill": "$color/bg/page",
       "layout": "vertical",
       "children": [
         {
           "type": "frame",
-          "id": "f4eg9",
+          "id": "b5PJBo",
           "name": "EntryNote",
           "width": "fill_container",
           "fill": "#1A2E28",
@@ -9249,8 +9330,8 @@
           "children": [
             {
               "type": "icon",
-              "id": "A0eVO4",
-              "name": "EI",
+              "id": "IoQRi",
+              "name": "EIcon",
               "width": 12,
               "height": 12,
               "icon": "corner-down-right",
@@ -9259,12 +9340,12 @@
             },
             {
               "type": "text",
-              "id": "uM7zG",
-              "name": "ET",
+              "id": "l55jbD",
+              "name": "EText",
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：编辑页顶栏「记忆」Tab · 条目 CRUD；浏览设定卡请用「设定」Tab",
+              "content": "入口：编辑页顶栏「设定」· 映射 memory.json：五分类 key → MemoryEntry[]；统一 CRUD",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -9273,7 +9354,7 @@
         },
         {
           "type": "frame",
-          "id": "dIALc",
+          "id": "Ly4e2",
           "name": "Header",
           "width": "fill_container",
           "height": 56,
@@ -9284,44 +9365,64 @@
           },
           "padding": [
             0,
-            24
+            20
           ],
           "justifyContent": "space_between",
           "alignItems": "center",
           "children": [
             {
               "type": "frame",
-              "id": "VQSjE",
+              "id": "q8rzN",
               "name": "NavLeft",
               "width": 280,
-              "gap": 12,
+              "gap": 16,
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon",
-                  "id": "cFDqY",
+                  "type": "frame",
+                  "id": "q2ghN9",
                   "name": "Back",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "chevron-left",
-                  "library": "lucide",
-                  "fill": "#5A6E66"
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "zHjl1",
+                      "name": "BackIcon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "#5A6E66"
+                    },
+                    {
+                      "type": "text",
+                      "id": "YXJkM",
+                      "name": "ProjName",
+                      "fill": "#1A2E28",
+                      "content": "星渊剑主",
+                      "fontFamily": "Newsreader",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
                 },
                 {
-                  "type": "text",
-                  "id": "uMM2f",
-                  "name": "Title",
-                  "fill": "#1A2E28",
-                  "content": " 星渊剑主",
-                  "fontFamily": "Newsreader",
-                  "fontSize": 18,
-                  "fontWeight": "600"
+                  "id": "qWiY9",
+                  "type": "ref",
+                  "ref": "lsTOX",
+                  "name": "StatusBadge",
+                  "descendants": {
+                    "yfQji": {
+                      "content": "已保存"
+                    }
+                  }
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "YUf0o",
+              "id": "G7Dr8h",
               "name": "NavMid",
               "fill": "$color/bg/sidebar",
               "cornerRadius": "$radius/md",
@@ -9331,7 +9432,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "MF5sm",
+                  "id": "xkZyn",
                   "name": "Tab/编辑",
                   "fill": "#FFFFFF00",
                   "cornerRadius": "$radius/sm",
@@ -9343,7 +9444,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "Apm6B",
+                      "id": "rCGFQ",
                       "name": "T",
                       "fill": "#5A6E66",
                       "content": "编辑",
@@ -9355,9 +9456,9 @@
                 },
                 {
                   "type": "frame",
-                  "id": "IRon6",
+                  "id": "O1RWHE",
                   "name": "Tab/设定",
-                  "fill": "#FFFFFF00",
+                  "fill": "#FFFFFF",
                   "cornerRadius": "$radius/sm",
                   "padding": [
                     6,
@@ -9367,34 +9468,10 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "Y12Xx",
+                      "id": "YLdr0",
                       "name": "T",
-                      "fill": "$color/text/secondary",
+                      "fill": "#1A2E28",
                       "content": "设定",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "F0WqX",
-                  "name": "Tab/记忆",
-                  "fill": "$color/bg/surface",
-                  "cornerRadius": "$radius/sm",
-                  "padding": [
-                    6,
-                    14
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "tPOk7",
-                      "name": "T",
-                      "fill": "$color/text/primary",
-                      "content": "记忆",
                       "fontFamily": "Geist",
                       "fontSize": 12,
                       "fontWeight": "600"
@@ -9405,7 +9482,7 @@
             },
             {
               "type": "frame",
-              "id": "TTvDn",
+              "id": "Plkpp",
               "name": "NavRight",
               "width": 280,
               "gap": 10,
@@ -9414,8 +9491,8 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "OJt8j",
-                  "name": "BtnSettings",
+                  "id": "OMWqo",
+                  "name": "Btn/项目设置",
                   "fill": "#FFFFFF",
                   "cornerRadius": 8,
                   "stroke": "#D5DED9",
@@ -9429,7 +9506,7 @@
                   "children": [
                     {
                       "type": "icon",
-                      "id": "dkHNp",
+                      "id": "oGken",
                       "name": "SetIcon",
                       "width": 14,
                       "height": 14,
@@ -9439,10 +9516,10 @@
                     },
                     {
                       "type": "text",
-                      "id": "pffTj",
+                      "id": "m1LXNj",
                       "name": "SetLabel",
                       "fill": "#1A2E28",
-                      "content": "设置",
+                      "content": "项目设置",
                       "fontFamily": "Geist",
                       "fontSize": 13,
                       "fontWeight": "500"
@@ -9455,410 +9532,83 @@
         },
         {
           "type": "frame",
-          "id": "Bex85",
+          "id": "M7zETh",
           "name": "Body",
-          "clip": true,
           "width": "fill_container",
           "height": "fill_container",
+          "fill": "#F3F5F3",
+          "layout": "vertical",
           "children": [
             {
               "type": "frame",
-              "id": "NChBM",
-              "name": "Sidebar/Categories",
-              "width": 220,
-              "height": "fill_container",
-              "fill": "$color/bg/sidebar",
+              "id": "a3Hza",
+              "name": "Toolbar",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "$color/bg/surface",
               "stroke": "$color/border/default",
               "strokeWidth": {
-                "right": 1
+                "bottom": 1
               },
-              "layout": "vertical",
-              "gap": 4,
-              "padding": 16,
+              "padding": [
+                0,
+                20
+              ],
               "justifyContent": "space_between",
+              "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "h1LjGO",
-                  "name": "CatGroup",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 4,
+                  "id": "me5jA",
+                  "name": "KeyHint",
+                  "fill": "#FFFFFF00",
+                  "cornerRadius": "$radius/sm",
+                  "padding": [
+                    6,
+                    0
+                  ],
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "HTVvn",
-                      "name": "Cat/worldview",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "ciybe",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "iN25u",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "globe",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "O6172",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "世界观",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "o9nfl9",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "2",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "axwMw",
-                      "name": "Cat/characters",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "QDxM0",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "Yt3zQ",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "users",
-                              "library": "lucide",
-                              "fill": "$color/primary"
-                            },
-                            {
-                              "type": "text",
-                              "id": "x5TDtJ",
-                              "name": "CLabel",
-                              "fill": "$color/text/primary",
-                              "content": "人物",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "w98uUg",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "3",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "vfIlE",
-                      "name": "Cat/items",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "cAJko",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "IMrIZ",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "gem",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "HvAGf",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "物品",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "yxICA",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "1",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "MhYwy",
-                      "name": "Cat/plot_points",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "l7CYvq",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "pKFhQ",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "git-branch",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "gBC0P",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "剧情要点",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "fsY7A",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "2",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "n6Tqbj",
-                      "name": "Cat/relationships",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "Fhv7e",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "Fj7BU",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "heart-handshake",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Q1fvF",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "人物关系",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "f8RkJO",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "1",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "YhMTl",
+                      "name": "T",
+                      "fill": "#8A9A93",
+                      "content": "memory.json → characters[]",
+                      "fontFamily": "Geist Mono",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
                 {
                   "type": "frame",
-                  "id": "q2w6r",
-                  "name": "SidebarFoot",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 6,
-                  "padding": [
-                    16,
-                    4,
-                    4,
-                    4
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Q0PjLE",
-                      "name": "ApiHint",
-                      "fill": "$color/text/muted",
-                      "content": "memory.json",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
-                    },
-                    {
-                      "type": "text",
-                      "id": "IouFW",
-                      "name": "ApiHint2",
-                      "fill": "$color/text/muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "注入 AI：$worldview 等变量",
-                      "lineHeight": 1.4,
-                      "fontFamily": "Geist",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "V0MDw",
-              "name": "ListCol",
-              "width": 420,
-              "height": "fill_container",
-              "fill": "$color/bg/sidebar",
-              "stroke": "$color/border/default",
-              "strokeWidth": {
-                "right": 1
-              },
-              "layout": "vertical",
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "R913wF",
-                  "name": "ListHead",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 12,
-                  "padding": [
-                    20,
-                    20,
-                    12,
-                    20
-                  ],
-                  "justifyContent": "space_between",
+                  "id": "PQDWy",
+                  "name": "NavMid",
+                  "fill": "$color/bg/sidebar",
+                  "cornerRadius": "$radius/md",
+                  "gap": 4,
+                  "padding": 4,
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "frame",
-                      "id": "sy2wL",
-                      "name": "ListMeta",
-                      "layout": "vertical",
-                      "gap": 2,
+                      "id": "eCgrM",
+                      "name": "Cat/worldview",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
                       "children": [
                         {
                           "type": "text",
-                          "id": "Or4ZP",
-                          "name": "LH",
-                          "fill": "#1A2E28",
-                          "content": "人物",
-                          "fontFamily": "Newsreader",
-                          "fontSize": 18,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "text",
-                          "id": "leXAh",
-                          "name": "Count",
-                          "fill": "#8A9A93",
-                          "content": "characters · 3 条",
+                          "id": "GhdnX",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "世界观",
                           "fontFamily": "Geist",
                           "fontSize": 12,
                           "fontWeight": "normal"
@@ -9867,790 +9617,635 @@
                     },
                     {
                       "type": "frame",
-                      "id": "gSzfl",
-                      "name": "ToolsRow",
+                      "id": "Gwce2",
+                      "name": "Cat/characters",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "D3QoDw",
+                          "name": "T",
+                          "fill": "#1A2E28",
+                          "content": "人物",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "lxR54",
+                      "name": "Cat/items",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "BXXse",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "物品",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "f4cTxu",
+                      "name": "Cat/plot_points",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "gBCFk",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "剧情要点",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "T3Uo2U",
+                      "name": "Cat/relationships",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "vaXRA",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "人物关系",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rlgpz",
+                  "name": "RightTools",
+                  "fill": "$color/bg/sidebar",
+                  "cornerRadius": "$radius/md",
+                  "gap": 8,
+                  "padding": 4,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "LVeut",
+                      "name": "View/列表",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kXaIU",
+                          "name": "T",
+                          "fill": "#1A2E28",
+                          "content": "列表",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "y3vwAZ",
+                      "name": "View/卡片",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "owJO3",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "卡片",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "k1m3c",
+                      "name": "BtnAdd",
+                      "fill": "#2D5A4A",
+                      "cornerRadius": 8,
+                      "stroke": "#2D5A4A",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "SuhT6",
+                          "name": "SetIcon",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#FFFFFF"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Meqp7",
+                          "name": "SetLabel",
+                          "fill": "#FFFFFF",
+                          "content": "新增条目",
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A1wSR",
+              "name": "Workspace",
+              "width": "fill_container",
+              "height": "fill_container",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uXAsD",
+                  "name": "Pane/Entries",
+                  "width": 560,
+                  "height": "fill_container",
+                  "fill": "#FFFFFF",
+                  "stroke": "$color/border/default",
+                  "strokeWidth": {
+                    "right": 1
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DQpx5",
+                      "name": "ListHead",
                       "width": "fill_container",
                       "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
                         {
+                          "type": "text",
+                          "id": "B0rEH",
+                          "name": "ChTitle",
+                          "fill": "#8A9A93",
+                          "content": "name / tags / content",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "icon",
+                          "id": "Yyjux",
+                          "x": 220,
+                          "y": 1.5,
+                          "name": "AddCh",
+                          "enabled": false,
+                          "width": 16,
+                          "height": 16,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#5A6E66"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WnNby",
+                      "name": "EntryRows",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
                           "type": "frame",
-                          "id": "i5q6P",
-                          "name": "ListTools",
+                          "id": "lpeNg",
+                          "name": "Row/陆沉",
                           "width": "fill_container",
+                          "fill": "#E4EFE9",
+                          "cornerRadius": "$radius/md",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "vs0DF",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "陆沉 · 主角 · 执剑人",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "d3Q6C",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hP7It",
+                          "name": "Row/青灯人",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF00",
+                          "cornerRadius": "$radius/md",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ry0a5",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "青灯人 · 神秘 · 交易",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "abDZl",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "牌坊后的人影，知晓第七星渊秘密，交易条件不明。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pU6Wr",
+                          "name": "Row/苏晚",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF00",
+                          "cornerRadius": "$radius/md",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "padding": [
+                            12,
+                            14
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "WrCeN",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "苏晚 · 配角 · 观星台",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "a3nya",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "看守废弃观星台的少女，知晓部分铭文读法。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "I5Pha9",
+                  "name": "Pane/Editor",
+                  "width": "fill_container",
+                  "height": "fill_container",
+                  "fill": "#F3F5F3",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    24,
+                    28
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "NAQwK",
+                      "name": "EditorHead",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "justifyContent": "space_between",
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "TlXGi",
+                          "name": "ChapterTitleCol",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "U5Elx",
+                              "name": "ChMeta",
+                              "fill": "#8A9A93",
+                              "content": "MemoryEntry · characters",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 11,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "NfQWz",
+                              "name": "ChTitle",
+                              "fill": "#1A2E28",
+                              "content": "陆沉",
+                              "fontFamily": "Newsreader",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ghBpd",
+                          "name": "ChapterActions",
                           "gap": 10,
                           "alignItems": "center",
                           "children": [
                             {
+                              "type": "text",
+                              "id": "ixWwg",
+                              "name": "WordCount",
+                              "fill": "#8A9A93",
+                              "content": "updated_at · 07-24 14:02",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
                               "type": "frame",
-                              "id": "AQOt1",
-                              "name": "Search",
-                              "width": "fill_container",
-                              "fill": "$color/bg/page",
+                              "id": "sM7Wd",
+                              "name": "BtnSave",
+                              "fill": "#2D5A4A",
                               "cornerRadius": "$radius/md",
-                              "stroke": "$color/border/default",
-                              "strokeWidth": 1,
                               "gap": 8,
                               "padding": [
                                 8,
-                                12
+                                14
                               ],
                               "alignItems": "center",
                               "children": [
                                 {
                                   "type": "icon",
-                                  "id": "I7Ou2O",
-                                  "name": "SIcon",
+                                  "id": "vQP71",
+                                  "name": "AIIcon",
                                   "width": 14,
                                   "height": 14,
-                                  "icon": "search",
+                                  "icon": "check",
+                                  "library": "lucide",
+                                  "fill": "#FFFFFF"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "uiQdD",
+                                  "name": "AILabel",
+                                  "fill": "#FFFFFF",
+                                  "content": "保存",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "YRwjF",
+                      "name": "EditorBody",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "RJiU5",
+                          "name": "Field/name",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "xvZgQ",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "name\n陆沉",
+                              "lineHeight": 1.5,
+                              "fontFamily": "Geist",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "d0nWUI",
+                          "name": "Field/tags",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "zCtUd",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "tags\n主角 · 执剑人",
+                              "lineHeight": 1.5,
+                              "fontFamily": "Geist",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "zinwe",
+                          "name": "Field/content",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "iFbxc",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "content\n拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。\n\n外貌冷静、黑发、左腕有剑纹。与青灯人有未明交易。",
+                              "lineHeight": 1.55,
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "ZTesT",
+                          "name": "SysMeta",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": "$radius/md",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 10,
+                          "padding": 14,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "JQG73",
+                              "name": "MHead",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "cutVw",
+                                  "name": "MIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "database",
                                   "library": "lucide",
                                   "fill": "#8A9A93"
                                 },
                                 {
                                   "type": "text",
-                                  "id": "JQYHp",
-                                  "name": "SPlaceholder",
+                                  "id": "Hv5Mp",
+                                  "name": "MTitle",
                                   "fill": "#8A9A93",
-                                  "content": "按 name / tags 筛选…",
+                                  "content": "memory.json · system fields",
                                   "fontFamily": "Geist",
                                   "fontSize": 12,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            },
-                            {
-                              "id": "oOMuH",
-                              "type": "ref",
-                              "ref": "byhBc",
-                              "name": "BtnAdd",
-                              "descendants": {
-                                "E5lmi": {
-                                  "content": "新增条目"
-                                }
-                              }
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "Vltcp",
-                  "name": "EntryList",
-                  "width": "fill_container",
-                  "height": "fill_container",
-                  "fill": "#FFFFFF00",
-                  "stroke": "$color/border/default",
-                  "layout": "vertical",
-                  "gap": 10,
-                  "padding": [
-                    0,
-                    20,
-                    20,
-                    20
-                  ],
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "A4MYM",
-                      "name": "Entry/陆沉",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": 10,
-                      "stroke": "$color/primary",
-                      "strokeWidth": 1.5,
-                      "layout": "vertical",
-                      "gap": 8,
-                      "padding": 14,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "OOZ01",
-                          "name": "Top",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "cTDMG",
-                              "name": "Name",
-                              "fill": "$color/text/primary",
-                              "content": "陆沉",
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Z3qtt",
-                              "name": "Updated",
-                              "fill": "$color/text/muted",
-                              "content": "07-24 14:02",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "Oxva6",
-                          "name": "Content",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。",
-                          "lineHeight": 1.45,
-                          "fontFamily": "Geist",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "WVeQE",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "jg3QW",
-                              "name": "Tag/主角",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "wWL4B",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "主角",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
                                   "fontWeight": "600"
                                 }
                               ]
                             },
                             {
-                              "type": "frame",
-                              "id": "NfQ2j",
-                              "name": "Tag/执剑人",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "RCR9i",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "执剑人",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "jYqGV",
-                      "name": "Entry/青灯人",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": 10,
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 8,
-                      "padding": 14,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "AdIKC",
-                          "name": "Top",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
-                          "children": [
-                            {
                               "type": "text",
-                              "id": "BBpPZ",
-                              "name": "Name",
-                              "fill": "$color/text/primary",
-                              "content": "青灯人",
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "RaS4o",
-                              "name": "Updated",
-                              "fill": "$color/text/muted",
-                              "content": "07-24 13:40",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "Nowee",
-                          "name": "Content",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "牌坊后的人影，知晓第七星渊秘密，交易条件不明。",
-                          "lineHeight": 1.45,
-                          "fontFamily": "Geist",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "q2Z5b",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "LVgrs",
-                              "name": "Tag/神秘",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "VHm02",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "神秘",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "svHdX",
-                              "name": "Tag/引导者",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "BBuYL",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "引导者",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "sVZxm",
-                      "name": "Entry/苏晚",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": 10,
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 8,
-                      "padding": 14,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "iv229",
-                          "name": "Top",
-                          "width": "fill_container",
-                          "justifyContent": "space_between",
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "y0axy",
-                              "name": "Name",
-                              "fill": "$color/text/primary",
-                              "content": "苏晚",
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "pvihU",
-                              "name": "Updated",
-                              "fill": "$color/text/muted",
-                              "content": "07-23 21:18",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "keneR",
-                          "name": "Content",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "看守废弃观星台的少女，知晓部分铭文读法。",
-                          "lineHeight": 1.45,
-                          "fontFamily": "Geist",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "o5bwzD",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "vZPt7",
-                              "name": "Tag/配角",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "euntS",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "配角",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "Rl396",
-              "name": "EntryEditor",
-              "clip": true,
-              "width": "fill_container",
-              "height": "fill_container",
-              "fill": "$color/bg/surface",
-              "layout": "vertical",
-              "gap": 12,
-              "padding": [
-                20,
-                24
-              ],
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "a1gaa4",
-                  "name": "EH",
-                  "width": "fill_container",
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "QdayX",
-                      "name": "ET",
-                      "fill": "$color/text/primary",
-                      "content": "编辑条目",
-                      "fontFamily": "Newsreader",
-                      "fontSize": 22,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "sDJ8U",
-                      "name": "EActs",
-                      "gap": 8,
-                      "children": [
-                        {
-                          "id": "mE2O0",
-                          "type": "ref",
-                          "ref": "cV9gY",
-                          "name": "BtnDel",
-                          "descendants": {
-                            "xv6j5": {
-                              "content": "删除",
-                              "fill": "$color/text/secondary",
-                              "fontSize": 14
-                            }
-                          }
-                        },
-                        {
-                          "id": "MzTdj",
-                          "type": "ref",
-                          "ref": "byhBc",
-                          "name": "BtnSave",
-                          "descendants": {
-                            "E5lmi": {
-                              "content": "保存",
-                              "fill": "#FFFFFF",
-                              "fontSize": 14
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "nncfq",
-                  "name": "Meta",
-                  "width": "fill_container",
-                  "gap": 8,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "LfdXh",
-                      "name": "M/id",
-                      "width": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": 12,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "C2Tru",
-                          "name": "MK",
-                          "fill": "$color/text/muted",
-                          "content": "id",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "uwTX9",
-                          "name": "MV",
-                          "fill": "$color/text/primary",
-                          "content": "a1b2c3d4",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "s4sg1l",
-                      "name": "M/category",
-                      "width": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": 12,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "HiDo9",
-                          "name": "MK",
-                          "fill": "$color/text/muted",
-                          "content": "category",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "ENPNh",
-                          "name": "MV",
-                          "fill": "$color/text/primary",
-                          "content": "characters",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "xXoHW",
-                      "name": "M/updated_at",
-                      "width": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "layout": "vertical",
-                      "gap": 4,
-                      "padding": 12,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "Lmt1T",
-                          "name": "MK",
-                          "fill": "$color/text/muted",
-                          "content": "updated_at",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "rcYwW",
-                          "name": "MV",
-                          "fill": "$color/text/primary",
-                          "content": "2026-07-24T06:02:00Z",
-                          "fontFamily": "Geist Mono",
-                          "fontSize": 12,
-                          "fontWeight": "500"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "G6Rb1",
-                  "name": "Field/name",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 6,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "lDB4k",
-                      "name": "Label",
-                      "fill": "$color/text/secondary",
-                      "content": "name（必填）",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "wIr0j",
-                      "name": "Input",
-                      "width": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "padding": [
-                        12,
-                        14
-                      ],
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "V5Ooad",
-                          "name": "Val",
-                          "fill": "$color/text/primary",
-                          "content": "陆沉",
-                          "fontFamily": "Geist",
-                          "fontSize": 14,
-                          "fontWeight": "500"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "kAt74",
-                  "name": "Field/tags",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 6,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "j5FRT",
-                      "name": "Label",
-                      "fill": "$color/text/secondary",
-                      "content": "tags",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "TQsaC",
-                      "name": "TagBox",
-                      "width": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "gap": 8,
-                      "padding": 12,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "CG3Tg",
-                          "name": "Chip/主角",
-                          "fill": "$color/primary/soft",
-                          "cornerRadius": 4,
-                          "gap": 6,
-                          "padding": [
-                            4,
-                            10
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "yX6IN",
-                              "name": "TT",
-                              "fill": "$color/primary",
-                              "content": "主角",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "nSkfp",
-                          "name": "Chip/执剑人",
-                          "fill": "$color/primary/soft",
-                          "cornerRadius": 4,
-                          "gap": 6,
-                          "padding": [
-                            4,
-                            10
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "yS5P6",
-                              "name": "TT",
-                              "fill": "$color/primary",
-                              "content": "执剑人",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "DWZmW",
-                          "name": "Chip/Add",
-                          "cornerRadius": 4,
-                          "stroke": "$color/border/default",
-                          "strokeWidth": 1,
-                          "padding": [
-                            4,
-                            10
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "denDp",
-                              "name": "TT",
-                              "fill": "$color/text/muted",
-                              "content": "+ 添加",
+                              "id": "oHonh",
+                              "name": "MBody",
+                              "fill": "#5A6E66",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "id: a1b2c3d4    category: characters    created_at / updated_at: 2026-07-24",
+                              "lineHeight": 1.45,
                               "fontFamily": "Geist",
                               "fontSize": 12,
                               "fontWeight": "normal"
                             }
                           ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "KlVX8",
-                  "name": "Field/content",
-                  "width": "fill_container",
-                  "height": "fill_container",
-                  "layout": "vertical",
-                  "gap": 6,
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "n3KAC",
-                      "name": "Label",
-                      "fill": "$color/text/secondary",
-                      "content": "content",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "r56rOe",
-                      "name": "TextArea",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "$color/bg/page",
-                      "cornerRadius": 8,
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 8,
-                      "padding": 14,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "NSqFe",
-                          "name": "Val",
-                          "fill": "$color/text/primary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。\n\n外貌冷静、黑发、左腕有剑纹。与青灯人有未明交易。",
-                          "lineHeight": 1.55,
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
                         }
                       ]
                     }
@@ -10664,19 +10259,19 @@
     },
     {
       "type": "frame",
-      "id": "p0wF7U",
-      "x": 6080,
+      "id": "VpeAl",
+      "x": 12160,
       "y": 326,
-      "name": "Review/Screen/Settings",
+      "name": "Review/Screen/设定库-卡片",
       "clip": true,
       "width": 1440,
       "height": 960,
-      "fill": "#F3F5F3",
+      "fill": "$color/bg/page",
       "layout": "vertical",
       "children": [
         {
           "type": "frame",
-          "id": "bZB7k",
+          "id": "x6VrZ",
           "name": "EntryNote",
           "width": "fill_container",
           "fill": "#1A2E28",
@@ -10689,8 +10284,8 @@
           "children": [
             {
               "type": "icon",
-              "id": "qMKgH",
-              "name": "EI",
+              "id": "nsxTr",
+              "name": "EIcon",
               "width": 12,
               "height": 12,
               "icon": "corner-down-right",
@@ -10699,12 +10294,12 @@
             },
             {
               "type": "text",
-              "id": "YMCQV",
-              "name": "ET",
+              "id": "Yktvr",
+              "name": "EText",
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：编辑页顶栏「设定」Tab · 设定卡浏览（memory.json）+ 全局规则/文风（settings.json）",
+              "content": "入口：编辑页顶栏「设定」· 与列表同一壳层；条目区为卡片浏览，右侧仍编辑选中 MemoryEntry",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -10713,7 +10308,7 @@
         },
         {
           "type": "frame",
-          "id": "mVSut",
+          "id": "LCN2i",
           "name": "Header",
           "width": "fill_container",
           "height": 56,
@@ -10724,44 +10319,64 @@
           },
           "padding": [
             0,
-            24
+            20
           ],
           "justifyContent": "space_between",
           "alignItems": "center",
           "children": [
             {
               "type": "frame",
-              "id": "uEN52",
+              "id": "IgP0D",
               "name": "NavLeft",
               "width": 280,
-              "gap": 12,
+              "gap": 16,
               "alignItems": "center",
               "children": [
                 {
-                  "type": "icon",
-                  "id": "Dvsmx",
+                  "type": "frame",
+                  "id": "t6PWMr",
                   "name": "Back",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "chevron-left",
-                  "library": "lucide",
-                  "fill": "#5A6E66"
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "E764bR",
+                      "name": "BackIcon",
+                      "width": 16,
+                      "height": 16,
+                      "icon": "chevron-left",
+                      "library": "lucide",
+                      "fill": "#5A6E66"
+                    },
+                    {
+                      "type": "text",
+                      "id": "w4UtJ4",
+                      "name": "ProjName",
+                      "fill": "#1A2E28",
+                      "content": "星渊剑主",
+                      "fontFamily": "Newsreader",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
                 },
                 {
-                  "type": "text",
-                  "id": "h2CFr",
-                  "name": "Title",
-                  "fill": "#1A2E28",
-                  "content": " 星渊剑主",
-                  "fontFamily": "Newsreader",
-                  "fontSize": 18,
-                  "fontWeight": "600"
+                  "id": "hOP7e",
+                  "type": "ref",
+                  "ref": "lsTOX",
+                  "name": "StatusBadge",
+                  "descendants": {
+                    "yfQji": {
+                      "content": "已保存"
+                    }
+                  }
                 }
               ]
             },
             {
               "type": "frame",
-              "id": "v7QZe",
+              "id": "njYzM",
               "name": "NavMid",
               "fill": "$color/bg/sidebar",
               "cornerRadius": "$radius/md",
@@ -10771,7 +10386,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "I1Iek",
+                  "id": "CAyst",
                   "name": "Tab/编辑",
                   "fill": "#FFFFFF00",
                   "cornerRadius": "$radius/sm",
@@ -10783,7 +10398,7 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "ckRkB",
+                      "id": "L10bf",
                       "name": "T",
                       "fill": "#5A6E66",
                       "content": "编辑",
@@ -10795,9 +10410,9 @@
                 },
                 {
                   "type": "frame",
-                  "id": "Ht3le",
+                  "id": "J5gO4",
                   "name": "Tab/设定",
-                  "fill": "$color/bg/surface",
+                  "fill": "#FFFFFF",
                   "cornerRadius": "$radius/sm",
                   "padding": [
                     6,
@@ -10807,37 +10422,13 @@
                   "children": [
                     {
                       "type": "text",
-                      "id": "TqIb4",
+                      "id": "Plkoy",
                       "name": "T",
-                      "fill": "$color/text/primary",
+                      "fill": "#1A2E28",
                       "content": "设定",
                       "fontFamily": "Geist",
                       "fontSize": 12,
                       "fontWeight": "600"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "y81Fe",
-                  "name": "Tab/记忆",
-                  "fill": "#FFFFFF00",
-                  "cornerRadius": "$radius/sm",
-                  "padding": [
-                    6,
-                    14
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "Y3SyhS",
-                      "name": "T",
-                      "fill": "$color/text/secondary",
-                      "content": "记忆",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -10845,7 +10436,7 @@
             },
             {
               "type": "frame",
-              "id": "Vep2R",
+              "id": "m9KP4",
               "name": "NavRight",
               "width": 280,
               "gap": 10,
@@ -10854,8 +10445,8 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "m0HgV",
-                  "name": "BtnSettings",
+                  "id": "I34iM",
+                  "name": "Btn/项目设置",
                   "fill": "#FFFFFF",
                   "cornerRadius": 8,
                   "stroke": "#D5DED9",
@@ -10869,7 +10460,7 @@
                   "children": [
                     {
                       "type": "icon",
-                      "id": "mlolM",
+                      "id": "OFPcI",
                       "name": "SetIcon",
                       "width": 14,
                       "height": 14,
@@ -10879,10 +10470,10 @@
                     },
                     {
                       "type": "text",
-                      "id": "DqYPN",
+                      "id": "t0AmH",
                       "name": "SetLabel",
                       "fill": "#1A2E28",
-                      "content": "设置",
+                      "content": "项目设置",
                       "fontFamily": "Geist",
                       "fontSize": 13,
                       "fontWeight": "500"
@@ -10895,404 +10486,181 @@
         },
         {
           "type": "frame",
-          "id": "YjCVH",
+          "id": "j54tGT",
           "name": "Body",
-          "clip": true,
           "width": "fill_container",
           "height": "fill_container",
+          "fill": "#F3F5F3",
+          "layout": "vertical",
           "children": [
             {
               "type": "frame",
-              "id": "BEcrL",
-              "name": "Sidebar/Categories",
-              "width": 220,
-              "height": "fill_container",
-              "fill": "$color/bg/sidebar",
+              "id": "p8FHf",
+              "name": "Toolbar",
+              "width": "fill_container",
+              "height": 56,
+              "fill": "$color/bg/surface",
               "stroke": "$color/border/default",
               "strokeWidth": {
-                "right": 1
+                "bottom": 1
               },
-              "layout": "vertical",
-              "gap": 4,
-              "padding": 16,
+              "padding": [
+                0,
+                20
+              ],
               "justifyContent": "space_between",
+              "alignItems": "center",
               "children": [
                 {
                   "type": "frame",
-                  "id": "fs3G0",
-                  "name": "CatGroup",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 4,
+                  "id": "w6emE6",
+                  "name": "KeyHint",
+                  "fill": "#FFFFFF00",
+                  "cornerRadius": "$radius/sm",
+                  "padding": [
+                    6,
+                    0
+                  ],
+                  "alignItems": "center",
                   "children": [
                     {
                       "type": "text",
-                      "id": "CQxn3",
-                      "name": "Sec/设定卡",
-                      "fill": "$color/text/muted",
-                      "content": "设定卡 · memory.json",
-                      "fontFamily": "Geist",
+                      "id": "a2ss7",
+                      "name": "T",
+                      "fill": "#8A9A93",
+                      "content": "memory.json → characters[]",
+                      "fontFamily": "Geist Mono",
                       "fontSize": 11,
-                      "fontWeight": "600"
-                    },
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "FQukH",
+                  "name": "NavMid",
+                  "fill": "$color/bg/sidebar",
+                  "cornerRadius": "$radius/md",
+                  "gap": 4,
+                  "padding": 4,
+                  "alignItems": "center",
+                  "children": [
                     {
                       "type": "frame",
-                      "id": "k1ocy",
-                      "name": "Cat/characters",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "bjx3s",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "MqAyg",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "users",
-                              "library": "lucide",
-                              "fill": "$color/primary"
-                            },
-                            {
-                              "type": "text",
-                              "id": "ewBEb",
-                              "name": "CLabel",
-                              "fill": "$color/text/primary",
-                              "content": "人物",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "qmhXF",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "3",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "NVvcC",
-                      "name": "Cat/items",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "Ik7TB",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "amNwF",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "gem",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "IdZzr",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "物品",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "Ta27k",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "1",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "B84HH",
+                      "id": "q1llH",
                       "name": "Cat/worldview",
-                      "width": "fill_container",
                       "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
+                      "cornerRadius": "$radius/sm",
                       "padding": [
-                        10,
-                        12
+                        6,
+                        14
                       ],
-                      "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "DxXcK",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "k2RPHW",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "globe",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "nz4Gs",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "世界观",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
                           "type": "text",
-                          "id": "DsKd4",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "2",
+                          "id": "g5dRj",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "世界观",
                           "fontFamily": "Geist",
-                          "fontSize": 11,
+                          "fontSize": 12,
                           "fontWeight": "normal"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "q7V7v",
+                      "id": "nFtp1",
+                      "name": "Cat/characters",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "m6z9hm",
+                          "name": "T",
+                          "fill": "#1A2E28",
+                          "content": "人物",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "d5cINN",
+                      "name": "Cat/items",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "v9Ode5",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "物品",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "oqmNw",
                       "name": "Cat/plot_points",
-                      "width": "fill_container",
                       "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
+                      "cornerRadius": "$radius/sm",
                       "padding": [
-                        10,
-                        12
+                        6,
+                        14
                       ],
-                      "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
                         {
-                          "type": "frame",
-                          "id": "zKcj9",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "fnItT",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "git-branch",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "bchpP",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "剧情要点",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
                           "type": "text",
-                          "id": "lTmey",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "2",
+                          "id": "S5Ah8x",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "剧情要点",
                           "fontFamily": "Geist",
-                          "fontSize": 11,
+                          "fontSize": 12,
                           "fontWeight": "normal"
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "LOXzC",
+                      "id": "MK1J6",
                       "name": "Cat/relationships",
-                      "width": "fill_container",
                       "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
+                      "cornerRadius": "$radius/sm",
                       "padding": [
-                        10,
-                        12
-                      ],
-                      "justifyContent": "space_between",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "U9z8v",
-                          "name": "Left",
-                          "gap": 10,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "Lu9kt",
-                              "name": "CIcon",
-                              "width": 16,
-                              "height": 16,
-                              "icon": "heart-handshake",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "cUE8h",
-                              "name": "CLabel",
-                              "fill": "$color/text/secondary",
-                              "content": "人物关系",
-                              "fontFamily": "Geist",
-                              "fontSize": 13,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "O4HXLR",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "1",
-                          "fontFamily": "Geist",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "text",
-                      "id": "DBJnP",
-                      "name": "Sec/项目设定",
-                      "fill": "$color/text/muted",
-                      "content": "项目设定 · settings.json",
-                      "fontFamily": "Geist",
-                      "fontSize": 11,
-                      "fontWeight": "600"
-                    },
-                    {
-                      "type": "frame",
-                      "id": "UGSYs",
-                      "name": "Cat/global_rules",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
+                        6,
+                        14
                       ],
                       "alignItems": "center",
                       "children": [
                         {
-                          "type": "icon",
-                          "id": "H9aiaK",
-                          "name": "CIcon",
-                          "width": 16,
-                          "height": 16,
-                          "icon": "file-text",
-                          "library": "lucide",
-                          "fill": "$color/text/muted"
-                        },
-                        {
                           "type": "text",
-                          "id": "jF1Ob",
-                          "name": "CLabel",
-                          "fill": "$color/text/secondary",
-                          "content": "全局规则",
+                          "id": "gDiGd",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "人物关系",
                           "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Qz4KF",
-                      "name": "Cat/style_preference",
-                      "width": "fill_container",
-                      "fill": "#FFFFFF00",
-                      "cornerRadius": "$radius/md",
-                      "gap": 10,
-                      "padding": [
-                        10,
-                        12
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "H51CO5",
-                          "name": "CIcon",
-                          "width": 16,
-                          "height": 16,
-                          "icon": "pen-line",
-                          "library": "lucide",
-                          "fill": "$color/text/muted"
-                        },
-                        {
-                          "type": "text",
-                          "id": "GMOku",
-                          "name": "CLabel",
-                          "fill": "$color/text/secondary",
-                          "content": "文风偏好",
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
+                          "fontSize": 12,
                           "fontWeight": "normal"
                         }
                       ]
@@ -11301,40 +10669,98 @@
                 },
                 {
                   "type": "frame",
-                  "id": "U4LRo",
-                  "name": "SidebarFoot",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 6,
-                  "padding": [
-                    16,
-                    4,
-                    4,
-                    4
-                  ],
+                  "id": "O2UQQ",
+                  "name": "RightTools",
+                  "fill": "$color/bg/sidebar",
+                  "cornerRadius": "$radius/md",
+                  "gap": 8,
+                  "padding": 4,
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "text",
-                      "id": "D6BZU",
-                      "name": "ApiHint",
-                      "fill": "$color/text/muted",
-                      "content": "设定卡 ↔ memory.json",
-                      "fontFamily": "Geist Mono",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "tb2Ap",
+                      "name": "View/列表",
+                      "fill": "#FFFFFF00",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "PZp9f",
+                          "name": "T",
+                          "fill": "#5A6E66",
+                          "content": "列表",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        }
+                      ]
                     },
                     {
-                      "type": "text",
-                      "id": "Qmvpc",
-                      "name": "ApiHint2",
-                      "fill": "$color/text/muted",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "规则/文风 ↔ settings.json",
-                      "lineHeight": 1.4,
-                      "fontFamily": "Geist",
-                      "fontSize": 11,
-                      "fontWeight": "normal"
+                      "type": "frame",
+                      "id": "ONZic",
+                      "name": "View/卡片",
+                      "fill": "#FFFFFF",
+                      "cornerRadius": "$radius/sm",
+                      "padding": [
+                        6,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "MNgCC",
+                          "name": "T",
+                          "fill": "#1A2E28",
+                          "content": "卡片",
+                          "fontFamily": "Geist",
+                          "fontSize": 12,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DI63g",
+                      "name": "BtnAdd",
+                      "fill": "#2D5A4A",
+                      "cornerRadius": 8,
+                      "stroke": "#2D5A4A",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        8,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "qkw12",
+                          "name": "SetIcon",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "plus",
+                          "library": "lucide",
+                          "fill": "#5A6E66"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bg4BK",
+                          "name": "SetLabel",
+                          "fill": "#FFFFFF",
+                          "content": "新增条目",
+                          "fontFamily": "Geist",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
                     }
                   ]
                 }
@@ -11342,699 +10768,437 @@
             },
             {
               "type": "frame",
-              "id": "aauh6",
-              "name": "Main/Cards",
+              "id": "QTNC4",
+              "name": "Workspace",
               "width": "fill_container",
               "height": "fill_container",
-              "layout": "vertical",
-              "gap": 16,
-              "padding": 24,
               "children": [
                 {
                   "type": "frame",
-                  "id": "lGuDK",
-                  "name": "ListHead",
+                  "id": "sKnou",
+                  "name": "Pane/Entries",
                   "width": "fill_container",
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
+                  "height": "fill_container",
+                  "fill": "#FFFFFF",
+                  "stroke": "$color/border/default",
+                  "strokeWidth": {
+                    "right": 1
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 16,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "h0isS9",
-                      "name": "ListMeta",
-                      "gap": 12,
+                      "id": "wVFVc",
+                      "name": "ListHead",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "text",
-                          "id": "xG0xp",
-                          "name": "LH",
-                          "fill": "$color/text/primary",
-                          "content": "人物设定卡",
-                          "fontFamily": "Newsreader",
-                          "fontSize": 22,
+                          "id": "L10oo",
+                          "name": "ChTitle",
+                          "fill": "#8A9A93",
+                          "content": "characters[] · card view",
+                          "fontFamily": "Geist Mono",
+                          "fontSize": 11,
                           "fontWeight": "600"
                         },
                         {
-                          "type": "text",
-                          "id": "mE6lT",
-                          "name": "Count",
-                          "fill": "$color/text/muted",
-                          "content": "characters · 3 张",
-                          "fontFamily": "Geist",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "kj8Sm",
-                      "name": "ListTools",
-                      "gap": 10,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "CUuQW",
-                          "name": "Search",
-                          "width": 220,
-                          "fill": "$color/bg/page",
-                          "cornerRadius": "$radius/md",
-                          "stroke": "$color/border/default",
-                          "strokeWidth": 1,
-                          "gap": 8,
-                          "padding": [
-                            8,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "WBD2K",
-                              "name": "SIcon",
-                              "width": 14,
-                              "height": 14,
-                              "icon": "search",
-                              "library": "lucide",
-                              "fill": "$color/text/muted"
-                            },
-                            {
-                              "type": "text",
-                              "id": "rtvwV",
-                              "name": "SPlaceholder",
-                              "fill": "$color/text/muted",
-                              "content": "检索设定关键词…",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "id": "eJO2V",
-                          "type": "ref",
-                          "ref": "byhBc",
-                          "name": "BtnAdd",
-                          "descendants": {
-                            "E5lmi": {
-                              "content": "新增设定卡",
-                              "fill": "#FFFFFF",
-                              "fontSize": 14
-                            }
-                          }
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "MitZZ",
-                  "name": "CardGrid",
-                  "width": "fill_container",
-                  "height": "fill_container",
-                  "gap": 16,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "b9FWFR",
-                      "name": "Card/陆沉",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": "$radius/lg",
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 12,
-                      "padding": 18,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "pMbCe",
-                          "name": "CHead",
-                          "width": "fill_container",
-                          "gap": 12,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "O6PTf",
-                              "name": "Avatar",
-                              "width": 40,
-                              "height": 40,
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 20,
-                              "justifyContent": "center",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "b24p7",
-                                  "name": "Init",
-                                  "fill": "$color/primary",
-                                  "content": "陆",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "EAvOc",
-                              "name": "CMeta",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 2,
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Kjqc7",
-                                  "name": "Name",
-                                  "fill": "$color/text/primary",
-                                  "content": "陆沉",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "nN4or",
-                                  "name": "Role",
-                                  "fill": "$color/text/muted",
-                                  "content": "主角 · 执剑人",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "UvAfw",
-                          "name": "Bio",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。",
-                          "lineHeight": 1.5,
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "XJ4nU",
-                          "name": "Highlight",
-                          "width": "fill_container",
-                          "fill": "$color/bg/page",
-                          "cornerRadius": "$radius/sm",
-                          "layout": "vertical",
-                          "gap": 4,
-                          "padding": 10,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "CALHF",
-                              "name": "LookL",
-                              "fill": "$color/text/muted",
-                              "content": "要点摘录",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Ld4za",
-                              "name": "LookV",
-                              "fill": "$color/text/primary",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "外貌冷静、黑发、左腕有剑纹",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "AvPmT",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "YWNdP",
-                              "name": "Tag/主角",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "U1SVs",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "主角",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "JlxMu",
-                              "name": "Tag/执剑人",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "m3w6U",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "执剑人",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "BNTEi",
-                      "name": "Card/青灯人",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": "$radius/lg",
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 12,
-                      "padding": 18,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "x0QDr",
-                          "name": "CHead",
-                          "width": "fill_container",
-                          "gap": 12,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "OlQoA",
-                              "name": "Avatar",
-                              "width": 40,
-                              "height": 40,
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 20,
-                              "justifyContent": "center",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Bjb2x",
-                                  "name": "Init",
-                                  "fill": "$color/primary",
-                                  "content": "青",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "Mwi0o",
-                              "name": "CMeta",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 2,
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "rzJD5",
-                                  "name": "Name",
-                                  "fill": "$color/text/primary",
-                                  "content": "青灯人",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "qkgD6",
-                                  "name": "Role",
-                                  "fill": "$color/text/muted",
-                                  "content": "神秘 · 引导者",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "w9oGA1",
-                          "name": "Bio",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "牌坊后的人影，知晓第七星渊秘密，交易条件不明。",
-                          "lineHeight": 1.5,
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "MBITb",
-                          "name": "Highlight",
-                          "width": "fill_container",
-                          "fill": "$color/bg/page",
-                          "cornerRadius": "$radius/sm",
-                          "layout": "vertical",
-                          "gap": 4,
-                          "padding": 10,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "LfAAX",
-                              "name": "LookL",
-                              "fill": "$color/text/muted",
-                              "content": "要点摘录",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "I3ecg",
-                              "name": "LookV",
-                              "fill": "$color/text/primary",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "青袍、背影、不露面",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Ntqit",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "w2NiRA",
-                              "name": "Tag/神秘",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "n48QA",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "神秘",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "FVodS",
-                              "name": "Tag/引导者",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Emt60",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "引导者",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "yObEq",
-                      "name": "Card/苏晚",
-                      "width": "fill_container",
-                      "fill": "$color/bg/surface",
-                      "cornerRadius": "$radius/lg",
-                      "stroke": "$color/border/default",
-                      "strokeWidth": 1,
-                      "layout": "vertical",
-                      "gap": 12,
-                      "padding": 18,
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "h8wix",
-                          "name": "CHead",
-                          "width": "fill_container",
-                          "gap": 12,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "Ov4Sp",
-                              "name": "Avatar",
-                              "width": 40,
-                              "height": 40,
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 20,
-                              "justifyContent": "center",
-                              "alignItems": "center",
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "Qma4m",
-                                  "name": "Init",
-                                  "fill": "$color/primary",
-                                  "content": "苏",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "g4VN71",
-                              "name": "CMeta",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 2,
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "HpF36",
-                                  "name": "Name",
-                                  "fill": "$color/text/primary",
-                                  "content": "苏晚",
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 18,
-                                  "fontWeight": "600"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "jRHMk",
-                                  "name": "Role",
-                                  "fill": "$color/text/muted",
-                                  "content": "配角 · 观星台看守",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "ueaNw",
-                          "name": "Bio",
-                          "fill": "$color/text/secondary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "看守废弃观星台的少女，知晓部分铭文读法。",
-                          "lineHeight": 1.5,
-                          "fontFamily": "Geist",
-                          "fontSize": 13,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "FLOzV",
-                          "name": "Highlight",
-                          "width": "fill_container",
-                          "fill": "$color/bg/page",
-                          "cornerRadius": "$radius/sm",
-                          "layout": "vertical",
-                          "gap": 4,
-                          "padding": 10,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Smvx4",
-                              "name": "LookL",
-                              "fill": "$color/text/muted",
-                              "content": "要点摘录",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "text",
-                              "id": "sg86Y",
-                              "name": "LookV",
-                              "fill": "$color/text/primary",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "灰衣、短发、持旧灯",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "HjDrV",
-                          "name": "Tags",
-                          "gap": 6,
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "HgyOY",
-                              "name": "Tag/配角",
-                              "fill": "$color/primary/soft",
-                              "cornerRadius": 4,
-                              "padding": [
-                                3,
-                                8
-                              ],
-                              "children": [
-                                {
-                                  "type": "text",
-                                  "id": "keH7k",
-                                  "name": "TT",
-                                  "fill": "$color/primary",
-                                  "content": "配角",
-                                  "fontFamily": "Geist",
-                                  "fontSize": 10,
-                                  "fontWeight": "600"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "CiTnw",
-                  "name": "ToMemory",
-                  "width": "fill_container",
-                  "fill": "$color/primary/soft",
-                  "cornerRadius": 8,
-                  "gap": 10,
-                  "padding": [
-                    12,
-                    16
-                  ],
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "qcDji",
-                      "name": "L",
-                      "width": "fill_container",
-                      "gap": 8,
-                      "alignItems": "center",
-                      "children": [
-                        {
                           "type": "icon",
-                          "id": "IiKgE",
-                          "name": "LI",
-                          "width": 14,
-                          "height": 14,
-                          "icon": "database",
+                          "id": "vkIIy",
+                          "x": 220,
+                          "y": 1.5,
+                          "name": "AddCh",
+                          "enabled": false,
+                          "width": 16,
+                          "height": 16,
+                          "icon": "plus",
                           "library": "lucide",
-                          "fill": "$color/primary"
-                        },
-                        {
-                          "type": "text",
-                          "id": "r0KMOV",
-                          "name": "LT",
-                          "fill": "$color/primary",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "设定卡数据来自 memory.json（name / content / tags）。需要精细增删改请切换到「记忆」Tab。",
-                          "fontFamily": "Geist",
-                          "fontSize": 12,
-                          "fontWeight": "normal"
+                          "fill": "#5A6E66"
                         }
                       ]
                     },
                     {
-                      "type": "text",
-                      "id": "QGFfj",
-                      "name": "LA",
-                      "fill": "$color/primary",
-                      "content": "打开记忆库 →",
-                      "fontFamily": "Geist",
-                      "fontSize": 12,
-                      "fontWeight": "600"
+                      "type": "frame",
+                      "id": "l16FK",
+                      "name": "EntryRows",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "iYLe7",
+                          "name": "Row/陆沉",
+                          "width": "fill_container",
+                          "fill": "#E4EFE9",
+                          "cornerRadius": "$radius/md",
+                          "stroke": "#2D5A4A",
+                          "strokeWidth": 1.5,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 16,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "JRfuz",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "陆沉 · 主角 · 执剑人",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "600"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ngUB0",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "I94oK",
+                          "name": "Row/青灯人",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": "$radius/md",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 16,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "IPKY4",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "青灯人 · 神秘 · 交易",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ImE9C",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "牌坊后的人影，知晓第七星渊秘密，交易条件不明。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "bXHeX",
+                          "name": "Row/苏晚",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": "$radius/md",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 8,
+                          "padding": 16,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "SWI4V",
+                              "name": "Num",
+                              "fill": "#1A2E28",
+                              "content": "苏晚 · 配角 · 观星台",
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "Cy9nZ",
+                              "name": "Title",
+                              "fill": "#5A6E66",
+                              "content": "看守废弃观星台的少女，知晓部分铭文读法。",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "yDnxc",
+                  "name": "Pane/Editor",
+                  "width": 400,
+                  "height": "fill_container",
+                  "fill": "#F3F5F3",
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": [
+                    24,
+                    28
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "M9tUP",
+                      "name": "EditorHead",
+                      "width": "fill_container",
+                      "gap": 16,
+                      "justifyContent": "space_between",
+                      "alignItems": "end",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "b6hF8",
+                          "name": "ChapterTitleCol",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "o4zOpM",
+                              "name": "ChMeta",
+                              "fill": "#8A9A93",
+                              "content": "MemoryEntry · characters",
+                              "fontFamily": "Geist Mono",
+                              "fontSize": 11,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "text",
+                              "id": "ZFbch",
+                              "name": "ChTitle",
+                              "fill": "#1A2E28",
+                              "content": "陆沉",
+                              "fontFamily": "Newsreader",
+                              "fontSize": 24,
+                              "fontWeight": "600"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hLrc2",
+                          "name": "ChapterActions",
+                          "gap": 10,
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ptRuy",
+                              "name": "WordCount",
+                              "fill": "#8A9A93",
+                              "content": "updated_at · 07-24 14:02",
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "jXrid",
+                              "name": "BtnSave",
+                              "fill": "#2D5A4A",
+                              "cornerRadius": "$radius/md",
+                              "gap": 8,
+                              "padding": [
+                                8,
+                                14
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "AuZvQ",
+                                  "name": "AIIcon",
+                                  "width": 14,
+                                  "height": 14,
+                                  "icon": "check",
+                                  "library": "lucide",
+                                  "fill": "#FFFFFF"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "ksbU9",
+                                  "name": "AILabel",
+                                  "fill": "#FFFFFF",
+                                  "content": "保存",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Cb1lf",
+                      "name": "EditorBody",
+                      "width": "fill_container",
+                      "height": "fill_container",
+                      "layout": "vertical",
+                      "gap": 16,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "LbwWt",
+                          "name": "Field/name",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "ZnZIk",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "name\n陆沉",
+                              "lineHeight": 1.5,
+                              "fontFamily": "Geist",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Lw8KD",
+                          "name": "Field/tags",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "T2xBp",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "tags\n主角 · 执剑人",
+                              "lineHeight": 1.5,
+                              "fontFamily": "Geist",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hsOfB",
+                          "name": "Field/content",
+                          "width": "fill_container",
+                          "height": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": 8,
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": 12,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "KDgaj",
+                              "name": "GV",
+                              "fill": "#1A2E28",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "content\n拾得青铜残剑的少年，性格沉静，对仙道既渴望又戒备。\n\n外貌冷静、黑发、左腕有剑纹。与青灯人有未明交易。",
+                              "lineHeight": 1.55,
+                              "fontFamily": "Geist",
+                              "fontSize": 13,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "Jopwm",
+                          "name": "SysMeta",
+                          "width": "fill_container",
+                          "fill": "#FFFFFF",
+                          "cornerRadius": "$radius/md",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": 1,
+                          "layout": "vertical",
+                          "gap": 10,
+                          "padding": 14,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "e35p2c",
+                              "name": "MHead",
+                              "gap": 8,
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "icon",
+                                  "id": "MRaun",
+                                  "name": "MIcon",
+                                  "width": 16,
+                                  "height": 16,
+                                  "icon": "database",
+                                  "library": "lucide",
+                                  "fill": "#8A9A93"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "vVpxe",
+                                  "name": "MTitle",
+                                  "fill": "#8A9A93",
+                                  "content": "memory.json · system fields",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "KKRgZ",
+                              "name": "MBody",
+                              "fill": "#5A6E66",
+                              "textGrowth": "fixed-width",
+                              "width": "fill_container",
+                              "content": "id: a1b2c3d4    category: characters    created_at / updated_at: 2026-07-24",
+                              "lineHeight": 1.45,
+                              "fontFamily": "Geist",
+                              "fontSize": 12,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   ]
                 }
