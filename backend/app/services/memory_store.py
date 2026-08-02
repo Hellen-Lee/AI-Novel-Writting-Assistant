@@ -15,8 +15,10 @@ MEMORY_CATEGORIES = (
     "characters",
     "items",
     "plot_points",
-    "relationships",
 )
+
+# Deprecated top-level key; stripped on load, rejected on strict normalize/save.
+_LEGACY_CATEGORIES = frozenset({"relationships"})
 
 DEFAULT_MEMORY: dict[str, list[dict[str, Any]]] = {
     category: [] for category in MEMORY_CATEGORIES
@@ -50,7 +52,43 @@ def _touch_project_updated_at(project_id: str) -> None:
         json.dump(meta, f, ensure_ascii=False, indent=2)
 
 
-def _normalize_entry(entry: dict[str, Any], *, now: Optional[str] = None) -> dict[str, Any]:
+def _normalize_tags(tags: Any) -> list[str]:
+    if tags is None:
+        tags = []
+    if not isinstance(tags, list):
+        raise ValueError("记忆条目 tags 必须是数组")
+    return [str(tag).strip() for tag in tags if str(tag).strip()]
+
+
+def _normalize_relationship_list(raw: Any) -> list[dict[str, str]]:
+    """Normalize to [{type, target}, ...]; accept legacy object map."""
+    if raw is None:
+        return []
+
+    pairs: list[tuple[str, str]] = []
+    if isinstance(raw, dict):
+        for key, value in raw.items():
+            rel_type = str(key).strip()
+            target = str(value).strip() if value is not None else ""
+            if rel_type and target:
+                pairs.append((rel_type, target))
+    elif isinstance(raw, list):
+        for item in raw:
+            if not isinstance(item, dict):
+                continue
+            rel_type = str(item.get("type") or "").strip()
+            target = str(item.get("target") or "").strip()
+            if rel_type and target:
+                pairs.append((rel_type, target))
+    else:
+        raise ValueError("relationship 必须是数组或对象")
+
+    return [{"type": t, "target": n} for t, n in pairs]
+
+
+def _normalize_generic_entry(
+    entry: dict[str, Any], *, now: Optional[str] = None
+) -> dict[str, Any]:
     stamp = now or _now_iso()
     name = str(entry.get("name", "")).strip()
     if not name:
@@ -60,19 +98,56 @@ def _normalize_entry(entry: dict[str, Any], *, now: Optional[str] = None) -> dic
     created_at = str(entry.get("created_at") or "").strip() or stamp
     updated_at = str(entry.get("updated_at") or "").strip() or stamp
 
-    tags = entry.get("tags") or []
-    if not isinstance(tags, list):
-        raise ValueError("记忆条目 tags 必须是数组")
-    normalized_tags = [str(tag).strip() for tag in tags if str(tag).strip()]
-
     return {
         "id": entry_id,
         "name": name,
         "content": str(entry.get("content") or ""),
-        "tags": normalized_tags,
+        "tags": _normalize_tags(entry.get("tags")),
         "created_at": created_at,
         "updated_at": updated_at,
     }
+
+
+def _normalize_character_entry(
+    entry: dict[str, Any], *, now: Optional[str] = None
+) -> dict[str, Any]:
+    stamp = now or _now_iso()
+    name = str(entry.get("name", "")).strip()
+    if not name:
+        raise ValueError("记忆条目 name 不能为空")
+
+    entry_id = str(entry.get("id") or "").strip() or uuid.uuid4().hex[:8]
+    created_at = str(entry.get("created_at") or "").strip() or stamp
+    updated_at = str(entry.get("updated_at") or "").strip() or stamp
+
+    # Legacy MemoryEntry used `content` for character bio.
+    if "profile" in entry:
+        profile = str(entry.get("profile") or "")
+    elif "content" in entry:
+        profile = str(entry.get("content") or "")
+    else:
+        profile = ""
+
+    return {
+        "id": entry_id,
+        "name": name,
+        "profile": profile,
+        "relationship": _normalize_relationship_list(entry.get("relationship")),
+        "tags": _normalize_tags(entry.get("tags")),
+        "created_at": created_at,
+        "updated_at": updated_at,
+    }
+
+
+def _normalize_entry(
+    entry: dict[str, Any],
+    category: str,
+    *,
+    now: Optional[str] = None,
+) -> dict[str, Any]:
+    if category == "characters":
+        return _normalize_character_entry(entry, now=now)
+    return _normalize_generic_entry(entry, now=now)
 
 
 def normalize_memory(memory: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
@@ -93,14 +168,14 @@ def normalize_memory(memory: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
         for item in items:
             if not isinstance(item, dict):
                 raise ValueError(f"{category} 中的条目必须是对象")
-            normalized = _normalize_entry(item, now=now)
+            normalized = _normalize_entry(item, category, now=now)
             if normalized["id"] in seen_ids:
                 normalized["id"] = uuid.uuid4().hex[:8]
             seen_ids.add(normalized["id"])
             normalized_items.append(normalized)
         result[category] = normalized_items
 
-    unknown = set(memory.keys()) - set(MEMORY_CATEGORIES)
+    unknown = set(memory.keys()) - set(MEMORY_CATEGORIES) - _LEGACY_CATEGORIES
     if unknown:
         raise ValueError(f"不支持的记忆分类: {', '.join(sorted(unknown))}")
 
@@ -134,7 +209,7 @@ def load_memory(project_id: str) -> dict[str, list[dict[str, Any]]]:
             merged[category] = items
 
     try:
-        return normalize_memory(merged)
+        normalized = normalize_memory(merged)
     except ValueError:
         # Tolerate partially invalid legacy files by dropping bad entries.
         cleaned = empty_memory()
@@ -143,10 +218,24 @@ def load_memory(project_id: str) -> dict[str, list[dict[str, Any]]]:
                 if not isinstance(item, dict):
                     continue
                 try:
-                    cleaned[category].append(_normalize_entry(item))
+                    cleaned[category].append(_normalize_entry(item, category))
                 except ValueError:
                     continue
-        return cleaned
+        normalized = cleaned
+
+    # Persist migration when dropping legacy keys or reshaping characters.
+    needs_rewrite = bool(_LEGACY_CATEGORIES.intersection(data.keys()))
+    if not needs_rewrite:
+        for item in data.get("characters") or []:
+            if not isinstance(item, dict):
+                continue
+            if "content" in item or isinstance(item.get("relationship"), dict):
+                needs_rewrite = True
+                break
+    if needs_rewrite:
+        save_memory(project_id, normalized, touch_meta=False)
+
+    return normalized
 
 
 def save_memory(
@@ -179,7 +268,7 @@ def add_memory_entry(
     if category not in MEMORY_CATEGORIES:
         raise ValueError(f"不支持的记忆分类: {category}")
     memory = load_memory(project_id)
-    normalized = _normalize_entry(entry)
+    normalized = _normalize_entry(entry, category)
     # Ensure unique id within category
     existing_ids = {item["id"] for item in memory[category]}
     while normalized["id"] in existing_ids:
@@ -205,7 +294,14 @@ def update_memory_entry(
         merged["id"] = entry_id
         merged["created_at"] = item.get("created_at") or _now_iso()
         merged["updated_at"] = _now_iso()
-        normalized = _normalize_entry(merged)
+        if category == "characters":
+            if (
+                "profile" not in updates
+                and updates.get("content") is not None
+            ):
+                merged["profile"] = updates["content"]
+            merged.pop("content", None)
+        normalized = _normalize_entry(merged, category)
         memory[category][index] = normalized
         save_memory(project_id, memory)
         return normalized

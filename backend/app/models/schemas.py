@@ -150,6 +150,8 @@ class ChapterDetail(BaseModel):
 
 
 class MemoryEntry(BaseModel):
+    """Generic memory item for worldview / items / plot_points."""
+
     id: str = ""
     name: str = Field(min_length=1)
     content: str = ""
@@ -158,23 +160,43 @@ class MemoryEntry(BaseModel):
     updated_at: str = ""
 
 
+class CharacterRelationship(BaseModel):
+    type: str = Field(min_length=1)
+    target: str = Field(min_length=1)
+
+
+class CharacterEntry(BaseModel):
+    """Character setting; relationships are nested (not a top-level category)."""
+
+    id: str = ""
+    name: str = Field(min_length=1)
+    profile: str = ""
+    relationship: list[CharacterRelationship] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    created_at: str = ""
+    updated_at: str = ""
+
+
 class ProjectMemory(BaseModel):
     worldview: list[MemoryEntry] = Field(default_factory=list)
-    characters: list[MemoryEntry] = Field(default_factory=list)
+    characters: list[CharacterEntry] = Field(default_factory=list)
     items: list[MemoryEntry] = Field(default_factory=list)
     plot_points: list[MemoryEntry] = Field(default_factory=list)
-    relationships: list[MemoryEntry] = Field(default_factory=list)
 
 
 class MemoryEntryCreateRequest(BaseModel):
     name: str = Field(min_length=1)
     content: str = ""
+    profile: str = ""
+    relationship: list[CharacterRelationship] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
 
 
 class MemoryEntryUpdateRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1)
     content: Optional[str] = None
+    profile: Optional[str] = None
+    relationship: Optional[list[CharacterRelationship]] = None
     tags: Optional[list[str]] = None
 
 

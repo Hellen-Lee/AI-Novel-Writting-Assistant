@@ -9,6 +9,12 @@ from app.services import memory_store, project_store, skill_loader
 from app.services.skill_loader import KIND_QUICK_ACTION, KIND_SKILL
 
 
+def _format_tags(tags: Any) -> str:
+    if isinstance(tags, list) and tags:
+        return " [" + ", ".join(str(t) for t in tags) + "]"
+    return ""
+
+
 def _format_memory_entries(entries: list[dict[str, Any]]) -> str:
     if not entries:
         return "（无）"
@@ -16,14 +22,51 @@ def _format_memory_entries(entries: list[dict[str, Any]]) -> str:
     for entry in entries:
         name = str(entry.get("name") or "").strip() or "未命名"
         content = str(entry.get("content") or "").strip()
-        tags = entry.get("tags") or []
-        tag_text = ""
-        if isinstance(tags, list) and tags:
-            tag_text = " [" + ", ".join(str(t) for t in tags) + "]"
+        tag_text = _format_tags(entry.get("tags"))
         if content:
             lines.append(f"- {name}{tag_text}：{content}")
         else:
             lines.append(f"- {name}{tag_text}")
+    return "\n".join(lines)
+
+
+def _format_characters(entries: list[dict[str, Any]]) -> str:
+    """Format characters with profile + nested relationship list."""
+    if not entries:
+        return "（无）"
+    lines: list[str] = []
+    for entry in entries:
+        name = str(entry.get("name") or "").strip() or "未命名"
+        profile = str(entry.get("profile") or "").strip()
+        # Tolerate legacy content field if present.
+        if not profile:
+            profile = str(entry.get("content") or "").strip()
+        tag_text = _format_tags(entry.get("tags"))
+        if profile:
+            lines.append(f"- {name}{tag_text}：{profile}")
+        else:
+            lines.append(f"- {name}{tag_text}")
+
+        rels = entry.get("relationship") or []
+        if isinstance(rels, dict):
+            rel_parts = [
+                f"{str(k).strip()}→{str(v).strip()}"
+                for k, v in rels.items()
+                if str(k).strip() and str(v).strip()
+            ]
+        elif isinstance(rels, list):
+            rel_parts = []
+            for rel in rels:
+                if not isinstance(rel, dict):
+                    continue
+                rel_type = str(rel.get("type") or "").strip()
+                target = str(rel.get("target") or "").strip()
+                if rel_type and target:
+                    rel_parts.append(f"{rel_type}→{target}")
+        else:
+            rel_parts = []
+        if rel_parts:
+            lines.append("  关系：" + "；".join(rel_parts))
     return "\n".join(lines)
 
 
@@ -78,7 +121,6 @@ def build_context(
     characters = "（无）"
     items = "（无）"
     plot_points = "（无）"
-    relationships = "（无）"
     previous_chapters = "（无）"
 
     if project_id and project_store.project_exists(project_id):
@@ -88,10 +130,9 @@ def build_context(
 
         memory = memory_store.load_memory(project_id)
         worldview = _format_memory_entries(memory.get("worldview") or [])
-        characters = _format_memory_entries(memory.get("characters") or [])
+        characters = _format_characters(memory.get("characters") or [])
         items = _format_memory_entries(memory.get("items") or [])
         plot_points = _format_memory_entries(memory.get("plot_points") or [])
-        relationships = _format_memory_entries(memory.get("relationships") or [])
         previous_chapters = _format_previous_chapters(
             project_id, chapter_id=chapter_id, limit=3
         )
@@ -111,7 +152,8 @@ def build_context(
         "characters": characters,
         "items": items,
         "plot_points": plot_points,
-        "relationships": relationships,
+        # Deprecated: kept so old templates with $relationships do not leave the placeholder.
+        "relationships": "（无）",
         "previous_chapters": previous_chapters,
         "current_content": current_content or "（无）",
         "selected_text": selected_text or "（无）",

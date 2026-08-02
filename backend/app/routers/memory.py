@@ -1,8 +1,11 @@
 """Project memory (settings library) API routes."""
 
+from typing import Union
+
 from fastapi import APIRouter, HTTPException
 
 from app.models.schemas import (
+    CharacterEntry,
     MemoryEntry,
     MemoryEntryCreateRequest,
     MemoryEntryUpdateRequest,
@@ -12,6 +15,22 @@ from app.services import memory_store
 from app.services.memory_store import MEMORY_CATEGORIES
 
 router = APIRouter()
+
+MemoryItem = Union[MemoryEntry, CharacterEntry]
+
+
+def _prepare_entry_payload(category: str, data: dict) -> dict:
+    """Map request fields for character vs generic categories."""
+    if category != "characters":
+        data.pop("profile", None)
+        data.pop("relationship", None)
+        return data
+
+    # Characters use profile; accept legacy `content` as profile fallback.
+    if not data.get("profile") and data.get("content"):
+        data["profile"] = data["content"]
+    data.pop("content", None)
+    return data
 
 
 @router.get("/projects/{project_id}/memory", response_model=ProjectMemory)
@@ -34,7 +53,7 @@ def put_memory(project_id: str, payload: ProjectMemory):
 
 @router.post(
     "/projects/{project_id}/memory/{category}",
-    response_model=MemoryEntry,
+    response_model=MemoryItem,
 )
 def create_memory_entry(
     project_id: str,
@@ -44,11 +63,8 @@ def create_memory_entry(
     if category not in MEMORY_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"不支持的记忆分类: {category}")
     try:
-        return memory_store.add_memory_entry(
-            project_id,
-            category,
-            payload.model_dump(),
-        )
+        data = _prepare_entry_payload(category, payload.model_dump())
+        return memory_store.add_memory_entry(project_id, category, data)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
@@ -57,7 +73,7 @@ def create_memory_entry(
 
 @router.put(
     "/projects/{project_id}/memory/{category}/{entry_id}",
-    response_model=MemoryEntry,
+    response_model=MemoryItem,
 )
 def update_memory_entry(
     project_id: str,
@@ -71,6 +87,7 @@ def update_memory_entry(
     if not data:
         raise HTTPException(status_code=400, detail="请求体不能为空")
     try:
+        data = _prepare_entry_payload(category, data)
         return memory_store.update_memory_entry(
             project_id,
             category,
