@@ -1,0 +1,104 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  padding: var(--space-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.home-page__hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.home-page__hero-copy h1 {
+  font-size: var(--text-heading-lg);
+  margin-bottom: var(--space-sm);
+}
+
+.home-page__hero-copy p {
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-md);
+}
+
+.home-page__stats {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.home-page__stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+  padding: 14px 16px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+}
+
+.home-page__stat strong {
+  font-family: var(--font-display);
+  font-size: var(--text-heading-sm);
+  color: var(--color-text-primary);
+}
+
+.home-page__stat span {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.home-page__list-head h2 {
+  font-family: var(--font-sans);
+  font-size: var(--text-body-md);
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.home-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.home-page__new-card {
+  height: 180px;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--color-primary-soft);
+  border: 1px dashed var(--color-border-strong);
+  color: var(--color-primary);
+  border-radius: var(--radius-lg);
+}
+
+.home-page__new-card:hover {
+  background: #d7e8df;
+}
+
+.home-page__tip {
+  padding: 12px 16px;
+  background: var(--color-accent-soft);
+  border-radius: var(--radius-md);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .home-page__hero {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .home-page__stats {
+    flex-wrap: wrap;
+  }
+
+  .home-page__stat {
+    flex: 1;
+    min-width: 100px;
+  }
+}

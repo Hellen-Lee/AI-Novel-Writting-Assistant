@@ -1,28 +1,92 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { AppHeader } from './components/layout/AppHeader'
+import { AppLayout } from './components/layout/AppLayout'
+import { EditorLayout } from './components/layout/EditorLayout'
+import { Button } from './components/ui/Button'
+import HomePage from './pages/HomePage'
+import OnboardingPage from './pages/OnboardingPage'
+import EditorPage from './pages/EditorPage'
+import MemoryPage from './pages/MemoryPage'
+import ConfigPage from './pages/ConfigPage'
 
-function App() {
-  const [message, setMessage] = useState('')
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        return res.json()
-      })
-      .then((data) => setMessage(data.message || JSON.stringify(data)))
-      .catch((err) => setError(err.message))
-  }, [])
-
+function HomeLayout() {
   return (
-    <div className="container">
-      <h1>AI 小说创作 Agent</h1>
-      <p>前端已启动，正在测试与后端连通……</p>
-      {message && <p className="success">后端响应：{message}</p>}
-      {error && <p className="error">连接失败：{error}</p>}
-    </div>
+    <AppLayout
+      header={
+        <AppHeader
+          actions={
+            <>
+              <Button to="/config" variant="ghost">
+                模型配置
+              </Button>
+              <Button to="/projects/new" variant="primary">
+                新建项目
+              </Button>
+            </>
+          }
+        />
+      }
+    />
   )
 }
 
-export default App
+function ConfigLayout() {
+  return (
+    <AppLayout
+      header={
+        <AppHeader
+          actions={
+            <Button to="/" variant="ghost">
+              返回首页
+            </Button>
+          }
+        />
+      }
+    />
+  )
+}
+
+function OnboardingLayout() {
+  return (
+    <AppLayout
+      header={
+        <AppHeader
+          actions={
+            <Button to="/" variant="ghost">
+              取消
+            </Button>
+          }
+        />
+      }
+    />
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route element={<HomeLayout />}>
+          <Route index element={<HomePage />} />
+        </Route>
+
+        <Route path="projects/new" element={<OnboardingLayout />}>
+          <Route index element={<OnboardingPage />} />
+        </Route>
+
+        <Route path="projects/:projectId" element={<EditorLayout />}>
+          <Route index element={<Navigate to="edit" replace />} />
+          <Route path="edit" element={<EditorPage />} />
+          <Route path="edit/:chapterId" element={<EditorPage />} />
+          <Route path="memory" element={<MemoryPage />} />
+        </Route>
+
+        <Route path="config" element={<ConfigLayout />}>
+          <Route index element={<ConfigPage />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}

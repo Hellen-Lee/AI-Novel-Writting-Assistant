@@ -1,0 +1,53 @@
+/* Design tokens from docs/Novel.pen */
+:root {
+  --color-accent: #c4783a;
+  --color-accent-soft: #f8ede3;
+  --color-ai: #1b6b5a;
+  --color-bg-elevated: #ffffff;
+  --color-bg-ink: #1a2e28;
+  --color-bg-page: #f3f5f3;
+  --color-bg-sidebar: #ecf0ed;
+  --color-bg-surface: #ffffff;
+  --color-border-default: #d5ded9;
+  --color-border-strong: #b8c4bd;
+  --color-error: #b42318;
+  --color-primary: #2d5a4a;
+  --color-primary-hover: #234a3c;
+  --color-primary-soft: #e4efe9;
+  --color-success: #2d7a4f;
+  --color-text-inverse: #ffffff;
+  --color-text-muted: #8a9a93;
+  --color-text-primary: #1a2e28;
+  --color-text-secondary: #5a6e66;
+  --color-warning: #b8860b;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  --text-caption: 11px;
+  --text-body-sm: 12px;
+  --text-body-md: 14px;
+  --text-body-lg: 16px;
+  --text-heading-sm: 18px;
+  --text-heading-md: 22px;
+  --text-heading-lg: 28px;
+  --text-display: 40px;
+
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-display: 'Newsreader', 'Noto Serif SC', Georgia, serif;
+  --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
+
+  --header-height: 64px;
+  --editor-header-height: 56px;
+  --sidebar-width: 220px;
+  --agent-width: 300px;
+}
