@@ -14,6 +14,214 @@ import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
 import './EditorPage.css'
 
+function ChapterSidebar({
+  chapters,
+  activeChapterId,
+  loadingList,
+  creating,
+  recentContextLabel,
+  onCreateChapter,
+  onSelectChapter,
+}) {
+  return (
+    <aside className="editor-page__sidebar">
+      <div className="editor-page__sidebar-head">
+        <h2>章节</h2>
+        <button
+          type="button"
+          className="editor-page__icon-btn"
+          aria-label="新建章节"
+          title="新建章节"
+          onClick={onCreateChapter}
+          disabled={creating}
+        >
+          <Plus size={16} />
+        </button>
+      </div>
+
+      <nav className="editor-page__chapters" aria-label="章节列表">
+        {loadingList ? (
+          <p className="editor-page__sidebar-empty">加载中…</p>
+        ) : chapters.length === 0 ? (
+          <p className="editor-page__sidebar-empty">
+            暂无章节。点击右上角 + 新建。
+          </p>
+        ) : (
+          chapters.map((ch) => (
+            <button
+              key={ch.id}
+              type="button"
+              className={`editor-page__chapter${ch.id === activeChapterId ? ' is-active' : ''}`}
+              onClick={() => onSelectChapter(ch.id)}
+            >
+              <span className="editor-page__chapter-num">第 {ch.order} 章</span>
+              <span className="editor-page__chapter-title">
+                {ch.title || '未命名'}
+              </span>
+            </button>
+          ))
+        )}
+      </nav>
+
+      <div className="editor-page__context-card">
+        <div className="editor-page__context-title">最近 3 章上下文</div>
+        <p className="editor-page__context-body">{recentContextLabel}</p>
+      </div>
+    </aside>
+  )
+}
+
+function ChapterMain({
+  error,
+  onDismissError,
+  activeChapterId,
+  activeChapter,
+  loadingList,
+  loadingChapter,
+  creating,
+  title,
+  onTitleChange,
+  content,
+  onContentChange,
+  liveWordCount,
+  dirty,
+  saving,
+  aiDraft,
+  onSave,
+  onCreateChapter,
+  onApplyDraft,
+  onRewriteDraft,
+  onDiscardDraft,
+}) {
+  return (
+    <section className="editor-page__main">
+      {error ? (
+        <div className="editor-page__error" role="alert">
+          {error}
+          <button type="button" onClick={onDismissError}>
+            关闭
+          </button>
+        </div>
+      ) : null}
+
+      {!activeChapterId && !loadingList ? (
+        <div className="editor-page__empty-main">
+          <p>还没有章节，先新建一章开始写作。</p>
+          <Button type="button" onClick={onCreateChapter} disabled={creating}>
+            新建章节
+          </Button>
+        </div>
+      ) : (
+        <>
+          <header className="editor-page__main-head">
+            <div className="editor-page__title-col">
+              <p className="editor-page__ch-meta">
+                {activeChapter ? `第 ${activeChapter.order} 章` : '—'}
+              </p>
+              <input
+                className="editor-page__title-input"
+                value={title}
+                onChange={(e) => onTitleChange(e.target.value)}
+                placeholder="章节标题"
+                aria-label="章节标题"
+                disabled={loadingChapter}
+              />
+            </div>
+            <div className="editor-page__chapter-actions">
+              <span className="editor-page__word-count">
+                本章 {formatWordCount(liveWordCount)}
+              </span>
+              <Button
+                type="button"
+                variant="secondary"
+                className="editor-page__save-btn"
+                onClick={onSave}
+                disabled={!dirty || saving || loadingChapter || !activeChapterId}
+              >
+                {saving ? '保存中…' : '保存'}
+              </Button>
+            </div>
+          </header>
+
+          <div className="editor-page__legend" aria-hidden>
+            <span className="editor-page__legend-item">
+              <i className="editor-page__swatch editor-page__swatch--body" />
+              已确认正文
+            </span>
+            <span className="editor-page__legend-item">
+              <i className="editor-page__swatch editor-page__swatch--ai" />
+              AI 生成 · 待插入
+            </span>
+          </div>
+
+          <div className="editor-page__canvas">
+            {loadingChapter ? (
+              <div className="editor-page__loading">
+                <LoaderCircle size={18} className="editor-page__spin" />
+                加载正文…
+              </div>
+            ) : (
+              <>
+                <textarea
+                  className="editor-page__textarea"
+                  value={content}
+                  onChange={(e) => onContentChange(e.target.value)}
+                  placeholder="请输入内容…"
+                  spellCheck={false}
+                />
+
+                {aiDraft ? (
+                  <div className="editor-page__ai-draft">
+                    <div className="editor-page__ai-draft-head">
+                      <Sparkles size={14} />
+                      <span>
+                        AI {aiDraft.skill || '续写'}
+                        {aiDraft.status === 'streaming' ? ' · 生成中' : ' · 待插入'}
+                      </span>
+                    </div>
+                    <p className="editor-page__ai-draft-text">{aiDraft.text}</p>
+                    {aiDraft.status === 'streaming' ? (
+                      <div className="editor-page__stream-tail">
+                        <i className="editor-page__cursor" />
+                        <span>流式输出中</span>
+                      </div>
+                    ) : null}
+                    <div className="editor-page__ai-draft-actions">
+                      <button
+                        type="button"
+                        className="editor-page__draft-btn editor-page__draft-btn--primary"
+                        disabled={aiDraft.status === 'streaming'}
+                        onClick={onApplyDraft}
+                      >
+                        插入正文
+                      </button>
+                      <button
+                        type="button"
+                        className="editor-page__draft-btn"
+                        disabled={aiDraft.status === 'streaming'}
+                        onClick={onRewriteDraft}
+                      >
+                        改写
+                      </button>
+                      <button
+                        type="button"
+                        className="editor-page__draft-btn editor-page__draft-btn--ghost"
+                        onClick={onDiscardDraft}
+                      >
+                        弃用
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </>
+      )}
+    </section>
+  )
+}
+
 /**
  * 编辑页三栏：章节列表 · 正文编辑 · AI Agent
  * 设计对照：Explore/Editor-v3 (NMi2X)、Review/Screen/Editor-v2 (N0lDh)
@@ -231,181 +439,39 @@ export default function EditorPage() {
 
   return (
     <div className="editor-page">
-      <aside className="editor-page__sidebar">
-        <div className="editor-page__sidebar-head">
-          <h2>章节</h2>
-          <button
-            type="button"
-            className="editor-page__icon-btn"
-            aria-label="新建章节"
-            title="新建章节"
-            onClick={handleCreateChapter}
-            disabled={creating}
-          >
-            <Plus size={16} />
-          </button>
-        </div>
-
-        <nav className="editor-page__chapters" aria-label="章节列表">
-          {loadingList ? (
-            <p className="editor-page__sidebar-empty">加载中…</p>
-          ) : chapters.length === 0 ? (
-            <p className="editor-page__sidebar-empty">
-              暂无章节。点击右上角 + 新建。
-            </p>
-          ) : (
-            chapters.map((ch) => (
-              <button
-                key={ch.id}
-                type="button"
-                className={`editor-page__chapter${ch.id === activeChapterId ? ' is-active' : ''}`}
-                onClick={() => handleSelectChapter(ch.id)}
-              >
-                <span className="editor-page__chapter-num">第 {ch.order} 章</span>
-                <span className="editor-page__chapter-title">
-                  {ch.title || '未命名'}
-                </span>
-              </button>
-            ))
-          )}
-        </nav>
-
-        <div className="editor-page__context-card">
-          <div className="editor-page__context-title">最近 3 章上下文</div>
-          <p className="editor-page__context-body">{recentContextLabel}</p>
-        </div>
-      </aside>
-
-      <section className="editor-page__main">
-        {error ? (
-          <div className="editor-page__error" role="alert">
-            {error}
-            <button type="button" onClick={() => setError('')}>
-              关闭
-            </button>
-          </div>
-        ) : null}
-
-        {!activeChapterId && !loadingList ? (
-          <div className="editor-page__empty-main">
-            <p>还没有章节，先新建一章开始写作。</p>
-            <Button type="button" onClick={handleCreateChapter} disabled={creating}>
-              新建章节
-            </Button>
-          </div>
-        ) : (
-          <>
-            <header className="editor-page__main-head">
-              <div className="editor-page__title-col">
-                <p className="editor-page__ch-meta">
-                  {activeChapter ? `第 ${activeChapter.order} 章` : '—'}
-                </p>
-                <input
-                  className="editor-page__title-input"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="章节标题"
-                  aria-label="章节标题"
-                  disabled={loadingChapter}
-                />
-              </div>
-              <div className="editor-page__chapter-actions">
-                <span className="editor-page__word-count">
-                  本章 {formatWordCount(liveWordCount)}
-                </span>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="editor-page__save-btn"
-                  onClick={handleSave}
-                  disabled={!dirty || saving || loadingChapter || !activeChapterId}
-                >
-                  {saving ? '保存中…' : '保存'}
-                </Button>
-              </div>
-            </header>
-
-            <div className="editor-page__legend" aria-hidden>
-              <span className="editor-page__legend-item">
-                <i className="editor-page__swatch editor-page__swatch--body" />
-                已确认正文
-              </span>
-              <span className="editor-page__legend-item">
-                <i className="editor-page__swatch editor-page__swatch--ai" />
-                AI 生成 · 待插入
-              </span>
-            </div>
-
-            <div className="editor-page__canvas">
-              {loadingChapter ? (
-                <div className="editor-page__loading">
-                  <LoaderCircle size={18} className="editor-page__spin" />
-                  加载正文…
-                </div>
-              ) : (
-                <>
-                  <textarea
-                    className="editor-page__textarea"
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="请输入内容…"
-                    spellCheck={false}
-                  />
-
-                  {aiDraft ? (
-                    <div className="editor-page__ai-draft">
-                      <div className="editor-page__ai-draft-head">
-                        <Sparkles size={14} />
-                        <span>
-                          AI {aiDraft.skill || '续写'}
-                          {aiDraft.status === 'streaming' ? ' · 生成中' : ' · 待插入'}
-                        </span>
-                      </div>
-                      <p className="editor-page__ai-draft-text">{aiDraft.text}</p>
-                      {aiDraft.status === 'streaming' ? (
-                        <div className="editor-page__stream-tail">
-                          <i className="editor-page__cursor" />
-                          <span>流式输出中</span>
-                        </div>
-                      ) : null}
-                      <div className="editor-page__ai-draft-actions">
-                        <button
-                          type="button"
-                          className="editor-page__draft-btn editor-page__draft-btn--primary"
-                          disabled={aiDraft.status === 'streaming'}
-                          onClick={handleApplyDraft}
-                        >
-                          插入正文
-                        </button>
-                        <button
-                          type="button"
-                          className="editor-page__draft-btn"
-                          disabled={aiDraft.status === 'streaming'}
-                          onClick={() =>
-                            setAiDraft((d) =>
-                              d ? { ...d, status: 'ready' } : d,
-                            )
-                          }
-                        >
-                          改写
-                        </button>
-                        <button
-                          type="button"
-                          className="editor-page__draft-btn editor-page__draft-btn--ghost"
-                          onClick={handleDiscardDraft}
-                        >
-                          弃用
-                        </button>
-                      </div>
-                    </div>
-                  ) : null}
-                </>
-              )}
-            </div>
-          </>
-        )}
-      </section>
-
+      <ChapterSidebar
+        chapters={chapters}
+        activeChapterId={activeChapterId}
+        loadingList={loadingList}
+        creating={creating}
+        recentContextLabel={recentContextLabel}
+        onCreateChapter={handleCreateChapter}
+        onSelectChapter={handleSelectChapter}
+      />
+      <ChapterMain
+        error={error}
+        onDismissError={() => setError('')}
+        activeChapterId={activeChapterId}
+        activeChapter={activeChapter}
+        loadingList={loadingList}
+        loadingChapter={loadingChapter}
+        creating={creating}
+        title={title}
+        onTitleChange={setTitle}
+        content={content}
+        onContentChange={setContent}
+        liveWordCount={liveWordCount}
+        dirty={dirty}
+        saving={saving}
+        aiDraft={aiDraft}
+        onSave={handleSave}
+        onCreateChapter={handleCreateChapter}
+        onApplyDraft={handleApplyDraft}
+        onRewriteDraft={() =>
+          setAiDraft((d) => (d ? { ...d, status: 'ready' } : d))
+        }
+        onDiscardDraft={handleDiscardDraft}
+      />
       <AgentPanel
         projectId={projectId}
         draft={aiDraft}

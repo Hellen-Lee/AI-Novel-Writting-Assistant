@@ -1,18 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import {
-  ArrowLeft,
-  CircleCheck,
-  Circle,
-  Expand,
-  Plus,
-  Sparkles,
-  Trash2,
-  X,
-} from 'lucide-react'
+import { ArrowLeft, CircleCheck, Circle, Sparkles } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
 import { putMemory } from '../api/memory'
 import { createProject, updateProject } from '../api/projects'
+import { CharacterEditModal } from '../components/onboarding/CharacterEditModal'
+import {
+  CharactersSection,
+  GENRE_PRESETS,
+  GenreWorldviewSection,
+  OutlineSection,
+  StoryCoreSection,
+} from '../components/onboarding/OnboardingSections'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
 import {
@@ -24,8 +23,6 @@ import {
   volumeLabelFromIndex,
 } from '../utils/onboarding'
 import './OnboardingPage.css'
-
-const GENRE_PRESETS = ['玄幻', '仙侠', '都市', '科幻', '悬疑']
 
 const AI_PLACEHOLDER = 'AI 生成将在生成链路联调后接入；当前请手动填写。'
 
@@ -326,300 +323,50 @@ export default function OnboardingPage() {
 
         <div className="onboarding-page__grid">
           <div className="onboarding-page__col">
-            {/* 题材 & 世界观 */}
-            <section className="onboarding-section">
-              <div className="onboarding-section__head">
-                <h2>题材 & 世界观</h2>
-                <button
-                  type="button"
-                  className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
-                  onClick={showAiNotice}
-                >
-                  <Sparkles size={12} />
-                  AI 生成
-                </button>
-              </div>
-
-              <div className="onboarding-field">
-                <label className="onboarding-field__label" htmlFor="ob-title">
-                  作品暂定名
-                </label>
-                <input
-                  id="ob-title"
-                  className="onboarding-input"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="例如：星渊剑主"
-                />
-              </div>
-
-              <div className="onboarding-field">
-                <span className="onboarding-field__label">题材分类</span>
-                <div className="onboarding-genres">
-                  {GENRE_PRESETS.map((item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      className={`onboarding-chip ${genre === item ? 'onboarding-chip--active' : ''}`}
-                      onClick={() => selectGenre(item)}
-                    >
-                      {item}
-                    </button>
-                  ))}
-                  <button
-                    type="button"
-                    className="onboarding-chip onboarding-chip--other"
-                    onClick={() => {
-                      setCustomGenreOpen(true)
-                      setCustomGenre(GENRE_PRESETS.includes(genre) ? '' : genre)
-                    }}
-                  >
-                    <Plus size={12} />
-                    其他
-                  </button>
-                  {customGenreOpen ? (
-                    <div className="onboarding-chip-input">
-                      <input
-                        value={customGenre}
-                        onChange={(e) => setCustomGenre(e.target.value)}
-                        placeholder="填写新分类…"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') confirmCustomGenre()
-                        }}
-                        autoFocus
-                      />
-                      <button type="button" aria-label="确认" onClick={confirmCustomGenre}>
-                        <CircleCheck size={14} />
-                      </button>
-                      <button
-                        type="button"
-                        aria-label="取消"
-                        onClick={() => setCustomGenreOpen(false)}
-                      >
-                        <X size={11} />
-                      </button>
-                    </div>
-                  ) : null}
-                  {genre && !GENRE_PRESETS.includes(genre) && !customGenreOpen ? (
-                    <span className="onboarding-chip onboarding-chip--active">{genre}</span>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className="onboarding-field onboarding-field--grow">
-                <div className="onboarding-field__label-row">
-                  <label className="onboarding-field__label" htmlFor="ob-world">
-                    世界观简述
-                  </label>
-                  <button
-                    type="button"
-                    className="onboarding-field__hint-btn"
-                    onClick={openWorldviewModal}
-                  >
-                    <Expand size={12} />
-                    点击展开编辑
-                  </button>
-                </div>
-                <textarea
-                  id="ob-world"
-                  className="onboarding-textarea onboarding-textarea--world"
-                  value={worldview}
-                  onChange={(e) => setWorldview(e.target.value)}
-                  placeholder="描述世界背景、时代、力量体系、地理格局等…"
-                />
-              </div>
-            </section>
-
-            {/* 故事内核 */}
-            <section className="onboarding-section">
-              <div className="onboarding-section__head">
-                <h2>故事内核</h2>
-                <button
-                  type="button"
-                  className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
-                  onClick={showAiNotice}
-                >
-                  <Sparkles size={12} />
-                  AI 生成
-                </button>
-              </div>
-              <div className="onboarding-field">
-                <label className="onboarding-field__label" htmlFor="ob-theme">
-                  核心主题
-                </label>
-                <input
-                  id="ob-theme"
-                  className="onboarding-input"
-                  value={core.theme}
-                  onChange={(e) => setCore((c) => ({ ...c, theme: e.target.value }))}
-                  placeholder="例如：成长与代价"
-                />
-              </div>
-              <div className="onboarding-field">
-                <label className="onboarding-field__label" htmlFor="ob-conflict">
-                  核心冲突
-                </label>
-                <textarea
-                  id="ob-conflict"
-                  className="onboarding-textarea onboarding-textarea--core"
-                  value={core.conflict}
-                  onChange={(e) => setCore((c) => ({ ...c, conflict: e.target.value }))}
-                  placeholder="例如：剑冢秘密 vs 宗门规矩"
-                />
-              </div>
-              <div className="onboarding-field">
-                <label className="onboarding-field__label" htmlFor="ob-plotline">
-                  故事主线
-                </label>
-                <textarea
-                  id="ob-plotline"
-                  className="onboarding-textarea onboarding-textarea--core"
-                  value={core.plotline}
-                  onChange={(e) => setCore((c) => ({ ...c, plotline: e.target.value }))}
-                  placeholder="例如：从边陲小城到九域之巅"
-                />
-              </div>
-            </section>
+            <GenreWorldviewSection
+              title={title}
+              onTitleChange={setTitle}
+              genre={genre}
+              customGenreOpen={customGenreOpen}
+              customGenre={customGenre}
+              onSelectGenre={selectGenre}
+              onOpenCustomGenre={() => {
+                setCustomGenreOpen(true)
+                setCustomGenre(GENRE_PRESETS.includes(genre) ? '' : genre)
+              }}
+              onCustomGenreChange={setCustomGenre}
+              onConfirmCustomGenre={confirmCustomGenre}
+              onCloseCustomGenre={() => setCustomGenreOpen(false)}
+              worldview={worldview}
+              onWorldviewChange={setWorldview}
+              onOpenWorldviewModal={openWorldviewModal}
+              onAiGenerate={showAiNotice}
+            />
+            <StoryCoreSection
+              core={core}
+              onCoreChange={(patch) => setCore((c) => ({ ...c, ...patch }))}
+              onAiGenerate={showAiNotice}
+            />
           </div>
 
           <div className="onboarding-page__col">
-            {/* 主要角色 */}
-            <section className="onboarding-section">
-              <div className="onboarding-section__head">
-                <h2>主要角色</h2>
-                <button
-                  type="button"
-                  className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
-                  onClick={showAiNotice}
-                >
-                  <Sparkles size={12} />
-                  AI 生成
-                </button>
-              </div>
-              <div className="onboarding-scroller">
-                {characters.map((c) => (
-                  <article key={c.id} className="onboarding-card">
-                    <div className="onboarding-card__top">
-                      <div className="onboarding-card__name-row">
-                        <span className="onboarding-card__name">{c.name}</span>
-                        {c.role ? <span className="onboarding-card__tag">{c.role}</span> : null}
-                      </div>
-                      <div className="onboarding-card__actions">
-                        <button
-                          type="button"
-                          className="onboarding-card__icon-btn"
-                          aria-label="展开编辑"
-                          onClick={() => openCharacterModal(c)}
-                        >
-                          <Expand size={15} />
-                        </button>
-                        <button
-                          type="button"
-                          className="onboarding-card__icon-btn onboarding-card__icon-btn--danger"
-                          aria-label="删除角色"
-                          onClick={() => removeCharacter(c.id)}
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      </div>
-                    </div>
-                    <span className="onboarding-card__desc-label">人物简介</span>
-                    <div className="onboarding-card__desc">
-                      {c.profile || '暂无简介'}
-                    </div>
-                  </article>
-                ))}
-                <button
-                  type="button"
-                  className="onboarding-card onboarding-card--add"
-                  onClick={() => openCharacterModal()}
-                >
-                  <span className="onboarding-card__add-icon">
-                    <Plus size={18} />
-                  </span>
-                  <span>添加</span>
-                </button>
-              </div>
-            </section>
-
-            {/* 全本大纲 */}
-            <section className="onboarding-section">
-              <div className="onboarding-section__head">
-                <h2>全本大纲</h2>
-                <button
-                  type="button"
-                  className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
-                  onClick={showAiNotice}
-                >
-                  <Sparkles size={12} />
-                  AI 生成
-                </button>
-              </div>
-              <div className="onboarding-outline">
-                <div className="onboarding-brief">
-                  <div className="onboarding-brief__top">
-                    <strong>全书概要</strong>
-                    <button
-                      type="button"
-                      className="onboarding-card__icon-btn"
-                      aria-label="展开编辑概要"
-                      onClick={openBriefModal}
-                    >
-                      <Expand size={15} />
-                    </button>
-                  </div>
-                  <textarea
-                    className="onboarding-brief__text"
-                    value={synopsis}
-                    onChange={(e) => setSynopsis(e.target.value)}
-                    placeholder="一句话概括全书主线…"
-                  />
-                </div>
-                <div className="onboarding-scroller">
-                  {volumes.map((v, index) => (
-                    <article key={v.id} className="onboarding-card onboarding-card--volume">
-                      <div className="onboarding-card__top">
-                        <div className="onboarding-card__name-row">
-                          <span className="onboarding-card__tag">
-                            {v.label || volumeLabelFromIndex(index)}
-                          </span>
-                          <span className="onboarding-card__name">{v.name}</span>
-                        </div>
-                        <div className="onboarding-card__actions">
-                          <button
-                            type="button"
-                            className="onboarding-card__icon-btn"
-                            aria-label="展开编辑"
-                            onClick={() => openVolumeModal(v, index)}
-                          >
-                            <Expand size={15} />
-                          </button>
-                          <button
-                            type="button"
-                            className="onboarding-card__icon-btn onboarding-card__icon-btn--danger"
-                            aria-label="删除卷"
-                            onClick={() => removeVolume(v.id)}
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </div>
-                      <div className="onboarding-card__desc">{v.summary || '暂无梗概'}</div>
-                    </article>
-                  ))}
-                  <button
-                    type="button"
-                    className="onboarding-card onboarding-card--add"
-                    onClick={() => openVolumeModal()}
-                  >
-                    <span className="onboarding-card__add-icon">
-                      <Plus size={18} />
-                    </span>
-                    <span>添加</span>
-                  </button>
-                </div>
-              </div>
-            </section>
+            <CharactersSection
+              characters={characters}
+              onEditCharacter={openCharacterModal}
+              onRemoveCharacter={removeCharacter}
+              onAddCharacter={() => openCharacterModal()}
+              onAiGenerate={showAiNotice}
+            />
+            <OutlineSection
+              synopsis={synopsis}
+              onSynopsisChange={setSynopsis}
+              volumes={volumes}
+              onOpenBriefModal={openBriefModal}
+              onEditVolume={openVolumeModal}
+              onRemoveVolume={removeVolume}
+              onAddVolume={() => openVolumeModal()}
+              onAiGenerate={showAiNotice}
+            />
           </div>
         </div>
 
@@ -636,7 +383,6 @@ export default function OnboardingPage() {
         </footer>
       </div>
 
-      {/* 世界观模态 */}
       <Modal
         open={modal?.type === 'worldview'}
         title="编辑世界观"
@@ -667,7 +413,6 @@ export default function OnboardingPage() {
         <div className="onboarding-modal-count">{countChars(draft?.text)} 字</div>
       </Modal>
 
-      {/* 全书概要模态 */}
       <Modal
         open={modal?.type === 'brief'}
         title="编辑全书概要"
@@ -684,108 +429,15 @@ export default function OnboardingPage() {
         <div className="onboarding-modal-count">{countChars(draft?.text)} 字</div>
       </Modal>
 
-      {/* 角色模态 */}
-      <Modal
+      <CharacterEditModal
         open={modal?.type === 'character'}
-        title={
-          modal?.mode === 'edit'
-            ? `编辑角色 · ${draft?.name || ''}`
-            : draft?.name
-              ? `添加角色 · ${draft.name}`
-              : '添加角色'
-        }
-        width={520}
+        mode={modal?.mode}
+        draft={draft}
+        onDraftChange={setDraft}
         onClose={closeModal}
-        footer={modalFooter(saveCharacterModal)}
-      >
-        <div className="onboarding-modal-field">
-          <label htmlFor="char-name">角色名</label>
-          <input
-            id="char-name"
-            value={draft?.name || ''}
-            onChange={(e) => setDraft((d) => ({ ...d, name: e.target.value }))}
-            placeholder="例如：林砚"
-          />
-        </div>
-        <div className="onboarding-modal-field">
-          <label htmlFor="char-role">角色定位</label>
-          <input
-            id="char-role"
-            value={draft?.role || ''}
-            onChange={(e) => setDraft((d) => ({ ...d, role: e.target.value }))}
-            placeholder="例如：主角 / 女主 / 反派"
-          />
-        </div>
-        <div className="onboarding-modal-field">
-          <label htmlFor="char-profile">人物简介</label>
-          <textarea
-            id="char-profile"
-            value={draft?.profile || ''}
-            onChange={(e) => setDraft((d) => ({ ...d, profile: e.target.value }))}
-            placeholder="性格、身世、能力等"
-          />
-        </div>
-        <div className="onboarding-modal-field">
-          <label>人物关系</label>
-          <p className="onboarding-rel-hint">左侧填写关系类型，右侧填写对方角色名</p>
-          {(draft?.relationship || []).map((rel, index) => (
-            <div className="onboarding-rel-row" key={`rel-${index}`}>
-              <input
-                value={rel.type}
-                onChange={(e) =>
-                  setDraft((d) => {
-                    const next = [...(d.relationship || [])]
-                    next[index] = { ...next[index], type: e.target.value }
-                    return { ...d, relationship: next }
-                  })
-                }
-                placeholder="关系"
-              />
-              <input
-                value={rel.target}
-                onChange={(e) =>
-                  setDraft((d) => {
-                    const next = [...(d.relationship || [])]
-                    next[index] = { ...next[index], target: e.target.value }
-                    return { ...d, relationship: next }
-                  })
-                }
-                placeholder="对方角色"
-              />
-              <button
-                type="button"
-                aria-label="删除关系"
-                onClick={() =>
-                  setDraft((d) => {
-                    const next = (d.relationship || []).filter((_, i) => i !== index)
-                    return {
-                      ...d,
-                      relationship: next.length ? next : [{ type: '', target: '' }],
-                    }
-                  })
-                }
-              >
-                <X size={14} />
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            className="onboarding-rel-add"
-            onClick={() =>
-              setDraft((d) => ({
-                ...d,
-                relationship: [...(d.relationship || []), { type: '', target: '' }],
-              }))
-            }
-          >
-            <Plus size={12} />
-            添加关系
-          </button>
-        </div>
-      </Modal>
+        onSave={saveCharacterModal}
+      />
 
-      {/* 卷大纲模态 */}
       <Modal
         open={modal?.type === 'volume'}
         title={

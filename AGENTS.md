@@ -42,6 +42,7 @@ AINovel/
 │   ├── build/                # 模块开发架构决策记录（见 §8）
 │   └── ...
 ├── frontend/                 # React 前端
+│   ├── AGENT.md              # 前端开发规则与约束（JSX 结构、行数、职责划分）
 │   ├── public/
 │   ├── src/
 │   │   ├── api/              # 后端 API 调用封装
