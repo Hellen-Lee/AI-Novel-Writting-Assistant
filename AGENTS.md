@@ -42,7 +42,7 @@ AINovel/
 │   ├── src/
 │   │   ├── api/              # 后端 API 调用封装
 │   │   ├── components/       # 通用组件
-│   │   ├── pages/            # 页面：首页、引导、编辑页、设定管理、配置
+│   │   ├── pages/            # 页面：首页、单页引导、编辑页（含 Agent 对话栏）、设定管理、配置
 │   │   ├── stores/           # 状态管理（早期可用 Context 或简单 State）
 │   │   ├── utils/            # 工具函数
 │   │   ├── App.jsx
@@ -132,8 +132,9 @@ AINovel/
 
 ### 5.3 记忆管理（memory_store）
 
-- 按项目维护 `memory.json`。
-- 结构分为：世界观、人物、物品、剧情要点、人物关系等。
+- 按项目维护 `memory.json`（设定数据）。
+- 顶层分类：`worldview`、`characters`、`items`、`plot_points`（**无**独立 `relationships`）。
+- 人物条目为 CharacterEntry：`name`、`profile`、`relationship: [{ type, target }]`（`type` 允许中文，原样存储）、`tags` 等；人物关系内嵌于人物。
 - 提供增删改查接口。
 - 记忆进化：当字数/章节达到节点时，调用模型从新增内容中提取设定，弹窗让用户确认后再写入。
 
@@ -168,7 +169,7 @@ SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录
 - `kind`：`quick_action` \| `skill`。
 - `system`：仅 `quick_action` 使用。
 - `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（MVP 不做自动选用，但字段落地并校验；两种 kind 均可手动调用）。
-- 正文：用户消息模板；常见变量如 `$worldview`、`$characters`、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules` 等。
+- 正文：用户消息模板；常见变量如 `$worldview`、`$characters`（含内嵌关系）、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules`、`$chapter_rules` 等。
 
 示例（quick_action）：
 
@@ -211,8 +212,14 @@ $user_input
 - `meta.json`：项目名、题材、创建时间、总字数等。
 - `settings.json`：全局规则、文风偏好。
 - `outline.json`：大纲与章节列表。
-- `memory.json`：长期记忆。
+- `memory.json`：长期设定/记忆（人物含 `profile` + `relationship: [{ type, target }]`）。
 - `chapters/`：章节正文，以 Markdown 存储。
+
+### 5.7 前端关键页面约定（与设计稿对齐）
+
+- **单页引导**：题材/内核/人物/大纲同一页；支持 AI 一键生成全部；卡片可模态展开编辑。
+- **编辑页右侧**：AI Agent 对话栏；右上角为历史会话、新建对话、临时规则遮罩（非「设定/规则/技能」多 Tab）。
+- **快捷指令**：对话栏底栏按钮或 `/name`，与 SKILL.md 对应。
 
 ---
 
