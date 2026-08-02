@@ -78,8 +78,18 @@ class ProjectSettings(BaseModel):
     style_preference: str = ""
 
 
+class OutlineVolume(BaseModel):
+    """卷纲条目（引导页「全本大纲」卡片）。"""
+
+    id: str = ""
+    label: str = ""
+    name: str = ""
+    summary: str = ""
+
+
 class ProjectOutline(BaseModel):
     synopsis: str = ""
+    volumes: list[OutlineVolume] = Field(default_factory=list)
     chapters: list[OutlineChapter] = Field(default_factory=list)
 
 
@@ -100,6 +110,7 @@ class ProjectUpdateRequest(BaseModel):
     global_rules: Optional[str] = None
     style_preference: Optional[str] = None
     synopsis: Optional[str] = None
+    volumes: Optional[list[OutlineVolume]] = None
 
 
 class ProjectSummary(BaseModel):

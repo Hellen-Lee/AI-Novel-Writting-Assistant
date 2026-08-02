@@ -47,19 +47,8 @@ function ConfigLayout() {
 }
 
 function OnboardingLayout() {
-  return (
-    <AppLayout
-      header={
-        <AppHeader
-          actions={
-            <Button to="/" variant="ghost">
-              取消
-            </Button>
-          }
-        />
-      }
-    />
-  )
+  /** 引导页自带顶栏（返回 / 步骤 / 跳过），不再套全局品牌 Header */
+  return <AppLayout />
 }
 
 export default function App() {

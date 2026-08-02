@@ -87,7 +87,7 @@ def save_settings(project_id: str, settings: dict[str, Any]) -> None:
 def load_outline(project_id: str) -> dict[str, Any]:
     return _read_json(
         get_project_dir(project_id) / "outline.json",
-        {"synopsis": "", "chapters": []},
+        {"synopsis": "", "volumes": [], "chapters": []},
     )
 
 
@@ -220,6 +220,7 @@ def create_project(
     }
     outline = {
         "synopsis": synopsis or "",
+        "volumes": [],
         "chapters": [
             {
                 "id": chapter_id,
@@ -258,6 +259,9 @@ def update_project(project_id: str, updates: dict[str, Any]) -> dict[str, Any]:
 
     if "synopsis" in updates and updates["synopsis"] is not None:
         outline["synopsis"] = updates["synopsis"]
+
+    if "volumes" in updates and updates["volumes"] is not None:
+        outline["volumes"] = updates["volumes"]
 
     meta["updated_at"] = _now_iso()
     save_meta(project_id, meta)
