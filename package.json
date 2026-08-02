@@ -1,0 +1,14 @@
+{
+  "name": "ainovel",
+  "private": true,
+  "version": "0.0.0",
+  "description": "AI 小说创作 Agent — 根目录脚本",
+  "scripts": {
+    "start": "node scripts/start.mjs",
+    "start:prod": "node scripts/start.mjs --prod",
+    "build": "node scripts/build.mjs",
+    "build:frontend": "node scripts/build.mjs --frontend-only",
+    "build:backend": "node scripts/build.mjs --backend-only",
+    "build:install": "node scripts/build.mjs --install"
+  }
+}

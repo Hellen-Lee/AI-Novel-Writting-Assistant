@@ -250,25 +250,44 @@ $user_input
 
 ## 7. 启动方式
 
-### 后端
+在仓库**根目录**执行即可，无需再分别 `cd frontend` / `cd backend`。
+
+### 开发（后端 + 前端热更新）
 
 ```bash
-cd backend
-pip install -r requirements.txt
-python run.py
+npm run start
 ```
 
-默认监听 `http://localhost:8000`。
+- 前端：`http://localhost:5173`（Vite dev，`/api` 代理到后端）
+- 后端：`http://localhost:8001`（`python run.py`，带 reload）
+- 停止：`Ctrl+C`（同时结束两侧）
 
-### 前端
+### 生产（构建产物预览）
 
 ```bash
-cd frontend
-npm install
-npm run dev
+npm run build        # 打包 frontend/dist + 后端导入校验
+npm run start:prod   # 后端 uvicorn（无 reload）+ 前端 vite preview
 ```
 
-默认访问 `http://localhost:5173`，并代理到后端 `localhost:8000`。
+- 前端：`http://localhost:4173`
+- 若尚无 `frontend/dist`，`start:prod` 会先自动执行一次 build
+
+### 仅构建
+
+```bash
+npm run build
+# 可选：npm run build:install / build:frontend / build:backend
+```
+
+### 分目录启动（调试用）
+
+```bash
+# 后端
+cd backend && python run.py
+
+# 前端
+cd frontend && npm run dev
+```
 
 ---
 
