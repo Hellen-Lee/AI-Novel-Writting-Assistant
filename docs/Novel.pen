@@ -5703,7 +5703,7 @@
                   "id": "pBPRE",
                   "name": "OverlayHead",
                   "width": "fill_container",
-                  "fill": "#FFFFFF",
+                  "fill": "#f3f5f3",
                   "stroke": "#D5DED9",
                   "strokeWidth": {
                     "bottom": 1
@@ -5960,11 +5960,7 @@
                   "id": "vkYGl",
                   "name": "OverlayFooter",
                   "width": "fill_container",
-                  "fill": "#FFFFFF",
-                  "stroke": "#D5DED9",
-                  "strokeWidth": {
-                    "top": 1
-                  },
+                  "fill": "#f3f5f3",
                   "gap": 8,
                   "padding": [
                     12,
@@ -13538,36 +13534,7 @@
               "children": [
                 {
                   "type": "frame",
-                  "id": "SX4iE",
-                  "name": "HeadLeft",
-                  "gap": 8,
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "icon",
-                      "id": "sWgMN",
-                      "name": "I",
-                      "width": 16,
-                      "height": 16,
-                      "icon": "bot",
-                      "library": "lucide",
-                      "fill": "#2D5A4A"
-                    },
-                    {
-                      "type": "text",
-                      "id": "Y77l5j",
-                      "name": "Title",
-                      "fill": "#1A2E28",
-                      "content": "AI 对话",
-                      "fontFamily": "Geist",
-                      "fontSize": 14,
-                      "fontWeight": "600"
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "mkkHx",
+                  "id": "cpVbk",
                   "name": "AgentHead",
                   "width": "fill_container",
                   "height": 48,
@@ -13585,14 +13552,43 @@
                   "children": [
                     {
                       "type": "frame",
-                      "id": "MXwmR",
+                      "id": "tOAS3",
+                      "name": "HeadLeft",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "oCYHs",
+                          "name": "I",
+                          "width": 16,
+                          "height": 16,
+                          "icon": "bot",
+                          "library": "lucide",
+                          "fill": "#2D5A4A"
+                        },
+                        {
+                          "type": "text",
+                          "id": "V6oda",
+                          "name": "Title",
+                          "fill": "#1A2E28",
+                          "content": "AI 对话",
+                          "fontFamily": "Geist",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z2HWiz",
                       "name": "HeadActions",
                       "gap": 4,
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "frame",
-                          "id": "RunjC",
+                          "id": "S9lb2",
                           "name": "Btn/历史",
                           "width": 28,
                           "height": 28,
@@ -13602,7 +13598,7 @@
                           "children": [
                             {
                               "type": "icon",
-                              "id": "ddsZ9",
+                              "id": "N4woMd",
                               "name": "I",
                               "width": 15,
                               "height": 15,
@@ -13614,7 +13610,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "tmcS0",
+                          "id": "jiWce",
                           "name": "Btn/新建对话",
                           "width": 28,
                           "height": 28,
@@ -13624,7 +13620,7 @@
                           "children": [
                             {
                               "type": "icon",
-                              "id": "aSCCf",
+                              "id": "cOPno",
                               "name": "I",
                               "width": 15,
                               "height": 15,
@@ -13636,7 +13632,7 @@
                         },
                         {
                           "type": "frame",
-                          "id": "OdZlg",
+                          "id": "Or0cJ",
                           "name": "Btn/临时规则",
                           "cornerRadius": 6,
                           "gap": 4,
@@ -13648,7 +13644,7 @@
                           "children": [
                             {
                               "type": "icon",
-                              "id": "m9dO5G",
+                              "id": "Ym1BT",
                               "name": "I",
                               "width": 12,
                               "height": 12,
@@ -15852,43 +15848,6 @@
                               "fontWeight": "500"
                             }
                           ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "ZXKjY",
-                          "name": "QA/设定",
-                          "fill": "#FFFFFF",
-                          "cornerRadius": 8,
-                          "stroke": "#D5DED9",
-                          "strokeWidth": 1,
-                          "gap": 6,
-                          "padding": [
-                            8,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "D5SCg",
-                              "name": "Icon",
-                              "width": 14,
-                              "height": 14,
-                              "icon": "book-open",
-                              "library": "lucide",
-                              "fill": "#5A6E66"
-                            },
-                            {
-                              "type": "text",
-                              "id": "yQDwx",
-                              "name": "Label",
-                              "fill": "#1A2E28",
-                              "content": "生成设定",
-                              "fontFamily": "Geist",
-                              "fontSize": 12,
-                              "fontWeight": "500"
-                            }
-                          ]
                         }
                       ]
                     },
@@ -15955,6 +15914,45 @@
                                   "width": 16,
                                   "height": 16,
                                   "icon": "plus",
+                                  "library": "lucide",
+                                  "fill": "#5A6E66"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Tpk6m",
+                              "name": "Btn/Model",
+                              "height": 28,
+                              "fill": "#F3F5F3",
+                              "cornerRadius": 14,
+                              "stroke": "#D5DED9",
+                              "strokeWidth": 1,
+                              "gap": 4,
+                              "padding": [
+                                0,
+                                10
+                              ],
+                              "justifyContent": "center",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dEog7",
+                                  "name": "ModelName",
+                                  "fill": "#1A2E28",
+                                  "content": "DeepSeek",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "500"
+                                },
+                                {
+                                  "type": "icon",
+                                  "id": "LcWgS",
+                                  "name": "Chevron",
+                                  "width": 12,
+                                  "height": 12,
+                                  "icon": "chevron-down",
                                   "library": "lucide",
                                   "fill": "#5A6E66"
                                 }

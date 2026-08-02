@@ -24,10 +24,26 @@
   align-items: center;
   gap: var(--space-md);
   width: 280px;
+  min-width: 0;
 }
 
 .editor-layout__nav-right {
   justify-content: flex-end;
+}
+
+.editor-layout__save-badge {
+  flex-shrink: 0;
+}
+
+.editor-layout__save-badge--dirty {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.editor-layout__settings {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 13px;
 }
 
 .editor-layout__back {

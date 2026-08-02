@@ -1,3 +1,9 @@
+/** 与后端一致：去掉空白后的字符数 */
+export function countWords(text) {
+  if (!text) return 0
+  return Array.from(String(text).replace(/\s+/g, '')).length
+}
+
 /** 字数展示：不足万用「字」，否则用「万字」 */
 export function formatWordCount(count) {
   const n = Number(count) || 0
