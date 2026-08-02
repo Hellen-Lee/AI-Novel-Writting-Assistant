@@ -1,0 +1,78 @@
+.agent-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--agent-width);
+  flex-shrink: 0;
+  background: var(--color-bg-page);
+  border-left: 1px solid var(--color-border-default);
+  min-height: 0;
+}
+
+.agent-panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.agent-panel__head-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 28px;
+  color: var(--color-primary);
+}
+
+.agent-panel__head-left svg {
+  display: block;
+  flex-shrink: 0;
+  /* Lucide Bot 顶部天线使几何中心偏上，视觉上图标偏下 */
+  transform: translateY(-1px);
+}
+
+.agent-panel__head-left h2 {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: var(--text-body-md);
+  font-weight: 600;
+  line-height: 16px;
+  height: 16px;
+  color: var(--color-text-primary);
+}
+
+.agent-panel__rules-badge {
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.agent-panel__head-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.agent-panel__icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.agent-panel__icon-btn:hover,
+.agent-panel__icon-btn.is-active {
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+}

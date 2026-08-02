@@ -1,0 +1,33 @@
+.agent-panel__qa {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agent-panel__qa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+}
+
+.agent-panel__qa-btn:hover:not(:disabled) {
+  border-color: var(--color-border-strong);
+}
+
+.agent-panel__qa-btn.is-active {
+  background: var(--color-primary);
+  border-color: transparent;
+  color: var(--color-text-inverse);
+}
+
+.agent-panel__qa-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

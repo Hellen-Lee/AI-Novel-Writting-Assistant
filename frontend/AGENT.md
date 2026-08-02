@@ -38,12 +38,29 @@ export function AgentPanel() {
   - **components/<域>/**：可复用的展示块（如 `editor/`、`onboarding/`）。
   - **api / utils / stores**：无 UI 的请求、纯函数、跨页状态。
 
+### Agent 域分层（`components/editor/Agent/`）
+
+编辑页右侧 Agent 栏已按域拆目录，后续扩展（生成链路、会话、规则）优先落在对应层，避免再堆回单文件：
+
+| 目录 | 职责 |
+| --- | --- |
+| `component/` | UI：`AgentPanel` 编排；`shell/`（遮罩与快捷指令）；`chatpanel/`；`inputbar/` |
+| `hook/` | 会话 / 规则 / 生成等 React 状态与编排（`useAgentPanel` 组合） |
+| `service/` | Agent 域数据链路（封装 `api/`、占位/真实 generate）；不依赖 React |
+| `utils/` | 纯函数与常量 |
+| `index.jsx` | 唯一对外出口：`export { AgentPanel }` |
+
+- 页面只 `import { AgentPanel } from '../components/editor/Agent'`。
+- 快捷指令属壳层（`shell/QuickActions`），不属于 `inputbar`。
+- 头栏入口较少时可内联在 `AgentPanel`，不必再抽 Header 文件。
+- 样式放在 `Agent/styles/`，按 UI 块拆分（`AgentPanel.css`、`ChatPanel.css`、`InputBar.css`、`QuickActions.css`、`HistoryPanel.css`、`RulesPanel.css`），由对应组件引入。
+
 ---
 
 ## 3. 组件声明位置
 
 - 子组件写在**文件顶层**（sibling）或**独立文件**，**禁止**在父组件函数体内声明组件（避免每次渲染重建类型、状态丢失）。
-- 样式与组件同目录、同名 `.css`（如 `AgentPanel.jsx` + `AgentPanel.css`）。
+- 样式与组件同目录、同名 `.css`；域模块可集中一份样式由入口组件引入（如 `Agent/Agent.css`）。
 
 ---
 

@@ -8,7 +8,7 @@ import {
   listChapters,
   updateChapter,
 } from '../api/chapters'
-import { AgentPanel } from '../components/editor/AgentPanel'
+import { AgentPanel } from '../components/editor/Agent'
 import { Button } from '../components/ui/Button'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'

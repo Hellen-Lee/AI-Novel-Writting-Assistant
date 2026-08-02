@@ -1,0 +1,67 @@
+.agent-panel__overlay {
+  position: absolute;
+  inset: 48px 0 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--color-bg-page);
+}
+
+.agent-panel__overlay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agent-panel__overlay-head h3 {
+  font-size: var(--text-body-md);
+  font-weight: 600;
+}
+
+.agent-panel__session-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.agent-panel__session {
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agent-panel__session.is-active {
+  border-color: var(--color-primary);
+  box-shadow: 0 1px 2px rgba(26, 46, 40, 0.06);
+}
+
+.agent-panel__session-title {
+  font-size: var(--text-body-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.agent-panel__session-meta {
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+
+.agent-panel__hint {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
