@@ -22,6 +22,18 @@ export function formatTotalWordsShort(count) {
   return `${text.replace(/\.0$/, '')} 万`
 }
 
+/** ISO 时间 →「MM-DD HH:mm」，用于设定详情「更新于」 */
+export function formatUpdatedAt(iso) {
+  if (!iso) return ''
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return ''
+  const mm = String(date.getMonth() + 1).padStart(2, '0')
+  const dd = String(date.getDate()).padStart(2, '0')
+  const hh = String(date.getHours()).padStart(2, '0')
+  const mi = String(date.getMinutes()).padStart(2, '0')
+  return `${mm}-${dd} ${hh}:${mi}`
+}
+
 /** ISO 时间 → 相对时间文案 */
 export function formatRelativeTime(iso) {
   if (!iso) return '—'

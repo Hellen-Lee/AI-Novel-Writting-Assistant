@@ -43,3 +43,9 @@
   background: var(--color-bg-sidebar);
   color: var(--color-text-primary);
 }
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}

@@ -8669,7 +8669,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：设定库 · memory.json → worldview[] · MemoryEntry 统一字段 name/tags/content",
+              "content": "入口：设定库 · 世界观条目以表单编辑；名称、标签、内容用中文展示，不暴露底层字段名",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -9072,7 +9072,7 @@
                           "id": "U9nid",
                           "name": "Num",
                           "fill": "$color/text/muted",
-                          "content": "relationships",
+                          "content": "—",
                           "fontFamily": "Geist",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -9082,7 +9082,7 @@
                           "id": "V8jCa",
                           "name": "Title",
                           "fill": "#1A2E28",
-                          "content": "人物关系 · 3",
+                          "content": "（已并入人物）",
                           "fontFamily": "Geist",
                           "fontSize": 13,
                           "fontWeight": "500"
@@ -9109,7 +9109,7 @@
                       "id": "USTON",
                       "name": "CtxTitle",
                       "fill": "$color/primary",
-                      "content": "memory.json",
+                      "content": "设定库",
                       "fontFamily": "Geist",
                       "fontSize": 11,
                       "fontWeight": "600"
@@ -9121,7 +9121,7 @@
                       "fill": "#5A6E66",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "五分类 key → MemoryEntry[]\n注入 AI：$characters 等",
+                      "content": "分类管理设定，写入后供 AI 续写引用",
                       "lineHeight": 1.4,
                       "fontFamily": "Geist",
                       "fontSize": 12,
@@ -9181,7 +9181,7 @@
                               "id": "SSjZq",
                               "name": "ChTitle",
                               "fill": "$color/text/primary",
-                              "content": "世界观 · 3",
+                              "content": "世界观",
                               "fontFamily": "Geist",
                               "fontSize": 13,
                               "fontWeight": "600"
@@ -9451,7 +9451,7 @@
                                   "id": "lcaCg",
                                   "name": "ChMeta",
                                   "fill": "$color/text/muted",
-                                  "content": "MemoryEntry · worldview",
+                                  "content": "世界观设定",
                                   "fontFamily": "Geist Mono",
                                   "fontSize": 11,
                                   "fontWeight": "500"
@@ -9534,57 +9534,146 @@
                           "gap": 16,
                           "children": [
                             {
-                              "type": "text",
-                              "id": "rOt3D",
-                              "name": "Field/name",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "name\n第七星渊",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Ter9R",
-                              "name": "Field/tags",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "tags\n地理 · 禁地",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
                               "type": "frame",
-                              "id": "uC8Db",
-                              "name": "Field/content",
+                              "id": "Kn5yI",
+                              "name": "Field/Name",
                               "width": "fill_container",
-                              "height": "fill_container",
-                              "fill": "$color/bg/surface",
-                              "cornerRadius": "$radius/lg",
-                              "stroke": "$color/border/default",
-                              "strokeWidth": 1,
                               "layout": "vertical",
-                              "gap": 12,
-                              "padding": 16,
+                              "gap": 6,
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "E92jEh",
-                                  "name": "AIText",
-                                  "fill": "#1A2E28",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "content\n传说中的第七处星渊裂隙，铭文与青铜残剑同源。\n\n常人不可近；朔望之夜裂隙微开，可见星砂坠落。",
-                                  "lineHeight": 1.55,
+                                  "id": "AO9NS",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "名称",
                                   "fontFamily": "Geist",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "KFQcV",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "iAUlF",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "第七星渊",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "zj0L5",
+                              "name": "Field/Tags",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bMrk2",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "标签",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "x7FQI",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "HFssg",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "地理 · 禁地",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "OL7Kd",
+                              "name": "Field/Content",
+                              "width": "fill_container",
+                              "height": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LVNAQ",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "内容",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "an60M",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "height": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "bEX4W",
+                                      "name": "Val",
+                                      "fill": "$color/text/secondary",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "传说中的第七处星渊裂隙，铭文与青铜残剑同源。\n\n常人不可近；朔望之夜裂隙微开，可见星砂坠落。",
+                                      "lineHeight": 1.55,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             }
@@ -9642,7 +9731,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：设定库 · memory.json → items[] · 道具/功法/地点等 MemoryEntry",
+              "content": "入口：设定库 · 物品条目以表单编辑；名称、标签、内容用中文展示，不暴露底层字段名",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -10045,7 +10134,7 @@
                           "id": "XCOsV",
                           "name": "Num",
                           "fill": "$color/text/muted",
-                          "content": "relationships",
+                          "content": "—",
                           "fontFamily": "Geist",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -10055,7 +10144,7 @@
                           "id": "x0nz6D",
                           "name": "Title",
                           "fill": "#1A2E28",
-                          "content": "人物关系 · 3",
+                          "content": "（已并入人物）",
                           "fontFamily": "Geist",
                           "fontSize": 13,
                           "fontWeight": "500"
@@ -10082,7 +10171,7 @@
                       "id": "TOGba",
                       "name": "CtxTitle",
                       "fill": "$color/primary",
-                      "content": "memory.json",
+                      "content": "设定库",
                       "fontFamily": "Geist",
                       "fontSize": 11,
                       "fontWeight": "600"
@@ -10094,7 +10183,7 @@
                       "fill": "#5A6E66",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "五分类 key → MemoryEntry[]\n注入 AI：$characters 等",
+                      "content": "分类管理设定，写入后供 AI 续写引用",
                       "lineHeight": 1.4,
                       "fontFamily": "Geist",
                       "fontSize": 12,
@@ -10154,7 +10243,7 @@
                               "id": "cjFMl",
                               "name": "ChTitle",
                               "fill": "$color/text/primary",
-                              "content": "物品 · 3",
+                              "content": "物品",
                               "fontFamily": "Geist",
                               "fontSize": 13,
                               "fontWeight": "600"
@@ -10424,7 +10513,7 @@
                                   "id": "vYZLP",
                                   "name": "ChMeta",
                                   "fill": "$color/text/muted",
-                                  "content": "MemoryEntry · items",
+                                  "content": "物品设定",
                                   "fontFamily": "Geist Mono",
                                   "fontSize": 11,
                                   "fontWeight": "500"
@@ -10507,57 +10596,146 @@
                           "gap": 16,
                           "children": [
                             {
-                              "type": "text",
-                              "id": "OKARC",
-                              "name": "Field/name",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "name\n青铜残剑",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
-                              "type": "text",
-                              "id": "f6Ahdp",
-                              "name": "Field/tags",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "tags\n兵器 · 主角",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
                               "type": "frame",
-                              "id": "CAMpZ",
-                              "name": "Field/content",
+                              "id": "V7SMZQ",
+                              "name": "Field/Name",
                               "width": "fill_container",
-                              "height": "fill_container",
-                              "fill": "$color/bg/surface",
-                              "cornerRadius": "$radius/lg",
-                              "stroke": "$color/border/default",
-                              "strokeWidth": 1,
                               "layout": "vertical",
-                              "gap": 12,
-                              "padding": 16,
+                              "gap": 6,
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "R8sKIy",
-                                  "name": "AIText",
-                                  "fill": "#1A2E28",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "content\n陆沉拾得的残剑，剑身铭文与第七星渊同源。\n\n握持时左腕剑纹会隐隐发热；刃口缺口处可见星砂。",
-                                  "lineHeight": 1.55,
+                                  "id": "FcR4Z",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "名称",
                                   "fontFamily": "Geist",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "PVDnT",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "hwTdG",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "青铜残剑",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "VyJxE",
+                              "name": "Field/Tags",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "LBTIj",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "标签",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "c0eSQ",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "m5iiNJ",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "兵器 · 主角",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "mrchr",
+                              "name": "Field/Content",
+                              "width": "fill_container",
+                              "height": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Cza3H",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "内容",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "s43hs",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "height": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "Wr4sp",
+                                      "name": "Val",
+                                      "fill": "$color/text/secondary",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "陆沉拾得的残剑，剑身铭文与第七星渊同源。\n\n握持时左腕剑纹会隐隐发热；刃口缺口处可见星砂。",
+                                      "lineHeight": 1.55,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             }
@@ -10615,7 +10793,7 @@
               "fill": "#E4EFE9",
               "textGrowth": "fixed-width",
               "width": "fill_container",
-              "content": "入口：设定库 · memory.json → plot_points[] · 已发生事件/伏笔/主线节点",
+              "content": "入口：设定库 · 剧情要点以表单编辑；名称、标签、内容用中文展示，不暴露底层字段名",
               "fontFamily": "Geist",
               "fontSize": 11,
               "fontWeight": "500"
@@ -11018,7 +11196,7 @@
                           "id": "mmfEt",
                           "name": "Num",
                           "fill": "$color/text/muted",
-                          "content": "relationships",
+                          "content": "—",
                           "fontFamily": "Geist",
                           "fontSize": 11,
                           "fontWeight": "normal"
@@ -11028,7 +11206,7 @@
                           "id": "ZvOHC",
                           "name": "Title",
                           "fill": "#1A2E28",
-                          "content": "人物关系 · 3",
+                          "content": "（已并入人物）",
                           "fontFamily": "Geist",
                           "fontSize": 13,
                           "fontWeight": "500"
@@ -11055,7 +11233,7 @@
                       "id": "WjAdP",
                       "name": "CtxTitle",
                       "fill": "$color/primary",
-                      "content": "memory.json",
+                      "content": "设定库",
                       "fontFamily": "Geist",
                       "fontSize": 11,
                       "fontWeight": "600"
@@ -11067,7 +11245,7 @@
                       "fill": "#5A6E66",
                       "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "content": "五分类 key → MemoryEntry[]\n注入 AI：$characters 等",
+                      "content": "分类管理设定，写入后供 AI 续写引用",
                       "lineHeight": 1.4,
                       "fontFamily": "Geist",
                       "fontSize": 12,
@@ -11127,7 +11305,7 @@
                               "id": "D6XnGb",
                               "name": "ChTitle",
                               "fill": "$color/text/primary",
-                              "content": "剧情要点 · 3",
+                              "content": "剧情要点",
                               "fontFamily": "Geist",
                               "fontSize": 13,
                               "fontWeight": "600"
@@ -11397,7 +11575,7 @@
                                   "id": "pNrKy",
                                   "name": "ChMeta",
                                   "fill": "$color/text/muted",
-                                  "content": "MemoryEntry · plot_points",
+                                  "content": "剧情要点设定",
                                   "fontFamily": "Geist Mono",
                                   "fontSize": 11,
                                   "fontWeight": "500"
@@ -11480,57 +11658,146 @@
                           "gap": 16,
                           "children": [
                             {
-                              "type": "text",
-                              "id": "yOvcg",
-                              "name": "Field/name",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "name\n拾剑开端",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
-                              "type": "text",
-                              "id": "uxU5P",
-                              "name": "Field/tags",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "tags\n主线 · 已发生",
-                              "lineHeight": 1.55,
-                              "fontFamily": "Geist",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            },
-                            {
                               "type": "frame",
-                              "id": "RwWqL",
-                              "name": "Field/content",
+                              "id": "pfYSk",
+                              "name": "Field/Name",
                               "width": "fill_container",
-                              "height": "fill_container",
-                              "fill": "$color/bg/surface",
-                              "cornerRadius": "$radius/lg",
-                              "stroke": "$color/border/default",
-                              "strokeWidth": 1,
                               "layout": "vertical",
-                              "gap": 12,
-                              "padding": 16,
+                              "gap": 6,
                               "children": [
                                 {
                                   "type": "text",
-                                  "id": "C9TsG",
-                                  "name": "AIText",
-                                  "fill": "#1A2E28",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "content\n陆沉于荒村拾得青铜残剑，踏入修行之路。\n\n此节点后，观星台与青灯人两条线开始交汇。",
-                                  "lineHeight": 1.55,
+                                  "id": "xRq95",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "名称",
                                   "fontFamily": "Geist",
-                                  "fontSize": 14,
-                                  "fontWeight": "normal"
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Z1qFq",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "MAJbV",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "拾剑开端",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "YZsFs",
+                              "name": "Field/Tags",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "PUbUs",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "标签",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "e8Mgw",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "s98rl",
+                                      "name": "Val",
+                                      "fill": "$color/text/primary",
+                                      "content": "主线 · 已发生",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "GmoEl",
+                              "name": "Field/Content",
+                              "width": "fill_container",
+                              "height": "fill_container",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "k1vfr",
+                                  "name": "Label",
+                                  "fill": "$color/text/primary",
+                                  "content": "内容",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 12,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "QitoC",
+                                  "name": "Input",
+                                  "width": "fill_container",
+                                  "height": "fill_container",
+                                  "fill": "$color/bg/surface",
+                                  "cornerRadius": "$radius/md",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "layout": "vertical",
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "gg7Vu",
+                                      "name": "Val",
+                                      "fill": "$color/text/secondary",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "陆沉于荒村拾得青铜残剑，踏入修行之路。\n\n此节点后，观星台与青灯人两条线开始交汇。",
+                                      "lineHeight": 1.55,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             }

@@ -26,6 +26,8 @@ function EditorLayoutInner() {
   const { saveStatus } = useEditorChrome()
   const [projectName, setProjectName] = useState('加载中…')
   const isEditRoute = location.pathname.includes('/edit')
+  const showSaveBadge =
+    isEditRoute || location.pathname.includes('/memory')
 
   useEffect(() => {
     let cancelled = false
@@ -49,7 +51,7 @@ function EditorLayoutInner() {
             <ChevronLeft size={16} strokeWidth={2} />
             <span className="editor-layout__project-name">{projectName}</span>
           </NavLink>
-          {isEditRoute ? (
+          {showSaveBadge ? (
             <Badge
               className={
                 saveStatus === 'dirty'
