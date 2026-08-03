@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import { AppHeader } from './components/layout/AppHeader'
 import { AppLayout } from './components/layout/AppLayout'
 import { EditorLayout } from './components/layout/EditorLayout'
@@ -7,7 +8,7 @@ import HomePage from './pages/HomePage'
 import OnboardingPage from './pages/OnboardingPage'
 import EditorPage from './pages/EditorPage'
 import MemoryPage from './pages/MemoryPage'
-import ConfigPage from './pages/ConfigPage'
+import SettingsPage from './pages/SettingsPage'
 
 function HomeLayout() {
   return (
@@ -16,8 +17,9 @@ function HomeLayout() {
         <AppHeader
           actions={
             <>
-              <Button to="/config" variant="ghost">
-                模型配置
+              <Button to="/settings" variant="ghost" className="app-header__settings">
+                <Settings size={14} strokeWidth={2} />
+                设置
               </Button>
               <Button to="/projects/new" variant="primary">
                 新建项目
@@ -30,20 +32,9 @@ function HomeLayout() {
   )
 }
 
-function ConfigLayout() {
-  return (
-    <AppLayout
-      header={
-        <AppHeader
-          actions={
-            <Button to="/" variant="ghost">
-              返回首页
-            </Button>
-          }
-        />
-      }
-    />
-  )
+function SettingsLayout() {
+  /** 设置页自带顶栏与侧栏，全屏自管布局 */
+  return <Outlet />
 }
 
 function OnboardingLayout() {
@@ -70,9 +61,11 @@ export default function App() {
           <Route path="memory" element={<MemoryPage />} />
         </Route>
 
-        <Route path="config" element={<ConfigLayout />}>
-          <Route index element={<ConfigPage />} />
+        <Route path="settings" element={<SettingsLayout />}>
+          <Route index element={<SettingsPage />} />
         </Route>
+
+        <Route path="config" element={<Navigate to="/settings?tab=api" replace />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

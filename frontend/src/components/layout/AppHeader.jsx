@@ -3,7 +3,7 @@ import { Feather } from 'lucide-react'
 import './AppHeader.css'
 
 /**
- * 全局顶栏（首页 / 模型配置等）
+ * 全局顶栏（首页等）
  * 设计对照：Review/Screen/Projects Header
  */
 export function AppHeader({ actions }) {

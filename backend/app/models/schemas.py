@@ -18,6 +18,7 @@ class ConfigUpdateRequest(BaseModel):
     api_base: Optional[str] = None
     api_key: Optional[str] = None
     model: Optional[str] = None
+    context_window: Optional[int] = None
     temperature: Optional[float] = Field(default=None, ge=0, le=2)
     top_p: Optional[float] = Field(default=None, ge=0, le=1)
     max_tokens: Optional[int] = Field(default=None, ge=1, le=128000)

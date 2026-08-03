@@ -13,10 +13,16 @@ CONFIG_PATH = DATA_DIR / "config.json"
 PROJECTS_DIR = DATA_DIR / "projects"
 
 
+# 单次会话最大上下文（token 预算），与设置页下拉一致
+CONTEXT_WINDOW_CHOICES = (32_768, 65_536, 131_072)
+
+
 class AppConfig(BaseModel):
     api_base: str = "https://api.openai.com/v1"
     api_key: str = ""
     model: str = "gpt-4o-mini"
+    context_window: int = Field(default=131_072)
+    # 以下为模型调用内部默认，设置页不暴露（MVP）
     temperature: float = Field(default=0.7, ge=0, le=2)
     top_p: float = Field(default=0.9, ge=0, le=1)
     max_tokens: int = Field(default=2048, ge=1, le=128000)
@@ -37,6 +43,15 @@ class AppConfig(BaseModel):
         value = value.strip()
         if not value:
             raise ValueError("model 不能为空")
+        return value
+
+    @field_validator("context_window")
+    @classmethod
+    def validate_context_window(cls, value: int) -> int:
+        if value not in CONTEXT_WINDOW_CHOICES:
+            raise ValueError(
+                f"context_window 必须是 {', '.join(str(v) for v in CONTEXT_WINDOW_CHOICES)} 之一"
+            )
         return value
 
 

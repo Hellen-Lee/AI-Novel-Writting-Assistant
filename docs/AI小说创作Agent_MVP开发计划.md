@@ -146,10 +146,10 @@
 > 设计稿：`docs/Novel.pen` → `Review/Screen/Settings-{通用|API|skill}`；入口：首页右上角「设置」。  
 > 原独立「模型配置」「Skills 技能库」画面已 Archive，开发以实现 Settings 三栏为准。架构说明见 `docs/build/05-全局设置面板.md`。
 
-- [ ] 入口：首页右上角「设置」打开全局设置（侧栏三栏：**通用 / API / skill**）
-- [ ] **通用**：数据目录、自动保存、字数统计、删除确认等本地偏好
-- [ ] **API**（原模型配置）：API 地址、密钥、默认模型、生成参数；测试连接；保存到 `data/config.json`
-- [ ] **skill**（原技能库管理）：内置 / 自定义 SKILL.md 列表与编辑（frontmatter + 正文模板）；新建 Skill
+- [x] 入口：首页右上角「设置」打开全局设置（侧栏三栏：**通用 / API / skill**）
+- [ ] **通用**：数据目录、自动保存、字数统计、删除确认等本地偏好 — UI 占位，待实现
+- [x] **API**（原模型配置）：API 地址、密钥、默认模型、生成参数；测试连接；保存到 `data/config.json`
+- [ ] **skill**（原技能库管理）：内置 / 自定义 SKILL.md 列表与编辑（frontmatter + 正文模板）；新建 Skill — UI 占位，待实现
 
 ---
 

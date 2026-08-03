@@ -84,9 +84,13 @@ function EditorLayoutInner() {
         </nav>
 
         <div className="editor-layout__nav-right">
-          <Button to="/config" variant="secondary" className="editor-layout__settings">
+          <Button
+            to="/settings?tab=api"
+            variant="secondary"
+            className="editor-layout__settings"
+          >
             <Settings size={14} strokeWidth={2} />
-            项目设置
+            设置
           </Button>
         </div>
       </header>
