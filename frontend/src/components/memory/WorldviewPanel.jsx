@@ -9,7 +9,6 @@ export function WorldviewPanel({
   onOpenHero,
   onOpenEntry,
   onDeleteEntry,
-  onSelectGenre,
 }) {
   const { primary, secondary } = splitWorldviewEntries(entries)
   const content = (primary?.content || '').trim()
@@ -50,7 +49,7 @@ export function WorldviewPanel({
                     key={item}
                     type="button"
                     className={`memory-page__genre-chip${active ? ' is-active' : ''}`}
-                    onClick={() => onSelectGenre(item)}
+                    onClick={onOpenHero}
                   >
                     {item}
                   </button>

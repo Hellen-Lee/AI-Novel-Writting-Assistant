@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoaderCircle, Plus, Sparkles } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
@@ -13,6 +13,9 @@ import { Button } from '../components/ui/Button'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
 import './EditorPage.css'
+
+/** 仅章节正文（含一并提交的标题）防抖自动保存；设定库等其它页不使用 */
+const AUTOSAVE_MS = 1000
 
 function ChapterSidebar({
   chapters,
@@ -249,8 +252,24 @@ export default function EditorPage() {
       title !== savedSnapshot.title || content !== savedSnapshot.content,
     [title, content, savedSnapshot],
   )
+  const contentDirty = content !== savedSnapshot.content
 
   const liveWordCount = useMemo(() => countWords(content), [content])
+  const saveTimerRef = useRef(null)
+  const handleSaveRef = useRef(null)
+  const titleRef = useRef(title)
+  const contentRef = useRef(content)
+  const snapshotRef = useRef(savedSnapshot)
+
+  useEffect(() => {
+    titleRef.current = title
+  }, [title])
+  useEffect(() => {
+    contentRef.current = content
+  }, [content])
+  useEffect(() => {
+    snapshotRef.current = savedSnapshot
+  }, [savedSnapshot])
 
   const recentContextLabel = useMemo(() => {
     if (!chapters.length || !activeChapterId) return '暂无章节上下文'
@@ -346,23 +365,12 @@ export default function EditorPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId, routeChapterId])
 
-  const confirmLeaveIfDirty = () => {
-    if (!dirty) return true
-    return window.confirm('当前章节有未保存修改，确定离开吗？')
-  }
-
-  const handleSelectChapter = async (id) => {
-    if (id === activeChapterId) return
-    if (!confirmLeaveIfDirty()) return
-    navigate(`/projects/${projectId}/edit/${id}`)
-  }
-
   const handleSave = useCallback(async () => {
-    if (!activeChapterId || saving) return
+    if (!activeChapterId || saving) return false
     const cleanedTitle = title.trim()
     if (!cleanedTitle) {
       setError('章节标题不能为空')
-      return
+      return false
     }
     setSaving(true)
     setError('')
@@ -385,16 +393,62 @@ export default function EditorPage() {
             : c,
         ),
       )
+      return true
     } catch (err) {
       setError(getErrorMessage(err, '保存失败'))
+      return false
     } finally {
       setSaving(false)
     }
   }, [activeChapterId, saving, title, content, projectId])
 
+  useEffect(() => {
+    handleSaveRef.current = handleSave
+  }, [handleSave])
+
+  const flushAutosave = useCallback(async () => {
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current)
+      saveTimerRef.current = null
+    }
+    if (!contentDirty) return true
+    return (await handleSaveRef.current?.()) ?? true
+  }, [contentDirty])
+
+  useEffect(() => {
+    if (!contentDirty || !activeChapterId || loadingChapter || saving) return
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current)
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null
+      handleSaveRef.current?.()
+    }, AUTOSAVE_MS)
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+    }
+  }, [contentDirty, content, activeChapterId, loadingChapter, saving])
+
+  const confirmLeaveIfDirty = async () => {
+    const saved = await flushAutosave()
+    if (!saved) return false
+    const snap = snapshotRef.current
+    const stillDirty =
+      titleRef.current !== snap.title || contentRef.current !== snap.content
+    if (!stillDirty) return true
+    return window.confirm('当前章节有未保存修改，确定离开吗？')
+  }
+
+  const handleSelectChapter = async (id) => {
+    if (id === activeChapterId) return
+    if (!(await confirmLeaveIfDirty())) return
+    navigate(`/projects/${projectId}/edit/${id}`)
+  }
+
   const handleCreateChapter = async () => {
     if (creating) return
-    if (!confirmLeaveIfDirty()) return
+    if (!(await confirmLeaveIfDirty())) return
     setCreating(true)
     setError('')
     try {

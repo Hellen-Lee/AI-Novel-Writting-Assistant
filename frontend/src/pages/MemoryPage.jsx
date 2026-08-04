@@ -25,7 +25,6 @@ export default function MemoryPage() {
     error,
     setError,
     updateDraft,
-    updateMetaField,
     switchCategory,
     openEntryEdit,
     openWorldviewHero,
@@ -86,7 +85,6 @@ export default function MemoryPage() {
             onDeleteEntry={handleDelete}
             onDeleteVolume={handleDelete}
             onAddVolume={handleCreate}
-            onSelectGenre={(genre) => updateMetaField({ genre })}
           />
         </div>
       </div>

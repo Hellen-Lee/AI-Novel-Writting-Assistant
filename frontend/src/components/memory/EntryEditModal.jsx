@@ -27,7 +27,7 @@ export function EntryEditModal({
       footer={
         <>
           <Button variant="ghost" onClick={onClose}>
-            关闭
+            {dirty ? '取消' : '关闭'}
           </Button>
           <Button
             variant="primary"
