@@ -6,13 +6,22 @@ import {
   getMemory,
   updateMemoryEntry,
 } from '../../api/memory'
+import { getProject, updateProject } from '../../api/projects'
+import {
+  createLocalId,
+  volumeLabelFromIndex,
+} from '../../utils/onboarding'
 import { useEditorChrome } from '../../stores/useEditorChrome'
 import {
   DEFAULT_ENTRY_NAME,
   EMPTY_MEMORY,
+  PRIMARY_WORLDVIEW_NAME,
   draftToPayload,
   entryToDraft,
   getCategoryMeta,
+  isMemoryCategory,
+  isOutlineCategory,
+  splitWorldviewEntries,
 } from './constants'
 
 const AUTOSAVE_MS = 700
@@ -20,8 +29,11 @@ const AUTOSAVE_MS = 700
 export function useMemoryPage(projectId) {
   const { setSaveStatus } = useEditorChrome()
   const [memory, setMemory] = useState(EMPTY_MEMORY)
-  const [category, setCategory] = useState('characters')
+  const [meta, setMeta] = useState({ name: '', genre: '' })
+  const [outline, setOutline] = useState({ synopsis: '', volumes: [] })
+  const [category, setCategory] = useState('worldview')
   const [selectedId, setSelectedId] = useState(null)
+  const [editTarget, setEditTarget] = useState(null)
   const [draft, setDraft] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -32,6 +44,9 @@ export function useMemoryPage(projectId) {
   const dirtyRef = useRef(false)
   const categoryRef = useRef(category)
   const selectedIdRef = useRef(selectedId)
+  const editTargetRef = useRef(null)
+  const metaRef = useRef(meta)
+  const outlineRef = useRef(outline)
   const saveTimerRef = useRef(null)
   const skipAutosaveRef = useRef(false)
 
@@ -47,6 +62,15 @@ export function useMemoryPage(projectId) {
   useEffect(() => {
     selectedIdRef.current = selectedId
   }, [selectedId])
+  useEffect(() => {
+    editTargetRef.current = editTarget
+  }, [editTarget])
+  useEffect(() => {
+    metaRef.current = meta
+  }, [meta])
+  useEffect(() => {
+    outlineRef.current = outline
+  }, [outline])
 
   useEffect(() => {
     setSaveStatus(saving ? 'saving' : dirty ? 'dirty' : 'saved')
@@ -56,14 +80,14 @@ export function useMemoryPage(projectId) {
     return () => setSaveStatus('saved')
   }, [setSaveStatus])
 
-  const entries = memory[category] || []
   const categoryMeta = getCategoryMeta(category)
+  const entries = isMemoryCategory(category) ? memory[category] || [] : []
 
-  const selectEntry = useCallback((cat, entry) => {
+  const clearDraftState = useCallback(() => {
     skipAutosaveRef.current = true
-    setCategory(cat)
-    setSelectedId(entry?.id || null)
-    setDraft(entryToDraft(cat, entry))
+    setSelectedId(null)
+    setEditTarget(null)
+    setDraft(null)
     setDirty(false)
     dirtyRef.current = false
     queueMicrotask(() => {
@@ -71,79 +95,188 @@ export function useMemoryPage(projectId) {
     })
   }, [])
 
-  const loadMemory = useCallback(async () => {
+  const openDraft = useCallback((target, nextDraft) => {
+    skipAutosaveRef.current = true
+    setEditTarget(target)
+    setSelectedId(target?.id || null)
+    setDraft(nextDraft)
+    setDirty(false)
+    dirtyRef.current = false
+    queueMicrotask(() => {
+      skipAutosaveRef.current = false
+    })
+  }, [])
+
+  const loadAll = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const data = await getMemory(projectId)
-      const next = {
-        worldview: data.worldview || [],
-        characters: data.characters || [],
-        items: data.items || [],
-        plot_points: data.plot_points || [],
+      const [memData, project] = await Promise.all([
+        getMemory(projectId),
+        getProject(projectId),
+      ])
+      const nextMemory = {
+        worldview: memData.worldview || [],
+        characters: memData.characters || [],
+        story_core: memData.story_core || [],
       }
-      setMemory(next)
-      const preferred = 'characters'
-      const list = next[preferred] || []
-      if (list.length > 0) {
-        selectEntry(preferred, list[0])
-      } else {
-        const fallback =
-          MEMORY_FIRST_NONEMPTY(next) || { cat: preferred, entry: null }
-        if (fallback.entry) {
-          selectEntry(fallback.cat, fallback.entry)
-        } else {
-          selectEntry(preferred, null)
-        }
-      }
+      setMemory(nextMemory)
+      setMeta({
+        name: project?.meta?.name || '',
+        genre: project?.meta?.genre || '',
+      })
+      setOutline({
+        synopsis: project?.outline?.synopsis || '',
+        volumes: project?.outline?.volumes || [],
+      })
+      clearDraftState()
+      setCategory('worldview')
     } catch (err) {
       setError(getErrorMessage(err, '加载设定失败'))
       setMemory(EMPTY_MEMORY)
-      selectEntry('characters', null)
+      setMeta({ name: '', genre: '' })
+      setOutline({ synopsis: '', volumes: [] })
+      clearDraftState()
     } finally {
       setLoading(false)
     }
-  }, [projectId, selectEntry])
+  }, [projectId, clearDraftState])
 
   useEffect(() => {
-    loadMemory()
-  }, [loadMemory])
+    loadAll()
+  }, [loadAll])
 
   const persistDraft = useCallback(
     async ({ silent = false } = {}) => {
       const currentDraft = draftRef.current
-      const cat = categoryRef.current
-      const entryId = selectedIdRef.current
-      if (!currentDraft || !entryId || !dirtyRef.current) return true
-
-      const payload = draftToPayload(cat, currentDraft)
-      if (!payload.name) {
-        if (!silent) setError('名称不能为空')
-        return false
-      }
+      const target = editTargetRef.current
+      if (!currentDraft || !target || !dirtyRef.current) return true
 
       setSaving(true)
       if (!silent) setError('')
       try {
-        const updated = await updateMemoryEntry(
-          projectId,
-          cat,
-          entryId,
-          payload,
-        )
-        setMemory((prev) => ({
-          ...prev,
-          [cat]: (prev[cat] || []).map((item) =>
-            item.id === entryId ? updated : item,
-          ),
-        }))
-        skipAutosaveRef.current = true
-        setDraft(entryToDraft(cat, updated))
-        setDirty(false)
-        dirtyRef.current = false
-        queueMicrotask(() => {
-          skipAutosaveRef.current = false
-        })
+        if (target.kind === 'memory') {
+          const payload = draftToPayload(target.category, currentDraft)
+          if (!payload.name) {
+            if (!silent) setError('名称不能为空')
+            return false
+          }
+          const updated = await updateMemoryEntry(
+            projectId,
+            target.category,
+            target.id,
+            payload,
+          )
+          setMemory((prev) => ({
+            ...prev,
+            [target.category]: (prev[target.category] || []).map((item) =>
+              item.id === target.id ? updated : item,
+            ),
+          }))
+          skipAutosaveRef.current = true
+          setDraft(entryToDraft(target.category, updated))
+          setDirty(false)
+          dirtyRef.current = false
+          queueMicrotask(() => {
+            skipAutosaveRef.current = false
+          })
+          return true
+        }
+
+        if (target.kind === 'worldview_hero') {
+          const name = (currentDraft.projectName || '').trim() || '未命名作品'
+          const genre = (currentDraft.genre || '').trim()
+          const content = (currentDraft.content || '').trim()
+          await updateProject(projectId, { name, genre })
+          setMeta({ name, genre })
+
+          let primaryId = target.id
+          if (primaryId) {
+            const updated = await updateMemoryEntry(
+              projectId,
+              'worldview',
+              primaryId,
+              { name: PRIMARY_WORLDVIEW_NAME, content, tags: [] },
+            )
+            setMemory((prev) => ({
+              ...prev,
+              worldview: (prev.worldview || []).map((item) =>
+                item.id === primaryId ? updated : item,
+              ),
+            }))
+            primaryId = updated.id
+          } else if (content) {
+            const created = await createMemoryEntry(projectId, 'worldview', {
+              name: PRIMARY_WORLDVIEW_NAME,
+              content,
+              tags: [],
+            })
+            setMemory((prev) => ({
+              ...prev,
+              worldview: [created, ...(prev.worldview || [])],
+            }))
+            primaryId = created.id
+            setEditTarget((prev) =>
+              prev ? { ...prev, id: primaryId } : prev,
+            )
+            setSelectedId(primaryId)
+          }
+          skipAutosaveRef.current = true
+          setDraft((d) =>
+            d
+              ? {
+                  ...d,
+                  projectName: name,
+                  genre,
+                  content,
+                  id: primaryId || d.id,
+                }
+              : d,
+          )
+          setDirty(false)
+          dirtyRef.current = false
+          queueMicrotask(() => {
+            skipAutosaveRef.current = false
+          })
+          return true
+        }
+
+        if (target.kind === 'synopsis') {
+          const synopsis = (currentDraft.synopsis || '').trim()
+          await updateProject(projectId, { synopsis })
+          setOutline((prev) => ({ ...prev, synopsis }))
+          skipAutosaveRef.current = true
+          setDirty(false)
+          dirtyRef.current = false
+          queueMicrotask(() => {
+            skipAutosaveRef.current = false
+          })
+          return true
+        }
+
+        if (target.kind === 'volume') {
+          const volumes = outlineRef.current.volumes || []
+          const nextVolumes = volumes.map((vol) =>
+            vol.id === target.id
+              ? {
+                  ...vol,
+                  label: (currentDraft.label || '').trim() || vol.label,
+                  name: (currentDraft.name || '').trim(),
+                  summary: (currentDraft.summary || '').trim(),
+                }
+              : vol,
+          )
+          await updateProject(projectId, { volumes: nextVolumes })
+          setOutline((prev) => ({ ...prev, volumes: nextVolumes }))
+          skipAutosaveRef.current = true
+          setDirty(false)
+          dirtyRef.current = false
+          queueMicrotask(() => {
+            skipAutosaveRef.current = false
+          })
+          return true
+        }
+
         return true
       } catch (err) {
         setError(getErrorMessage(err, '保存设定失败'))
@@ -181,8 +314,7 @@ export function useMemoryPage(projectId) {
     (updater) => {
       setDraft((prev) => {
         if (!prev) return prev
-        const next = typeof updater === 'function' ? updater(prev) : updater
-        return next
+        return typeof updater === 'function' ? updater(prev) : updater
       })
       if (skipAutosaveRef.current) return
       setDirty(true)
@@ -196,27 +328,112 @@ export function useMemoryPage(projectId) {
     async (nextCategory) => {
       if (nextCategory === categoryRef.current) return
       await flushAutosave()
-      const list = memory[nextCategory] || []
-      selectEntry(nextCategory, list[0] || null)
+      clearDraftState()
+      setCategory(nextCategory)
     },
-    [flushAutosave, memory, selectEntry],
+    [flushAutosave, clearDraftState],
   )
 
-  const switchEntry = useCallback(
+  const openEntryEdit = useCallback(
     async (entryId) => {
-      if (entryId === selectedIdRef.current) return
       await flushAutosave()
-      const list = memory[categoryRef.current] || []
-      const entry = list.find((item) => item.id === entryId) || null
-      selectEntry(categoryRef.current, entry)
+      const cat = categoryRef.current
+      if (!isMemoryCategory(cat)) return
+      const list = memory[cat] || []
+      const entry = list.find((item) => item.id === entryId)
+      if (!entry) return
+      openDraft(
+        { kind: 'memory', category: cat, id: entry.id },
+        entryToDraft(cat, entry),
+      )
     },
-    [flushAutosave, memory, selectEntry],
+    [flushAutosave, memory, openDraft],
   )
+
+  const openWorldviewHero = useCallback(async () => {
+    await flushAutosave()
+    const { primary } = splitWorldviewEntries(memory.worldview)
+    openDraft(
+      {
+        kind: 'worldview_hero',
+        id: primary?.id || null,
+        category: 'worldview',
+      },
+      {
+        id: primary?.id || '',
+        projectName: metaRef.current.name || '',
+        genre: metaRef.current.genre || '',
+        content: primary?.content || '',
+        updated_at: primary?.updated_at || '',
+      },
+    )
+  }, [flushAutosave, memory.worldview, openDraft])
+
+  const openSynopsisEdit = useCallback(async () => {
+    await flushAutosave()
+    openDraft(
+      { kind: 'synopsis', id: 'synopsis' },
+      { synopsis: outlineRef.current.synopsis || '' },
+    )
+  }, [flushAutosave, openDraft])
+
+  const openVolumeEdit = useCallback(
+    async (volumeId) => {
+      await flushAutosave()
+      const vol = (outlineRef.current.volumes || []).find((v) => v.id === volumeId)
+      if (!vol) return
+      openDraft(
+        { kind: 'volume', id: vol.id },
+        {
+          id: vol.id,
+          label: vol.label || '',
+          name: vol.name || '',
+          summary: vol.summary || '',
+        },
+      )
+    },
+    [flushAutosave, openDraft],
+  )
+
+  const closeEdit = useCallback(async () => {
+    await flushAutosave()
+    clearDraftState()
+  }, [flushAutosave, clearDraftState])
 
   const handleCreate = useCallback(async () => {
     await flushAutosave()
     setError('')
     const cat = categoryRef.current
+
+    if (isOutlineCategory(cat)) {
+      const volumes = outlineRef.current.volumes || []
+      const next = {
+        id: createLocalId('vol'),
+        label: volumeLabelFromIndex(volumes.length),
+        name: '',
+        summary: '',
+      }
+      const nextVolumes = [...volumes, next]
+      try {
+        await updateProject(projectId, { volumes: nextVolumes })
+        setOutline((prev) => ({ ...prev, volumes: nextVolumes }))
+        openDraft(
+          { kind: 'volume', id: next.id },
+          {
+            id: next.id,
+            label: next.label,
+            name: '',
+            summary: '',
+          },
+        )
+      } catch (err) {
+        setError(getErrorMessage(err, '添加分卷失败'))
+      }
+      return
+    }
+
+    if (!isMemoryCategory(cat)) return
+
     const payload =
       cat === 'characters'
         ? {
@@ -230,53 +447,68 @@ export function useMemoryPage(projectId) {
             content: '',
             tags: [],
           }
+
     try {
       const created = await createMemoryEntry(projectId, cat, payload)
       setMemory((prev) => ({
         ...prev,
         [cat]: [...(prev[cat] || []), created],
       }))
-      selectEntry(cat, created)
+      openDraft(
+        { kind: 'memory', category: cat, id: created.id },
+        entryToDraft(cat, created),
+      )
     } catch (err) {
       setError(getErrorMessage(err, '新建设定失败'))
     }
-  }, [flushAutosave, projectId, selectEntry])
+  }, [flushAutosave, projectId, openDraft])
 
   const handleDelete = useCallback(
     async (entryIdArg) => {
-      const entryId = entryIdArg || selectedIdRef.current
       const cat = categoryRef.current
+      const entryId = entryIdArg || selectedIdRef.current
       if (!entryId) return
+
+      if (isOutlineCategory(cat) || editTargetRef.current?.kind === 'volume') {
+        const volumes = outlineRef.current.volumes || []
+        const target = volumes.find((v) => v.id === entryId)
+        const name = target?.name || target?.label || '该分卷'
+        if (!window.confirm(`确定删除「${name}」？此操作不可撤销。`)) return
+        const nextVolumes = volumes.filter((v) => v.id !== entryId)
+        setError('')
+        try {
+          await updateProject(projectId, { volumes: nextVolumes })
+          setOutline((prev) => ({ ...prev, volumes: nextVolumes }))
+          if (selectedIdRef.current === entryId) clearDraftState()
+        } catch (err) {
+          setError(getErrorMessage(err, '删除分卷失败'))
+        }
+        return
+      }
+
+      if (!isMemoryCategory(cat)) return
       const list = memory[cat] || []
       const target = list.find((item) => item.id === entryId)
-      const name =
-        target?.name ||
-        (entryId === selectedIdRef.current ? draftRef.current?.name : '') ||
-        '该条目'
+      const name = target?.name || '该条目'
       if (!window.confirm(`确定删除「${name}」？此操作不可撤销。`)) return
 
-      if (entryId !== selectedIdRef.current) {
-        await flushAutosave()
-      } else if (saveTimerRef.current) {
+      if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current)
         saveTimerRef.current = null
       }
       setError('')
       try {
         await deleteMemoryEntry(projectId, cat, entryId)
-        setMemory((prev) => {
-          const nextList = (prev[cat] || []).filter((item) => item.id !== entryId)
-          const next = { ...prev, [cat]: nextList }
-          if (entryId === selectedIdRef.current) {
-            selectEntry(cat, nextList[0] || null)
-          }
-          return next
-        })
+        setMemory((prev) => ({
+          ...prev,
+          [cat]: (prev[cat] || []).filter((item) => item.id !== entryId),
+        }))
+        if (selectedIdRef.current === entryId) clearDraftState()
       } catch (err) {
         setError(getErrorMessage(err, '删除设定失败'))
       }
     },
-    [flushAutosave, memory, projectId, selectEntry],
+    [memory, projectId, clearDraftState],
   )
 
   const handleSave = useCallback(async () => {
@@ -287,31 +519,55 @@ export function useMemoryPage(projectId) {
     await persistDraft({ silent: false })
   }, [persistDraft])
 
+  const updateMetaField = useCallback(
+    async (patch) => {
+      const next = { ...metaRef.current, ...patch }
+      setMeta(next)
+      setDirty(true)
+      dirtyRef.current = true
+      setSaving(true)
+      try {
+        await updateProject(projectId, {
+          name: (next.name || '').trim() || '未命名作品',
+          genre: (next.genre || '').trim(),
+        })
+        setDirty(false)
+        dirtyRef.current = false
+      } catch (err) {
+        setError(getErrorMessage(err, '保存项目信息失败'))
+      } finally {
+        setSaving(false)
+      }
+    },
+    [projectId],
+  )
+
   return {
     memory,
+    meta,
+    outline,
     category,
     categoryMeta,
     entries,
     selectedId,
+    editTarget,
     draft,
+    modalOpen: Boolean(editTarget && draft),
     loading,
     saving,
     dirty,
     error,
     setError,
     updateDraft,
+    updateMetaField,
     switchCategory,
-    switchEntry,
+    openEntryEdit,
+    openWorldviewHero,
+    openSynopsisEdit,
+    openVolumeEdit,
+    closeEdit,
     handleCreate,
     handleDelete,
     handleSave,
   }
-}
-
-function MEMORY_FIRST_NONEMPTY(memory) {
-  for (const key of ['characters', 'worldview', 'items', 'plot_points']) {
-    const list = memory[key] || []
-    if (list.length > 0) return { cat: key, entry: list[0] }
-  }
-  return null
 }

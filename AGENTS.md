@@ -138,8 +138,9 @@ AINovel/
 ### 5.3 记忆管理（memory_store）
 
 - 按项目维护 `memory.json`（设定数据）。
-- 顶层分类：`worldview`、`characters`、`items`、`plot_points`（**无**独立 `relationships`）。
+- 顶层分类：`worldview`、`characters`、`story_core`（**无**独立 `relationships`；已弃用 `items` / `plot_points`）。
 - 人物条目为 CharacterEntry：`name`、`profile`、`relationship: [{ type, target }]`（`type` 允许中文，原样存储）、`tags` 等；人物关系内嵌于人物。
+- 全本大纲（`synopsis` + `volumes`）存在 `outline.json`，由设定库「大纲」栏编辑，不进 `memory.json`。
 - 提供增删改查接口。
 - 记忆进化：当字数/章节达到节点时，调用模型从新增内容中提取设定，弹窗让用户确认后再写入。
 
@@ -174,7 +175,7 @@ SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录
 - `kind`：`quick_action` \| `skill`。
 - `system`：仅 `quick_action` 使用。
 - `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（MVP 不做自动选用，但字段落地并校验；两种 kind 均可手动调用）。
-- 正文：用户消息模板；常见变量如 `$worldview`、`$characters`（含内嵌关系）、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules`、`$chapter_rules` 等。
+- 正文：用户消息模板；常见变量如 `$worldview`、`$characters`（含内嵌关系）、`$story_core`、`$synopsis`、`$volumes`、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules`、`$chapter_rules` 等。
 
 示例（quick_action）：
 
@@ -223,6 +224,7 @@ $user_input
 ### 5.7 前端关键页面约定（与设计稿对齐）
 
 - **单页引导**：题材/内核/人物/大纲同一页；支持 AI 一键生成全部；卡片可模态展开编辑。
+- **设定库**：侧栏四类（世界观 / 故事内核 / 人物 / 全本大纲）+ 卡片工作区；点卡片展开编辑；布局约束见 `frontend/AGENT.md` §5。
 - **编辑页右侧**：AI Agent 对话栏；右上角为历史会话、新建对话、临时规则遮罩（非「设定/规则/技能」多 Tab）。
 - **快捷指令**：对话栏底栏按钮或 `/name`，与 SKILL.md 对应。
 - **全局设置**：首页右上角「设置」进入；侧栏三栏为**通用 / API / skill**（API = 原模型配置，skill = 原技能库管理）。详见 `docs/build/05-全局设置面板.md`。
@@ -303,9 +305,10 @@ cd frontend && npm run dev
 - **错误处理**：模型调用失败、文件读写失败要给前端清晰报错。
 - **从简原则**：能用 JSON 就不用数据库，能用自然语言规则就不用复杂规则引擎，能前端处理就不加后端接口。
 - **架构决策落盘（`docs/build/`）**：开发模块时同步写下「如何设计架构、如何搭建、如何划分职责、为何如此」的 Markdown，供后续 Agent / 开发者接手；不是 API 说明书，也不是复述代码。粒度：
-  - **核心模块或改动较大** → 单独一篇（如编辑页、生成链路、记忆体系）。
-  - **模块较简单、改动小，或同一次开发多个模块** → 合并为一篇（示例：`docs/build/04-前端路由布局与首页.md` 覆盖 4.1 + 4.2）。
-  - 文件名建议带阶段/主题前缀，文内标明对应计划章节、设计稿节点与关键代码路径。
+ - **核心模块或改动较大** → 单独一篇（如编辑页、生成链路、记忆体系）。
+ - **模块较简单、改动小，或同一次开发多个模块** → 合并为一篇（示例：`docs/build/04-前端路由布局与首页.md` 覆盖 4.1 + 4.2）。
+ - 文件名建议带阶段/主题前缀，文内标明对应计划章节、设计稿节点与关键代码路径。
+- **迭代/重构过程文档（`docs/changes/`）**：重大重构、IA 变更等写在此处，文件名前缀用日期（如 `260804-设定库新IA与卡片工作区.md`），避免与 `docs/build/` 初期架构笔记混写。
 
 ---
 

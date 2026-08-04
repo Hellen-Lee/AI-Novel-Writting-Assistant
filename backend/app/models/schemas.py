@@ -162,7 +162,7 @@ class ChapterDetail(BaseModel):
 
 
 class MemoryEntry(BaseModel):
-    """Generic memory item for worldview / items / plot_points."""
+    """Generic memory item for worldview / story_core."""
 
     id: str = ""
     name: str = Field(min_length=1)
@@ -192,8 +192,7 @@ class CharacterEntry(BaseModel):
 class ProjectMemory(BaseModel):
     worldview: list[MemoryEntry] = Field(default_factory=list)
     characters: list[CharacterEntry] = Field(default_factory=list)
-    items: list[MemoryEntry] = Field(default_factory=list)
-    plot_points: list[MemoryEntry] = Field(default_factory=list)
+    story_core: list[MemoryEntry] = Field(default_factory=list)
 
 
 class MemoryEntryCreateRequest(BaseModel):

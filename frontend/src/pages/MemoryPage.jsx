@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom'
+import { CardWorkspace } from '../components/memory/CardWorkspace'
 import { CategorySidebar } from '../components/memory/CategorySidebar'
-import { EntryDetail } from '../components/memory/EntryDetail'
-import { EntryList } from '../components/memory/EntryList'
+import { CategoryToolbar } from '../components/memory/CategoryToolbar'
+import { EntryEditModal } from '../components/memory/EntryEditModal'
 import { useMemoryPage } from '../components/memory/useMemoryPage'
 import './MemoryPage.css'
 
@@ -10,19 +11,27 @@ export default function MemoryPage() {
   const { projectId } = useParams()
   const {
     memory,
+    meta,
+    outline,
     category,
     categoryMeta,
-    entries,
     selectedId,
+    editTarget,
     draft,
+    modalOpen,
     loading,
     saving,
     dirty,
     error,
     setError,
     updateDraft,
+    updateMetaField,
     switchCategory,
-    switchEntry,
+    openEntryEdit,
+    openWorldviewHero,
+    openSynopsisEdit,
+    openVolumeEdit,
+    closeEdit,
     handleCreate,
     handleDelete,
     handleSave,
@@ -40,6 +49,7 @@ export default function MemoryPage() {
     <div className="memory-page">
       <CategorySidebar
         memory={memory}
+        outline={outline}
         activeCategory={category}
         onSelect={switchCategory}
       />
@@ -54,28 +64,43 @@ export default function MemoryPage() {
           </div>
         ) : null}
 
-        <div className="memory-page__panes">
-          <EntryList
-            categoryLabel={categoryMeta.label}
+        <CategoryToolbar
+          category={category}
+          categoryMeta={categoryMeta}
+          memory={memory}
+          outline={outline}
+          onCreate={handleCreate}
+        />
+
+        <div className="memory-page__cards">
+          <CardWorkspace
             category={category}
-            entries={entries}
+            memory={memory}
+            meta={meta}
+            outline={outline}
             selectedId={selectedId}
-            onSelect={switchEntry}
-            onCreate={handleCreate}
-            onDelete={handleDelete}
-          />
-          <EntryDetail
-            category={category}
-            categoryLabel={categoryMeta.label}
-            draft={draft}
-            saving={saving}
-            dirty={dirty}
-            onDraftChange={updateDraft}
-            onSave={handleSave}
-            onDelete={() => handleDelete(selectedId)}
+            onOpenEntry={openEntryEdit}
+            onOpenHero={openWorldviewHero}
+            onOpenSynopsis={openSynopsisEdit}
+            onOpenVolume={openVolumeEdit}
+            onDeleteEntry={handleDelete}
+            onDeleteVolume={handleDelete}
+            onAddVolume={handleCreate}
+            onSelectGenre={(genre) => updateMetaField({ genre })}
           />
         </div>
       </div>
+
+      <EntryEditModal
+        open={modalOpen}
+        editTarget={editTarget}
+        draft={draft}
+        saving={saving}
+        dirty={dirty}
+        onDraftChange={updateDraft}
+        onSave={handleSave}
+        onClose={closeEdit}
+      />
     </div>
   )
 }

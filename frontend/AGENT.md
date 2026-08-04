@@ -67,11 +67,24 @@ export function AgentPanel() {
 ## 4. 结构重构约定
 
 - 纯结构重构时保持 `className`、文案、API 契约与交互语义不变。
-- 新增页面或改动较大时，同步更新 `docs/build/` 架构笔记（见根目录 AGENTS.md §8）。
+- 新增页面或改动较大时：模块架构笔记可写 `docs/build/`（见根目录 AGENTS.md §8）；**迭代/重构过程文档**写 `docs/changes/`，文件名前缀用日期（如 `260804-xxx.md`）。
 
 ---
 
-## 5. 其他约定（后续可补充）
+## 5. 设定库卡片布局（硬约束）
+
+适用于 `MemoryPage` / `components/memory/` 卡片工作区：
+
+1. **禁止卡片固定宽度**（如 `width: 584px`）。卡片一律 `width: 100%`，网格用 `minmax(0, 1fr)` 自适应容器。
+2. **同行最多两张同类型卡片**：双列网格 `repeat(2, minmax(0, 1fr))`；容器过窄（`max-width: 960px`）降为单列。设计为单列的分类（`story_core`、`outline`、世界观主卡）保持纵向堆叠，不强制凑双列。
+3. **高度**：
+   - CSS 变量：`--memory-card-char-height: 328px`；`--memory-card-default-height: 160px`；`--memory-card-max-height: 328px`。
+   - `story_core` / `characters` / `outline` 卡片：`min-height` = 默认高度，`max-height` = 上限，正文区 `overflow-y: auto`，超出不再撑高。
+   - `worldview` 卡片（含主卡与次卡）**不设** `max-height`，随内容撑开。
+
+---
+
+## 6. 其他约定（后续可补充）
 
 - 优先复用已有 `components/ui`（Button、Modal、Badge 等），避免平行再造一套控件。
 - 模型调用与提示词不在前端硬编码；生成走后端 skill / generate 接口。

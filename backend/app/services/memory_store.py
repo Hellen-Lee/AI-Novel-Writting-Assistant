@@ -13,12 +13,11 @@ from app.config import DATA_DIR
 MEMORY_CATEGORIES = (
     "worldview",
     "characters",
-    "items",
-    "plot_points",
+    "story_core",
 )
 
-# Deprecated top-level key; stripped on load, rejected on strict normalize/save.
-_LEGACY_CATEGORIES = frozenset({"relationships"})
+# Deprecated top-level keys; stripped on load, rejected on strict normalize/save.
+_LEGACY_CATEGORIES = frozenset({"relationships", "items", "plot_points"})
 
 DEFAULT_MEMORY: dict[str, list[dict[str, Any]]] = {
     category: [] for category in MEMORY_CATEGORIES
@@ -223,8 +222,10 @@ def load_memory(project_id: str) -> dict[str, list[dict[str, Any]]]:
                     continue
         normalized = cleaned
 
-    # Persist migration when dropping legacy keys or reshaping characters.
+    # Persist migration when dropping legacy keys, adding story_core, or reshaping characters.
     needs_rewrite = bool(_LEGACY_CATEGORIES.intersection(data.keys()))
+    if "story_core" not in data:
+        needs_rewrite = True
     if not needs_rewrite:
         for item in data.get("characters") or []:
             if not isinstance(item, dict):

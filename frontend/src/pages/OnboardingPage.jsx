@@ -213,6 +213,19 @@ export default function OnboardingPage() {
       if (!projectId) throw new Error('创建成功但未返回项目 ID')
 
       if (!skipRich) {
+        const storyCoreEntries = [
+          { key: 'theme', name: '核心主题', value: core.theme },
+          { key: 'conflict', name: '核心冲突', value: core.conflict },
+          { key: 'plotline', name: '故事主线', value: core.plotline },
+        ]
+          .filter((item) => (item.value || '').trim())
+          .map((item) => ({
+            id: createLocalId(item.key),
+            name: item.name,
+            content: item.value.trim(),
+            tags: [],
+          }))
+
         const memoryPayload = {
           worldview: worldview.trim()
             ? [
@@ -231,8 +244,7 @@ export default function OnboardingPage() {
             relationship: c.relationship || [],
             tags: c.role ? [c.role] : [],
           })),
-          items: [],
-          plot_points: [],
+          story_core: storyCoreEntries,
         }
         await putMemory(projectId, memoryPayload)
 

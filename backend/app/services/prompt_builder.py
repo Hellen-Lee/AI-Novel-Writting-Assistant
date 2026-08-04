@@ -70,6 +70,24 @@ def _format_characters(entries: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _format_volumes(volumes: list[Any]) -> str:
+    if not volumes:
+        return "（无）"
+    lines: list[str] = []
+    for vol in volumes:
+        if not isinstance(vol, dict):
+            continue
+        label = str(vol.get("label") or "").strip()
+        name = str(vol.get("name") or "").strip()
+        summary = str(vol.get("summary") or "").strip()
+        title = " · ".join(p for p in (label, name) if p) or "未命名分卷"
+        if summary:
+            lines.append(f"- {title}：{summary}")
+        else:
+            lines.append(f"- {title}")
+    return "\n".join(lines) if lines else "（无）"
+
+
 def _format_previous_chapters(
     project_id: str,
     *,
@@ -119,8 +137,9 @@ def build_context(
     style_preference = ""
     worldview = "（无）"
     characters = "（无）"
-    items = "（无）"
-    plot_points = "（无）"
+    story_core = "（无）"
+    synopsis = "（无）"
+    volumes = "（无）"
     previous_chapters = "（无）"
 
     if project_id and project_store.project_exists(project_id):
@@ -131,11 +150,15 @@ def build_context(
         memory = memory_store.load_memory(project_id)
         worldview = _format_memory_entries(memory.get("worldview") or [])
         characters = _format_characters(memory.get("characters") or [])
-        items = _format_memory_entries(memory.get("items") or [])
-        plot_points = _format_memory_entries(memory.get("plot_points") or [])
+        story_core = _format_memory_entries(memory.get("story_core") or [])
         previous_chapters = _format_previous_chapters(
             project_id, chapter_id=chapter_id, limit=3
         )
+
+        outline = project_store.load_outline(project_id)
+        synopsis_text = str(outline.get("synopsis") or "").strip()
+        synopsis = synopsis_text or "（无）"
+        volumes = _format_volumes(outline.get("volumes") or [])
 
         if not current_content and chapter_id:
             try:
@@ -150,9 +173,12 @@ def build_context(
         "chapter_rules": chapter_rules or "（无）",
         "worldview": worldview,
         "characters": characters,
-        "items": items,
-        "plot_points": plot_points,
-        # Deprecated: kept so old templates with $relationships do not leave the placeholder.
+        "story_core": story_core,
+        "synopsis": synopsis,
+        "volumes": volumes,
+        # Deprecated aliases: old custom templates keep rendering instead of leaving $placeholders.
+        "items": "（无）",
+        "plot_points": "（无）",
         "relationships": "（无）",
         "previous_chapters": previous_chapters,
         "current_content": current_content or "（无）",

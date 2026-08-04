@@ -1,10 +1,13 @@
 import { MEMORY_CATEGORIES } from './constants'
 
-export function CategorySidebar({ memory, activeCategory, onSelect }) {
-  const total = MEMORY_CATEGORIES.reduce(
+export function CategorySidebar({ memory, outline, activeCategory, onSelect }) {
+  const memoryTotal = MEMORY_CATEGORIES.filter((c) => !c.isOutline).reduce(
     (sum, cat) => sum + (memory[cat.key]?.length || 0),
     0,
   )
+  const outlineCount =
+    (outline?.synopsis?.trim() ? 1 : 0) + (outline?.volumes?.length || 0)
+  const total = memoryTotal + outlineCount
 
   return (
     <aside className="memory-page__sidebar">
@@ -14,7 +17,9 @@ export function CategorySidebar({ memory, activeCategory, onSelect }) {
 
       <nav className="memory-page__cats" aria-label="设定分类">
         {MEMORY_CATEGORIES.map((cat) => {
-          const count = memory[cat.key]?.length || 0
+          const count = cat.isOutline
+            ? outlineCount
+            : memory[cat.key]?.length || 0
           const active = cat.key === activeCategory
           return (
             <button

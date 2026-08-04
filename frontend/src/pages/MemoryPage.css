@@ -13,6 +13,14 @@
   font-size: var(--text-body-md);
 }
 
+/* 设定库卡片高度 Token（设计稿：人物 328；内核/大纲默认 160、上限 328） */
+.memory-page {
+  --memory-card-char-height: 328px;
+  --memory-card-default-height: 160px;
+  --memory-card-max-height: 328px;
+  --memory-card-gap: 12px;
+}
+
 /* —— 左栏：分类 —— */
 .memory-page__sidebar {
   display: flex;
@@ -65,6 +73,7 @@
 
 .memory-page__cat.is-active {
   background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
 }
 
 .memory-page__cat-key {
@@ -73,10 +82,18 @@
   font-family: var(--font-mono);
 }
 
+.memory-page__cat.is-active .memory-page__cat-key {
+  color: var(--color-primary);
+}
+
 .memory-page__cat-label {
   font-size: 13px;
   font-weight: 500;
   color: var(--color-text-primary);
+}
+
+.memory-page__cat.is-active .memory-page__cat-label {
+  font-weight: 600;
 }
 
 .memory-page__rail-hint {
@@ -134,48 +151,57 @@
   padding: 0;
 }
 
-.memory-page__panes {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-}
-
-/* —— 中栏：条目列表 —— */
-.memory-page__list {
-  display: flex;
-  flex-direction: column;
-  width: 360px;
-  flex-shrink: 0;
-  gap: 12px;
-  padding: 16px 14px;
-  background: var(--color-bg-surface);
-  border-right: 1px solid var(--color-border-default);
-  min-height: 0;
-}
-
-.memory-page__list-head {
+.memory-page__toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px 0;
   flex-shrink: 0;
 }
 
-.memory-page__list-head h2 {
+.memory-page__toolbar-titles {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.memory-page__toolbar-titles h2 {
   margin: 0;
-  font-family: var(--font-sans);
-  font-size: 13px;
+  font-family: var(--font-display);
+  font-size: 20px;
   font-weight: 600;
   color: var(--color-text-primary);
+}
+
+.memory-page__toolbar-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.memory-page__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.memory-page__toolbar-count {
+  font-size: 12px;
+  color: var(--color-text-muted);
 }
 
 .memory-page__add-btn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  height: 28px;
-  padding: 0 10px;
+  height: 32px;
+  padding: 0 14px;
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   background: var(--color-primary);
   color: var(--color-text-inverse);
   font-size: var(--text-body-sm);
@@ -186,60 +212,107 @@
   background: var(--color-primary-hover);
 }
 
-.memory-page__entries {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+.memory-page__cards {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  padding: 20px 24px 24px;
 }
 
-.memory-page__list-empty {
+.memory-page__empty {
   margin: 0;
-  padding: 8px 4px;
+  padding: 24px 4px;
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   line-height: 1.5;
 }
 
-.memory-page__entry {
-  position: relative;
-  display: flex;
-  align-items: stretch;
-  border-radius: var(--radius-md);
-}
-
-.memory-page__entry.is-active {
-  background: var(--color-primary-soft);
-}
-
-.memory-page__entry:not(.is-active):hover {
-  background: var(--color-bg-page);
-}
-
-.memory-page__entry-main {
-  flex: 1;
-  min-width: 0;
-  text-align: left;
-  padding: 12px 36px 12px 14px;
-  border: none;
-  border-radius: var(--radius-md);
-  background: transparent;
+.memory-workspace {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
+  width: 100%;
 }
 
-.memory-page__entry-head {
+.memory-workspace--stack {
+  gap: 16px;
+}
+
+.memory-workspace--characters {
+  gap: var(--memory-card-gap);
+}
+
+/* 同行最多 2 卡；宽度自适应，禁止固定 px 宽 */
+.memory-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--memory-card-gap);
+  width: 100%;
+}
+
+@media (max-width: 960px) {
+  .memory-card-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* —— 卡片通用 —— */
+.memory-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  box-shadow: 0 2px 8px rgba(26, 46, 40, 0.06);
+}
+
+.memory-card.is-selected {
+  border-color: var(--color-primary);
+  border-width: 2px;
+}
+
+.memory-card--character {
+  min-height: var(--memory-card-char-height);
+  max-height: var(--memory-card-char-height);
+  overflow: hidden;
+}
+
+.memory-card--constrained {
+  min-height: var(--memory-card-default-height);
+  max-height: var(--memory-card-max-height);
+  overflow: hidden;
+}
+
+.memory-card--free,
+.memory-card--hero {
+  max-height: none;
+}
+
+.memory-card__head {
   display: flex;
   align-items: center;
-  /* justify-content: space-between; */
-  gap: 8px;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
-.memory-page__entry-name {
-  font-size: var(--text-body-md);
+.memory-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.memory-card__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 18px;
   font-weight: 600;
   color: var(--color-text-primary);
   overflow: hidden;
@@ -247,146 +320,240 @@
   white-space: nowrap;
 }
 
-.memory-page__entry:not(.is-active) .memory-page__entry-name {
-  font-weight: 500;
+.memory-card--constrained .memory-card__title {
+  font-size: 16px;
 }
 
-.memory-page__entry-role {
+.memory-card__role {
   flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
   font-size: var(--text-caption);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.memory-card__subtitle {
+  font-size: 12px;
   color: var(--color-text-muted);
-}
-
-.memory-page__entry.is-active .memory-page__entry-role {
-  color: var(--color-primary);
-}
-
-.memory-page__entry-snippet {
-  margin: 0;
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  line-height: 18px;
-  white-space: pre-line;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.memory-page__entry-delete {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  transform: translateY(-50%);
-  display: none;
+.memory-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.memory-card__icon-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 28px;
   height: 28px;
   border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-bg-surface);
+  background: transparent;
   color: var(--color-text-muted);
 }
 
-.memory-page__entry:hover .memory-page__entry-delete,
-.memory-page__entry.is-active .memory-page__entry-delete {
-  display: inline-flex;
+.memory-card__icon-btn:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
 }
 
-.memory-page__entry-delete:hover {
-  color: var(--color-error);
-  background: #fdecea;
-}
-
-/* —— 右栏：详情编辑 —— */
-.memory-page__detail {
+.memory-card__body {
   flex: 1;
+  min-height: 0;
+}
+
+.memory-card__body--split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 720px) {
+  .memory-card__body--split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.memory-card__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   min-width: 0;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 20px 24px;
-  overflow: auto;
 }
 
-.memory-page__detail--empty {
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text-secondary);
-  font-size: var(--text-body-md);
-}
-
-.memory-page__detail-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-md);
-  flex-shrink: 0;
-}
-
-.memory-page__detail-titles {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-width: 0;
-}
-
-.memory-page__detail-meta {
-  font-family: var(--font-mono);
-  font-size: var(--text-caption);
-  font-weight: 500;
+.memory-card__label {
+  font-size: 11px;
+  font-weight: 600;
   color: var(--color-text-muted);
 }
 
-.memory-page__detail-titles h1 {
+.memory-card__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-page);
+}
+
+.memory-card--constrained > .memory-card__scroll {
+  flex: 1;
+}
+
+.memory-card__text {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 600;
-  color: var(--color-text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--color-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
-.memory-page__detail-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-
-.memory-page__detail-updated {
+.memory-card__empty {
+  margin: 0;
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
-.memory-page__icon-danger {
+.memory-card__rel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.memory-card__rel-add {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-surface);
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: var(--text-body-sm);
+  font-weight: 500;
+  padding: 0;
+}
+
+.memory-card__rel-add:hover {
+  opacity: 0.85;
+}
+
+.memory-card__rel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.memory-card__rel-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memory-card__rel-type {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-caption);
+  font-weight: 600;
+}
+
+.memory-card__rel-target {
+  font-size: 12px;
   color: var(--color-text-secondary);
 }
 
-.memory-page__icon-danger:hover {
-  color: var(--color-error);
-  border-color: #f5c6c2;
-  background: #fdecea;
+/* 世界观主卡 */
+.memory-card--hero {
+  padding: 20px;
+  gap: 12px;
 }
 
-.memory-page__detail-body {
+.memory-card__hero-fields {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: 12px;
+}
+
+.memory-card__readonly-input {
   width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.memory-card__hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.memory-card__expand-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.memory-card__preview {
+  width: 100%;
+  min-height: 120px;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.memory-page__genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.memory-page__genre-chip {
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font-size: 12px;
+}
+
+.memory-page__genre-chip.is-active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-weight: 600;
 }
 
 .memory-page__field {
@@ -395,7 +562,8 @@
   gap: 6px;
 }
 
-.memory-page__field label {
+.memory-page__field label,
+.memory-page__field-label {
   font-size: var(--text-body-sm);
   font-weight: 600;
   color: var(--color-text-primary);
@@ -428,8 +596,10 @@
   box-shadow: 0 0 0 2px rgba(45, 90, 74, 0.12);
 }
 
-.memory-page__field textarea {
-  min-height: 100px;
+.memory-page__modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
 }
 
 .memory-page__rel-rows {
@@ -504,12 +674,33 @@
   opacity: 0.85;
 }
 
-@media (max-width: 960px) {
-  .memory-page__list {
-    width: 280px;
-  }
+.memory-page__add-volume {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
 
-  .memory-page__detail-titles h1 {
-    font-size: 22px;
-  }
+.memory-page__add-volume:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.memory-page__add-volume-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
 }
