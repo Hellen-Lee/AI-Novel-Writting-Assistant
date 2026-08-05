@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react'
 import { fetchProjectRuleSettings } from '../service/projectSettings'
 
-export function useAgentRules({ projectId, panelMode }) {
+/** 临时规则 + 只读全局规则/文风；由 EditorPage 持有，供规则侧栏与生成链路共用 */
+export function useAgentRules({ projectId, active }) {
   const [tempRules, setTempRules] = useState('')
   const [rulesDraft, setRulesDraft] = useState('')
   const [globalRules, setGlobalRules] = useState('')
   const [stylePreference, setStylePreference] = useState('')
 
   useEffect(() => {
-    if (panelMode !== 'rules' || !projectId) return undefined
+    if (!active || !projectId) return undefined
     let cancelled = false
     fetchProjectRuleSettings(projectId)
       .then((settings) => {
@@ -24,7 +25,7 @@ export function useAgentRules({ projectId, panelMode }) {
     return () => {
       cancelled = true
     }
-  }, [panelMode, projectId])
+  }, [active, projectId])
 
   const openRules = () => {
     setRulesDraft(tempRules)

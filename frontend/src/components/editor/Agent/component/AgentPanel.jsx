@@ -1,8 +1,8 @@
 import {
   Bot,
-  FilePen,
   History,
   MessageSquarePlus,
+  PanelRightClose,
 } from 'lucide-react'
 import { useAgentPanel } from '../hook/useAgentPanel'
 import '../styles/AgentPanel.css'
@@ -10,16 +10,17 @@ import { ChatPanel } from './chatpanel/ChatPanel'
 import { InputBar } from './inputbar/InputBar'
 import { HistoryPanel } from './shell/HistoryPanel'
 import { QuickActions } from './shell/QuickActions'
-import { RulesPanel } from './shell/RulesPanel'
 
 /**
  * 右侧 AI Agent 栏（仅界面；生成走后续链路）
- * 设计对照：NMi2X Sidebar/Agent、C88ki / Ts9tL Overlay/TempRules
+ * 设计对照：d7ubn Sidebar/Agent；历史 UI 壳 OckRz
  */
 export function AgentPanel({
   projectId,
+  tempRules = '',
   onApplyDraft,
   onDiscardDraft,
+  onCollapse,
   draft = null,
 }) {
   const {
@@ -29,12 +30,6 @@ export function AgentPanel({
     activeSessionId,
     activeSession,
     messagesEndRef,
-    rulesId,
-    tempRules,
-    rulesDraft,
-    setRulesDraft,
-    globalRules,
-    stylePreference,
     selectedSkill,
     input,
     setInput,
@@ -51,13 +46,9 @@ export function AgentPanel({
     handleStop,
     handleRetry,
     handleQuickAction,
-    openRules,
-    handleRulesBack,
-    handleRulesClear,
-    handleRulesSave,
     setModelOpen,
     setModelId,
-  } = useAgentPanel({ projectId })
+  } = useAgentPanel({ projectId, tempRules })
 
   return (
     <aside className="agent-panel">
@@ -65,11 +56,6 @@ export function AgentPanel({
         <div className="agent-panel__head-left">
           <Bot size={16} strokeWidth={2} aria-hidden />
           <h2>AI 对话</h2>
-          {tempRules.trim() ? (
-            <span className="agent-panel__rules-badge" title="已设置临时规则">
-              规则
-            </span>
-          ) : null}
         </div>
         <div className="agent-panel__head-actions">
           <button
@@ -94,18 +80,12 @@ export function AgentPanel({
           </button>
           <button
             type="button"
-            className={`agent-panel__icon-btn${panelMode === 'rules' ? ' is-active' : ''}`}
-            aria-label="临时规则"
-            title="临时规则"
-            onClick={() => {
-              if (panelMode === 'rules') {
-                handleRulesBack()
-              } else {
-                openRules()
-              }
-            }}
+            className="agent-panel__icon-btn"
+            aria-label="收起侧栏"
+            title="收起"
+            onClick={onCollapse}
           >
-            <FilePen size={15} />
+            <PanelRightClose size={15} />
           </button>
         </div>
       </header>
@@ -116,17 +96,9 @@ export function AgentPanel({
           activeSessionId={activeSessionId}
           onClose={() => setPanelMode('chat')}
           onSelectSession={handleSelectSession}
-        />
-      ) : panelMode === 'rules' ? (
-        <RulesPanel
-          rulesId={rulesId}
-          globalRules={globalRules}
-          stylePreference={stylePreference}
-          rulesDraft={rulesDraft}
-          onRulesDraftChange={setRulesDraft}
-          onBack={handleRulesBack}
-          onClear={handleRulesClear}
-          onSave={handleRulesSave}
+          onNewChat={handleNewChat}
+          onCollapse={onCollapse}
+          onShowNotice={showNotice}
         />
       ) : (
         <>

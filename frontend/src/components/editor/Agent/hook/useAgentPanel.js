@@ -1,18 +1,16 @@
-import { useEffect, useId, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MODEL_OPTIONS } from '../utils/constants'
 import { parseCommand } from '../utils/parseCommand'
 import { useAgentGenerate } from './useAgentGenerate'
-import { useAgentRules } from './useAgentRules'
 import { useAgentSessions } from './useAgentSessions'
 
-export function useAgentPanel({ projectId }) {
-  const [panelMode, setPanelMode] = useState('chat') // chat | history | rules
+export function useAgentPanel({ projectId, tempRules = '' }) {
+  const [panelMode, setPanelMode] = useState('chat') // chat | history
   const [selectedSkill, setSelectedSkill] = useState('continue')
   const [input, setInput] = useState('')
   const [modelId, setModelId] = useState(MODEL_OPTIONS[0].id)
   const [modelOpen, setModelOpen] = useState(false)
   const messagesEndRef = useRef(null)
-  const rulesId = useId()
 
   const sessionsApi = useAgentSessions()
   const {
@@ -23,18 +21,6 @@ export function useAgentPanel({ projectId }) {
     handleNewChat: newChat,
     handleSelectSession: selectSession,
   } = sessionsApi
-
-  const rulesApi = useAgentRules({ projectId, panelMode })
-  const {
-    tempRules,
-    rulesDraft,
-    setRulesDraft,
-    globalRules,
-    stylePreference,
-    openRules: prepareRules,
-    handleRulesClear,
-    handleRulesSave: saveRules,
-  } = rulesApi
 
   const generateApi = useAgentGenerate({
     projectId,
@@ -96,20 +82,6 @@ export function useAgentPanel({ projectId }) {
     handleTriggerGenerate(skillId, userText)
   }
 
-  const openRules = () => {
-    prepareRules()
-    setPanelMode('rules')
-  }
-
-  const handleRulesBack = () => {
-    setPanelMode('chat')
-  }
-
-  const handleRulesSave = () => {
-    saveRules()
-    setPanelMode('chat')
-  }
-
   const handleQuickAction = (id, label) => {
     setSelectedSkill(id)
     handleTriggerGenerate(id, `请${label}`)
@@ -122,12 +94,6 @@ export function useAgentPanel({ projectId }) {
     activeSessionId,
     activeSession,
     messagesEndRef,
-    rulesId,
-    tempRules,
-    rulesDraft,
-    setRulesDraft,
-    globalRules,
-    stylePreference,
     selectedSkill,
     input,
     setInput,
@@ -144,10 +110,6 @@ export function useAgentPanel({ projectId }) {
     handleStop,
     handleRetry,
     handleQuickAction,
-    openRules,
-    handleRulesBack,
-    handleRulesClear,
-    handleRulesSave,
     setModelOpen,
     setModelId,
   }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoaderCircle, Plus, Sparkles } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
@@ -8,7 +8,9 @@ import {
   listChapters,
   updateChapter,
 } from '../api/chapters'
-import { AgentPanel } from '../components/editor/Agent'
+import { EditorRightRail } from '../components/editor/EditorRightRail'
+import { EditorToolbar } from '../components/editor/EditorToolbar'
+import { useAgentRules } from '../components/editor/Agent/hook/useAgentRules'
 import { Button } from '../components/ui/Button'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
@@ -77,6 +79,8 @@ function ChapterSidebar({
 function ChapterMain({
   error,
   onDismissError,
+  notice,
+  onDismissNotice,
   activeChapterId,
   activeChapter,
   loadingList,
@@ -95,13 +99,23 @@ function ChapterMain({
   onApplyDraft,
   onRewriteDraft,
   onDiscardDraft,
+  toolbar,
 }) {
   return (
     <section className="editor-page__main">
+      {toolbar}
       {error ? (
         <div className="editor-page__error" role="alert">
           {error}
           <button type="button" onClick={onDismissError}>
+            关闭
+          </button>
+        </div>
+      ) : null}
+      {notice ? (
+        <div className="editor-page__notice" role="status">
+          {notice}
+          <button type="button" onClick={onDismissNotice}>
             关闭
           </button>
         </div>
@@ -226,14 +240,15 @@ function ChapterMain({
 }
 
 /**
- * 编辑页三栏：章节列表 · 正文编辑 · AI Agent
- * 设计对照：Explore/Editor-v3 (NMi2X)、Review/Screen/Editor-v2 (N0lDh)
+ * 编辑页三栏：章节列表 · 正文编辑 · 右栏（Agent / 规则）
+ * 设计对照：d7ubn Editor-Toolbar、RvfPH Editor-Rules、OckRz Agent-History
  * Agent 生成链路属 §5，本阶段只搭界面与章节读写。
  */
 export default function EditorPage() {
   const { projectId, chapterId: routeChapterId } = useParams()
   const navigate = useNavigate()
   const { setSaveStatus } = useEditorChrome()
+  const rulesId = useId()
 
   const [chapters, setChapters] = useState([])
   const [activeChapterId, setActiveChapterId] = useState(null)
@@ -245,7 +260,21 @@ export default function EditorPage() {
   const [saving, setSaving] = useState(false)
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [aiDraft, setAiDraft] = useState(null)
+  const [rightPanel, setRightPanel] = useState({ open: true, mode: 'agent' })
+
+  const rulesActive = rightPanel.open && rightPanel.mode === 'rules'
+  const {
+    tempRules,
+    rulesDraft,
+    setRulesDraft,
+    globalRules,
+    stylePreference,
+    openRules,
+    handleRulesClear,
+    handleRulesSave,
+  } = useAgentRules({ projectId, active: rulesActive })
 
   const dirty = useMemo(
     () =>
@@ -491,6 +520,32 @@ export default function EditorPage() {
     setAiDraft(null)
   }
 
+  const handleSelectAgent = () => {
+    setRightPanel({ open: true, mode: 'agent' })
+  }
+
+  const handleSelectRules = () => {
+    openRules()
+    setRightPanel({ open: true, mode: 'rules' })
+  }
+
+  const handleExport = () => {
+    setNotice('导出功能待后续版本接入。')
+  }
+
+  const handleCollapseRail = () => {
+    setRightPanel((prev) => ({ ...prev, open: false }))
+  }
+
+  const handleRulesClose = () => {
+    setRightPanel({ open: true, mode: 'agent' })
+  }
+
+  const handleRulesSaveAndClose = () => {
+    handleRulesSave()
+    setRightPanel({ open: true, mode: 'agent' })
+  }
+
   return (
     <div className="editor-page">
       <ChapterSidebar
@@ -505,6 +560,8 @@ export default function EditorPage() {
       <ChapterMain
         error={error}
         onDismissError={() => setError('')}
+        notice={notice}
+        onDismissNotice={() => setNotice('')}
         activeChapterId={activeChapterId}
         activeChapter={activeChapter}
         loadingList={loadingList}
@@ -525,12 +582,34 @@ export default function EditorPage() {
           setAiDraft((d) => (d ? { ...d, status: 'ready' } : d))
         }
         onDiscardDraft={handleDiscardDraft}
+        toolbar={
+          <EditorToolbar
+            activeMode={rightPanel.mode}
+            panelOpen={rightPanel.open}
+            hasTempRules={Boolean(tempRules.trim())}
+            onSelectAgent={handleSelectAgent}
+            onSelectRules={handleSelectRules}
+            onExport={handleExport}
+          />
+        }
       />
-      <AgentPanel
+      <EditorRightRail
+        open={rightPanel.open}
+        mode={rightPanel.mode}
         projectId={projectId}
+        tempRules={tempRules}
         draft={aiDraft}
         onApplyDraft={handleApplyDraft}
         onDiscardDraft={handleDiscardDraft}
+        onCollapse={handleCollapseRail}
+        rulesId={rulesId}
+        globalRules={globalRules}
+        stylePreference={stylePreference}
+        rulesDraft={rulesDraft}
+        onRulesDraftChange={setRulesDraft}
+        onRulesClear={handleRulesClear}
+        onRulesSave={handleRulesSaveAndClose}
+        onRulesClose={handleRulesClose}
       />
     </div>
   )

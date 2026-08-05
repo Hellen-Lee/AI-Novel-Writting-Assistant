@@ -10,7 +10,7 @@
 - 推荐形态：
 
 ```jsx
-function RulesPanel({ ... }) {
+function HistoryPanel({ ... }) {
   return (/* ... */)
 }
 
@@ -19,7 +19,7 @@ export function AgentPanel() {
   return (
     <aside>
       <header>...</header>
-      {panelMode === 'rules' ? <RulesPanel ... /> : <ChatPanel ... />}
+      {panelMode === 'history' ? <HistoryPanel ... /> : <ChatPanel ... />}
     </aside>
   )
 }
@@ -38,22 +38,24 @@ export function AgentPanel() {
   - **components/<域>/**：可复用的展示块（如 `editor/`、`onboarding/`）。
   - **api / utils / stores**：无 UI 的请求、纯函数、跨页状态。
 
-### Agent 域分层（`components/editor/Agent/`）
+### 编辑页右栏与 Agent 域（`components/editor/`）
 
-编辑页右侧 Agent 栏已按域拆目录，后续扩展（生成链路、会话、规则）优先落在对应层，避免再堆回单文件：
+页面级工具栏与右栏编排在 `editor/` 根下；Agent 对话域仍按子目录拆分：
 
-| 目录 | 职责 |
+| 路径 | 职责 |
 | --- | --- |
-| `component/` | UI：`AgentPanel` 编排；`shell/`（遮罩与快捷指令）；`chatpanel/`；`inputbar/` |
-| `hook/` | 会话 / 规则 / 生成等 React 状态与编排（`useAgentPanel` 组合） |
-| `service/` | Agent 域数据链路（封装 `api/`、占位/真实 generate）；不依赖 React |
-| `utils/` | 纯函数与常量 |
-| `index.jsx` | 唯一对外出口：`export { AgentPanel }` |
+| `EditorToolbar.jsx` | 编辑区右上角：Agent 对话 / 规则 / 导出（占位） |
+| `EditorRightRail.jsx` | 按 `rightPanel.mode` 展示 Agent 或创作规则侧栏 |
+| `Agent/component/` | UI：`AgentPanel` 编排；`shell/`（历史壳、规则侧栏、快捷指令）；`chatpanel/`；`inputbar/` |
+| `Agent/hook/` | 会话 / 生成（`useAgentPanel`）；`useAgentRules` 由 **EditorPage** 调用并上提 `tempRules` |
+| `Agent/service/` | Agent 域数据链路（封装 `api/`、占位/真实 generate）；不依赖 React |
+| `Agent/utils/` | 纯函数与常量 |
+| `Agent/index.jsx` | Agent 域出口：`export { AgentPanel }`（页面经 `EditorRightRail` 间接使用） |
 
-- 页面只 `import { AgentPanel } from '../components/editor/Agent'`。
+- 页面编排：`EditorPage` 持有 `rightPanel` + `useAgentRules`，组合 `EditorToolbar` 与 `EditorRightRail`。
 - 快捷指令属壳层（`shell/QuickActions`），不属于 `inputbar`。
 - 头栏入口较少时可内联在 `AgentPanel`，不必再抽 Header 文件。
-- 样式放在 `Agent/styles/`，按 UI 块拆分（`AgentPanel.css`、`ChatPanel.css`、`InputBar.css`、`QuickActions.css`、`HistoryPanel.css`、`RulesPanel.css`），由对应组件引入。
+- 样式：工具栏 / 右栏与组件同目录；Agent 样式放在 `Agent/styles/`，按 UI 块拆分。
 
 ---
 
