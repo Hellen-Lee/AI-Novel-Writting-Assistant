@@ -12,7 +12,7 @@ export function MessageList({
     <div className="agent-panel__messages">
       {messages.length === 0 ? (
         <p className="agent-panel__empty">
-          使用底栏快捷指令，或输入 <code>/continue</code> 等 skill
+          使用底栏快捷指令，或输入 <code>/续写</code> 等 skill
           名。生成链路接入前，结果区仅作界面预览。
         </p>
       ) : (

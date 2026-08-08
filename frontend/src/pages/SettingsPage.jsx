@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 import { ApiSettingsPanel } from '../components/settings/ApiSettingsPanel'
 import { PlaceholderPanel } from '../components/settings/PlaceholderPanel'
 import { SettingsSidebar } from '../components/settings/SettingsSidebar'
+import { SkillSettingsPanel } from '../components/settings/SkillSettingsPanel'
 import { DEFAULT_TAB, SETTINGS_TABS } from '../components/settings/constants'
 import './SettingsPage.css'
 
@@ -42,10 +43,7 @@ export default function SettingsPage() {
         {activeTab === 'api' ? (
           <ApiSettingsPanel />
         ) : activeTab === 'skill' ? (
-          <PlaceholderPanel
-            title="Skill 技能库"
-            description="管理内置与自定义 SKILL.md（frontmatter + 正文模板），支持新建与编辑。"
-          />
+          <SkillSettingsPanel />
         ) : (
           <PlaceholderPanel
             title="通用"

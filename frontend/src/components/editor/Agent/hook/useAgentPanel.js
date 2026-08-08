@@ -6,7 +6,7 @@ import { useAgentSessions } from './useAgentSessions'
 
 export function useAgentPanel({ projectId, tempRules = '' }) {
   const [panelMode, setPanelMode] = useState('chat') // chat | history
-  const [selectedSkill, setSelectedSkill] = useState('continue')
+  const [selectedSkill, setSelectedSkill] = useState('续写')
   const [input, setInput] = useState('')
   const [modelId, setModelId] = useState(MODEL_OPTIONS[0].id)
   const [modelOpen, setModelOpen] = useState(false)

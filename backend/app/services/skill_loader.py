@@ -9,17 +9,23 @@ from typing import Any, Optional
 
 import yaml
 
+from app.config import CUSTOM_SKILLS_DIR, ensure_data_dir
+
 logger = logging.getLogger(__name__)
 
-SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
+# 内置技能（随仓库分发）；自定义技能在 data/skills/（本地数据，不入库）
+BUILTIN_SKILLS_DIR = Path(__file__).resolve().parent.parent / "skills"
 KIND_QUICK_ACTION = "quick_action"
 KIND_SKILL = "skill"
 VALID_KINDS = frozenset({KIND_QUICK_ACTION, KIND_SKILL})
 
-# 允许 continue、generate_setting、scene-beat
-NAME_RE = re.compile(r"^[a-z0-9]+(?:[_-][a-z0-9]+)*$")
+# 允许中文、小写字母/数字；可用 _ 或 - 连接（如 continue、scene-beat、场景节拍）
+NAME_RE = re.compile(
+    r"^[\u4e00-\u9fffa-z0-9]+(?:[_-][\u4e00-\u9fffa-z0-9]+)*$"
+)
 
 _skills: dict[str, dict[str, Any]] = {}
+_builtin_names: set[str] = set()
 _load_errors: list[str] = []
 
 
@@ -86,7 +92,7 @@ def _validate_and_normalize(
     name = str(meta.get("name") or path.stem).strip()
     if not name or not NAME_RE.match(name):
         raise SkillValidationError(
-            f"name 无效（需小写字母/数字/下划线或连字符）: {name!r}"
+            f"name 无效（需中文、小写字母/数字，可用下划线或连字符）: {name!r}"
         )
 
     description = str(meta.get("description") or "").strip()
@@ -142,20 +148,20 @@ def _load_skill_file(path: Path, *, source: str) -> dict[str, Any]:
 
 
 def load_skills() -> dict[str, dict[str, Any]]:
-    """Scan builtin + custom skill dirs. Custom overrides same name."""
-    global _skills, _load_errors
+    """Scan builtin + custom skill dirs. Custom may not reuse builtin names."""
+    global _skills, _builtin_names, _load_errors
     _skills = {}
+    _builtin_names = set()
     _load_errors = []
 
+    ensure_data_dir()
     scan_roots = [
-        (SKILLS_DIR, "builtin"),
-        (SKILLS_DIR / "custom", "custom"),
+        (BUILTIN_SKILLS_DIR, "builtin"),
+        (CUSTOM_SKILLS_DIR, "custom"),
     ]
 
     for directory, source in scan_roots:
         if not directory.exists():
-            if source == "custom":
-                directory.mkdir(parents=True, exist_ok=True)
             continue
 
         for path in sorted(directory.glob("*.md")):
@@ -171,8 +177,13 @@ def load_skills() -> dict[str, dict[str, Any]]:
                 continue
 
             name = skill["name"]
-            if name in _skills and source == "custom":
-                logger.info("自定义技能覆盖内置: %s", name)
+            if source == "builtin":
+                _builtin_names.add(name)
+            elif name in _builtin_names:
+                msg = f"{path}: 自定义技能不能使用内置 name {name!r}，已跳过"
+                _load_errors.append(msg)
+                logger.warning("%s", msg)
+                continue
             _skills[name] = skill
 
     return _skills
@@ -231,4 +242,151 @@ def get_skill_detail(name: str) -> Optional[dict[str, Any]]:
         "source": skill["source"],
         "slash_command": f"/{skill['name']}",
         "path": skill["path"],
+    }
+
+
+def _custom_dir() -> Path:
+    ensure_data_dir()
+    return CUSTOM_SKILLS_DIR
+
+
+def _custom_path(name: str) -> Path:
+    return _custom_dir() / f"{name}.md"
+
+
+def _yaml_scalar(value: str) -> str:
+    """Dump a single YAML scalar (quoted when needed)."""
+    # Wrap in a mapping so PyYAML won't append a bare document-end `...`
+    dumped = yaml.safe_dump(
+        {"v": value},
+        allow_unicode=True,
+        default_flow_style=False,
+        width=1000,
+        sort_keys=False,
+    )
+    # "v: <scalar>\n" or "v: |-\n  ...\n"
+    _, _, rest = dumped.partition(":")
+    return rest.lstrip(" ").rstrip("\n")
+
+
+def serialize_skill_markdown(
+    *,
+    name: str,
+    description: str,
+    kind: str,
+    disable_model_invocation: bool,
+    system: str,
+    user_template: str,
+) -> str:
+    """Serialize skill fields to SKILL.md text (YAML frontmatter + body)."""
+    lines = [
+        "---",
+        f"name: {name}",
+        f"description: {_yaml_scalar(description)}",
+        f"kind: {kind}",
+        f"disable-model-invocation: {'true' if disable_model_invocation else 'false'}",
+    ]
+    if kind == KIND_QUICK_ACTION:
+        lines.append("system: |")
+        sys_text = (system or "").rstrip("\n")
+        if not sys_text:
+            lines.append("  ")
+        else:
+            for sys_line in sys_text.splitlines():
+                lines.append(f"  {sys_line}")
+    lines.append("---")
+    body = user_template.strip()
+    lines.append(body)
+    lines.append("")
+    return "\n".join(lines)
+
+
+def upsert_custom_skill(
+    *,
+    path_name: str,
+    name: str,
+    description: str,
+    kind: str,
+    disable_model_invocation: bool = True,
+    system: str = "",
+    user_template: str = "",
+) -> dict[str, Any]:
+    """
+    Create or update a skill under data/skills/.
+    Builtin skills are read-only and cannot be overridden by name.
+    If path_name differs from name and path_name is a custom skill, rename (delete old file).
+    """
+    if not _skills:
+        load_skills()
+
+    existing_path = get_skill(path_name)
+    if existing_path is not None and existing_path["source"] == "builtin":
+        raise PermissionError("内置技能不可编辑")
+
+    if name in _builtin_names:
+        raise SkillValidationError(
+            f"不能使用内置技能的 name: {name!r}，请换一个名称"
+        )
+
+    target_path = _custom_path(name)
+    # Validate before touching disk
+    draft = _validate_and_normalize(
+        {
+            "name": name,
+            "description": description,
+            "kind": kind,
+            "disable-model-invocation": disable_model_invocation,
+            "system": system if kind == KIND_QUICK_ACTION else None,
+        },
+        user_template,
+        path=target_path,
+        source="custom",
+    )
+
+    text = serialize_skill_markdown(
+        name=draft["name"],
+        description=draft["description"],
+        kind=draft["kind"],
+        disable_model_invocation=draft["disable_model_invocation"],
+        system=draft["system"],
+        user_template=draft["user_template"],
+    )
+
+    if path_name != name:
+        existing = get_skill(path_name)
+        if existing is None:
+            raise SkillValidationError(f"原技能不存在，无法重命名: {path_name}")
+        if existing["source"] != "custom":
+            raise SkillValidationError("只能重命名自定义技能")
+        old_path = Path(existing["path"])
+        if old_path.resolve() != target_path.resolve() and old_path.exists():
+            old_path.unlink()
+
+    target_path.write_text(text, encoding="utf-8")
+    load_skills()
+    detail = get_skill_detail(name)
+    if detail is None:
+        raise SkillValidationError(f"保存后未能加载技能: {name}")
+    return detail
+
+
+def delete_custom_skill(name: str) -> dict[str, Any]:
+    """Delete a custom skill file. Builtin-only skills cannot be deleted."""
+    skill = get_skill(name)
+    if skill is None:
+        raise FileNotFoundError(f"Skill not found: {name}")
+    if skill["source"] != "custom":
+        raise PermissionError("只能删除自定义技能，内置技能不可删除")
+
+    path = Path(skill["path"])
+    if path.exists():
+        path.unlink()
+
+    load_skills()
+    # If a builtin with the same name remains, return its detail; else gone
+    restored = get_skill_detail(name)
+    return {
+        "deleted": name,
+        "restored_builtin": restored is not None and restored["source"] == "builtin",
+        "skill": restored,
     }

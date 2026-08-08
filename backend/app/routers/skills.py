@@ -1,12 +1,18 @@
-"""Skill listing and detail API."""
+"""Skill listing, detail, create/update and delete API."""
 
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 
-from app.models.schemas import SkillDetail, SkillListResponse, SkillSummary
+from app.models.schemas import (
+    SkillDeleteResponse,
+    SkillDetail,
+    SkillListResponse,
+    SkillSummary,
+    SkillUpsertRequest,
+)
 from app.services import skill_loader
-from app.services.skill_loader import VALID_KINDS
+from app.services.skill_loader import VALID_KINDS, SkillValidationError
 
 router = APIRouter()
 
@@ -34,3 +40,45 @@ def get_skill_detail(name: str):
     if detail is None:
         raise HTTPException(status_code=404, detail=f"Skill not found: {name}")
     return SkillDetail(**detail)
+
+
+@router.put("/skills/{name}", response_model=SkillDetail)
+def upsert_skill(name: str, body: SkillUpsertRequest):
+    """Create or update a custom skill (writes under data/skills/)."""
+    try:
+        detail = skill_loader.upsert_custom_skill(
+            path_name=name,
+            name=body.name.strip(),
+            description=body.description.strip(),
+            kind=body.kind.strip(),
+            disable_model_invocation=body.disable_model_invocation,
+            system=body.system or "",
+            user_template=body.user_template,
+        )
+    except SkillValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"写入技能失败: {exc}") from exc
+    return SkillDetail(**detail)
+
+
+@router.delete("/skills/{name}", response_model=SkillDeleteResponse)
+def delete_skill(name: str):
+    """Delete a custom skill. Builtin skills cannot be deleted."""
+    try:
+        result = skill_loader.delete_custom_skill(name)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"删除技能失败: {exc}") from exc
+
+    restored = result.get("skill")
+    return SkillDeleteResponse(
+        deleted=result["deleted"],
+        restored_builtin=bool(result.get("restored_builtin")),
+        skill=SkillDetail(**restored) if restored else None,
+    )

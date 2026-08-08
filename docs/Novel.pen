@@ -23736,7 +23736,7 @@
                                       "name": "IconWrap",
                                       "width": 36,
                                       "height": 36,
-                                      "fill": "$color/accent/soft",
+                                      "fill": "#e4f0e9ff",
                                       "cornerRadius": "$radius/md",
                                       "justifyContent": "center",
                                       "alignItems": "center",
@@ -23749,7 +23749,7 @@
                                           "height": 16,
                                           "icon": "puzzle",
                                           "library": "lucide",
-                                          "fill": "$color/accent"
+                                          "fill": "#2e594bff"
                                         }
                                       ]
                                     },
@@ -23785,41 +23785,8 @@
                                                   "fontFamily": "Geist",
                                                   "fontSize": 13,
                                                   "fontWeight": "600"
-                                                },
-                                                {
-                                                  "type": "frame",
-                                                  "id": "pbP2u",
-                                                  "name": "KindBadge",
-                                                  "fill": "$color/accent/soft",
-                                                  "cornerRadius": 4,
-                                                  "padding": [
-                                                    3,
-                                                    8
-                                                  ],
-                                                  "children": [
-                                                    {
-                                                      "type": "text",
-                                                      "id": "yt5lu",
-                                                      "name": "Kind",
-                                                      "fill": "$color/accent",
-                                                      "content": "skill",
-                                                      "fontFamily": "Geist",
-                                                      "fontSize": 10,
-                                                      "fontWeight": "600"
-                                                    }
-                                                  ]
                                                 }
                                               ]
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "ydA2h",
-                                              "name": "Slash",
-                                              "fill": "$color/text/muted",
-                                              "content": "/scene-beat",
-                                              "fontFamily": "Geist Mono",
-                                              "fontSize": 11,
-                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -23859,7 +23826,7 @@
                                       "name": "IconWrap",
                                       "width": 36,
                                       "height": 36,
-                                      "fill": "$color/accent/soft",
+                                      "fill": "#e4f0e9ff",
                                       "cornerRadius": "$radius/md",
                                       "justifyContent": "center",
                                       "alignItems": "center",
@@ -23872,7 +23839,7 @@
                                           "height": 16,
                                           "icon": "puzzle",
                                           "library": "lucide",
-                                          "fill": "$color/accent"
+                                          "fill": "#2e594bff"
                                         }
                                       ]
                                     },
@@ -23908,41 +23875,8 @@
                                                   "fontFamily": "Geist",
                                                   "fontSize": 13,
                                                   "fontWeight": "600"
-                                                },
-                                                {
-                                                  "type": "frame",
-                                                  "id": "jtxzz",
-                                                  "name": "KindBadge",
-                                                  "fill": "$color/accent/soft",
-                                                  "cornerRadius": 4,
-                                                  "padding": [
-                                                    3,
-                                                    8
-                                                  ],
-                                                  "children": [
-                                                    {
-                                                      "type": "text",
-                                                      "id": "S3o82d",
-                                                      "name": "Kind",
-                                                      "fill": "$color/accent",
-                                                      "content": "skill",
-                                                      "fontFamily": "Geist",
-                                                      "fontSize": 10,
-                                                      "fontWeight": "600"
-                                                    }
-                                                  ]
                                                 }
                                               ]
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "FcNIP",
-                                              "name": "Slash",
-                                              "fill": "$color/text/muted",
-                                              "content": "/dialogue-voice",
-                                              "fontFamily": "Geist Mono",
-                                              "fontSize": 11,
-                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -23982,7 +23916,7 @@
                                       "name": "IconWrap",
                                       "width": 36,
                                       "height": 36,
-                                      "fill": "$color/accent/soft",
+                                      "fill": "#e4f0e9ff",
                                       "cornerRadius": "$radius/md",
                                       "justifyContent": "center",
                                       "alignItems": "center",
@@ -23995,7 +23929,7 @@
                                           "height": 16,
                                           "icon": "puzzle",
                                           "library": "lucide",
-                                          "fill": "$color/accent"
+                                          "fill": "#2e594bff"
                                         }
                                       ]
                                     },
@@ -24031,41 +23965,8 @@
                                                   "fontFamily": "Geist",
                                                   "fontSize": 13,
                                                   "fontWeight": "600"
-                                                },
-                                                {
-                                                  "type": "frame",
-                                                  "id": "bohrQ",
-                                                  "name": "KindBadge",
-                                                  "fill": "$color/accent/soft",
-                                                  "cornerRadius": 4,
-                                                  "padding": [
-                                                    3,
-                                                    8
-                                                  ],
-                                                  "children": [
-                                                    {
-                                                      "type": "text",
-                                                      "id": "g8Fcx",
-                                                      "name": "Kind",
-                                                      "fill": "$color/accent",
-                                                      "content": "skill",
-                                                      "fontFamily": "Geist",
-                                                      "fontSize": 10,
-                                                      "fontWeight": "600"
-                                                    }
-                                                  ]
                                                 }
                                               ]
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "r7ii73",
-                                              "name": "Slash",
-                                              "fill": "$color/text/muted",
-                                              "content": "/pacing-check",
-                                              "fontFamily": "Geist Mono",
-                                              "fontSize": 11,
-                                              "fontWeight": "normal"
                                             }
                                           ]
                                         },
@@ -24087,32 +23988,32 @@
                                   ]
                                 },
                                 {
-                                  "type": "frame",
-                                  "id": "RWOzh",
+                                  "id": "MGKCf",
+                                  "type": "ref",
+                                  "ref": "cV9gY",
                                   "name": "BtnNew",
-                                  "width": 285,
-                                  "height": 62,
-                                  "fill": "#e1f0e9ff",
-                                  "cornerRadius": 8,
-                                  "gap": 8,
+                                  "width": "fill_container",
+                                  "height": "fit_content",
+                                  "fill": "$color/bg/surface",
+                                  "stroke": "$color/border/default",
+                                  "strokeWidth": 1,
+                                  "cornerRadius": "$radius/md",
                                   "padding": [
-                                    10,
-                                    18
+                                    9,
+                                    12
                                   ],
+                                  "gap": 6,
                                   "justifyContent": "center",
                                   "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "d9ZH1",
-                                      "name": "Label",
-                                      "fill": "#2d594aff",
-                                      "content": "新建 Skill",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 14,
-                                      "fontWeight": "600"
+                                  "descendants": {
+                                    "xv6j5": {
+                                      "content": "+  新建 Skill",
+                                      "fill": "$color/text/secondary",
+                                      "fontSize": "$text/body/sm",
+                                      "fontWeight": "500",
+                                      "fontFamily": "Geist"
                                     }
-                                  ]
+                                  }
                                 }
                               ]
                             }
@@ -24236,7 +24137,7 @@
                                       "id": "sFXPw",
                                       "name": "Value",
                                       "fill": "$color/text/primary",
-                                      "content": "scene-beat",
+                                      "content": "场景节拍",
                                       "fontFamily": "Geist Mono",
                                       "fontSize": 13,
                                       "fontWeight": "500"
@@ -24306,7 +24207,7 @@
                                   "fill": "$color/text/primary",
                                   "textGrowth": "fixed-width",
                                   "width": "fill_container",
-                                  "content": "根据当前章节与用户补充，列出 3-5 个场景节拍。手动调用：/scene-beat",
+                                  "content": "根据当前章节与用户补充，列出 3-5 个场景节拍。手动调用：/场景节拍",
                                   "lineHeight": 1.45,
                                   "fontFamily": "Geist",
                                   "fontSize": 13,
@@ -24429,48 +24330,10 @@
                           "id": "g6wqo0",
                           "name": "MDLabel",
                           "fill": "#1A2E28",
-                          "content": "正文模板（user message）",
+                          "content": "正文",
                           "fontFamily": "Geist",
                           "fontSize": 13,
                           "fontWeight": "600"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "H5jUe",
-                          "name": "VarHint",
-                          "width": "fill_container",
-                          "fill": "$color/primary/soft",
-                          "cornerRadius": 8,
-                          "gap": 8,
-                          "padding": [
-                            10,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "cfYWj",
-                              "name": "VI",
-                              "width": 14,
-                              "height": 14,
-                              "icon": "braces",
-                              "library": "lucide",
-                              "fill": "$color/primary"
-                            },
-                            {
-                              "type": "text",
-                              "id": "u0UqC1",
-                              "name": "VT",
-                              "fill": "$color/primary",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "可用变量：$global_rules · $worldview · $characters · $current_content · $user_input · $previous_chapters · $selected_text",
-                              "fontFamily": "Geist",
-                              "fontSize": 11,
-                              "fontWeight": "normal"
-                            }
-                          ]
                         },
                         {
                           "type": "frame",
@@ -24491,20 +24354,7 @@
                               "fill": "$color/text/primary",
                               "textGrowth": "fixed-width",
                               "width": "fill_container",
-                              "content": "请根据以下信息，列出 3-5 个场景节拍（每条一行，简洁，不要写完整正文）。",
-                              "lineHeight": 1.65,
-                              "fontFamily": "Geist Mono",
-                              "fontSize": 12,
-                              "fontWeight": "normal"
-                            },
-                            {
-                              "type": "text",
-                              "id": "XjyE8",
-                              "name": "MD2",
-                              "fill": "$color/primary",
-                              "textGrowth": "fixed-width",
-                              "width": "fill_container",
-                              "content": "全局规则：\n$global_rules\n\n世界观：\n$worldview\n\n人物：\n$characters\n\n当前章节内容：\n$current_content\n\n用户补充：\n$user_input",
+                              "content": "先直接展示markdown源代码，后续再考虑扩展成渲染markdown格式",
                               "lineHeight": 1.65,
                               "fontFamily": "Geist Mono",
                               "fontSize": 12,

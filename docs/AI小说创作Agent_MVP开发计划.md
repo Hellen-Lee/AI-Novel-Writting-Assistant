@@ -70,26 +70,27 @@
 ## 三、SKILL.md 体系（第 2–3 天）✅ 已完成
 
 > 约定：用 `kind: quick_action | skill` 显式区分。  
-> - `quick_action`（continue/polish/expand/generate_setting）：保留 `system` 槽位，按钮或 `/name` 手动调用。  
-> - `skill`（其他内置或 `custom/`）：无 `system`，调用时 system 固定为空；含 `disable-model-invocation`；可 `/name` 手动调用。  
-> MVP 不做模型自动选用，但开关字段落地。
+> - `quick_action`（续写/润色/扩写/生成设定）：保留 `system` 槽位，按钮或 `/name` 手动调用。  
+> - `skill`（`data/skills/` 自定义等）：无 `system`，调用时 system 固定为空；含 `disable-model-invocation`；可 `/name` 手动调用。  
+> MVP 不做模型自动选用，但开关字段落地。内置技能只读，不可编辑/覆盖。
 
 ### 3.1 SKILL.md 文件设计 ✅
 
 - [x] 设计 SKILL.md 格式规范（YAML frontmatter + Markdown body；`kind` 分流）
-- [x] 创建内置 quick_action：
-  - `backend/app/skills/continue.md`
-  - `backend/app/skills/polish.md`
-  - `backend/app/skills/expand.md`
-  - `backend/app/skills/generate_setting.md`
-- [x] 预留 `backend/app/skills/custom/`，并放 1 个 `kind: skill` 示例（`scene-beat.md`）
+- [x] 创建内置 quick_action（中文 name）：
+  - `backend/app/skills/续写.md`
+  - `backend/app/skills/润色.md`
+  - `backend/app/skills/扩写.md`
+  - `backend/app/skills/生成设定.md`
+- [x] 自定义技能落盘 `data/skills/`（gitignore，不入库）；可通过设置页或 API 新建
 
 ### 3.2 技能加载器（skill_loader） ✅
 
-- [x] 启动时扫描 `skills/` 和 `skills/custom/`（custom 同名覆盖）
+- [x] 启动时扫描 `backend/app/skills/` 与 `data/skills/`（自定义 name 不得与内置重名）
 - [x] 解析 name、description、kind、system（仅 quick_action）、disable-model-invocation、正文
 - [x] 按 kind 校验必填/禁止字段
 - [x] 提供列表与按名称查询；挂 `GET /api/skills`、`GET /api/skills/{name}`
+- [x] `PUT/DELETE /api/skills/{name}` 读写 `data/skills/`（内置不可 PUT）
 
 ### 3.3 提示词组装（prompt_builder） ✅
 
@@ -149,7 +150,7 @@
 - [x] 入口：首页右上角「设置」打开全局设置（侧栏三栏：**通用 / API / skill**）
 - [ ] **通用**：数据目录、自动保存、字数统计、删除确认等本地偏好 — UI 占位，待实现
 - [x] **API**（原模型配置）：API 地址、密钥、默认模型、生成参数；测试连接；保存到 `data/config.json`
-- [ ] **skill**（原技能库管理）：内置 / 自定义 SKILL.md 列表与编辑（frontmatter + 正文模板）；新建 Skill — UI 占位，待实现
+- [x] **skill**（原技能库管理）：内置 / 自定义 SKILL.md 列表与编辑（frontmatter + 正文模板）；新建 Skill（`GET/PUT/DELETE /api/skills`）
 
 ---
 

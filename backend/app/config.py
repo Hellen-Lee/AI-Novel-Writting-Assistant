@@ -11,6 +11,7 @@ from pydantic import BaseModel, Field, field_validator
 DATA_DIR = Path(__file__).resolve().parent.parent.parent / "data"
 CONFIG_PATH = DATA_DIR / "config.json"
 PROJECTS_DIR = DATA_DIR / "projects"
+CUSTOM_SKILLS_DIR = DATA_DIR / "skills"
 
 
 # 单次会话最大上下文（token 预算），与设置页下拉一致
@@ -61,6 +62,7 @@ DEFAULT_CONFIG = AppConfig().model_dump()
 def ensure_data_dir() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
+    CUSTOM_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def mask_api_key(api_key: str) -> str:

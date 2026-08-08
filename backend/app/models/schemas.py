@@ -226,6 +226,23 @@ class SkillDetail(SkillSummary):
     path: str = ""
 
 
+class SkillUpsertRequest(BaseModel):
+    """Create / update a custom SKILL.md (frontmatter + body)."""
+
+    name: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
+    kind: str
+    disable_model_invocation: bool = True
+    system: str = ""
+    user_template: str = Field(..., min_length=1)
+
+
+class SkillDeleteResponse(BaseModel):
+    deleted: str
+    restored_builtin: bool = False
+    skill: Optional[SkillDetail] = None
+
+
 class SkillListResponse(BaseModel):
     skills: list[SkillSummary] = Field(default_factory=list)
     count: int = 0

@@ -70,18 +70,18 @@ AINovel/
 │   │   │   ├── prompt_builder.py
 │   │   │   ├── memory_store.py
 │   │   │   └── skill_loader.py
-│   │   └── skills/           # SKILL.md 文件目录
-│   │       ├── continue.md          # kind: quick_action
-│   │       ├── polish.md
-│   │       ├── expand.md
-│   │       ├── generate_setting.md
-│   │       └── custom/              # 用户自定义（kind: skill）
+│   │   └── skills/           # 内置 SKILL.md（随仓库分发，只读）
+│   │       ├── 续写.md              # kind: quick_action
+│   │       ├── 润色.md
+│   │       ├── 扩写.md
+│   │       └── 生成设定.md
 │   │   └── models/           # Pydantic 数据模型
 │   │       └── schemas.py
 │   ├── requirements.txt
 │   └── run.py
-└── data/                     # 本地数据目录（运行时生成）
+└── data/                     # 本地数据目录（运行时生成，gitignore）
     ├── config.json           # 模型配置
+    ├── skills/               # 用户自定义 SKILL.md（name 不得与内置重名）
     └── projects/             # 项目数据
         └── {project_id}/
             ├── meta.json
@@ -148,16 +148,16 @@ AINovel/
 
 - 编辑页上的一组功能按钮，用户点击即可触发 AI 生成。
 - MVP 内置四个快捷指令（均为 `kind: quick_action`）：
-  - **续写（Continue）**：基于上下文续写下一段正文。
-  - **润色（Polish）**：优化当前选中的段落。
-  - **扩写（Expand）**：将简短描述扩写成完整场景或段落。
-  - **生成设定（Generate Setting）**：根据输入生成人物、物品或世界观设定。
+  - **续写**：基于上下文续写下一段正文。
+  - **润色**：优化当前选中的段落。
+  - **扩写**：将简短描述扩写成完整场景或段落。
+  - **生成设定**：根据输入生成人物、物品或世界观设定。
 - 每个快捷指令对应后端一个 SKILL.md；前端只传 `name` 与上下文，不维护提示词正文。
-- 也支持手动调用：`/continue`、`/polish` 等（与按钮等价）。
+- 也支持手动调用：`/续写`、`/润色` 等（与按钮等价）。
 
 ### 5.5 SKILL.md 体系
 
-SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录。启动时由 `skill_loader` 扫描加载（同名时 `custom/` 覆盖内置）。
+内置 SKILL.md 放在 `backend/app/skills/`（设置页只读，不可编辑/覆盖）；用户自定义放在 `data/skills/`（本地数据，不入库）。启动时由 `skill_loader` 扫描加载；自定义 `name` 不得与内置重名。
 
 格式：YAML frontmatter + Markdown 正文（正文即 user 侧模板，支持 `$变量`）。
 
@@ -170,7 +170,7 @@ SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录
 
 字段说明：
 
-- `name`：唯一标识（小写字母/数字/下划线或连字符），亦为 `/` 调用名。
+- `name`：唯一标识（中文、小写字母/数字，可用下划线或连字符），亦为 `/` 调用名。
 - `description`：功能说明；供列表展示，并为后续「模型自动选用」预留。
 - `kind`：`quick_action` \| `skill`。
 - `system`：仅 `quick_action` 使用。
@@ -181,8 +181,8 @@ SKILL.md 统一放在 `backend/app/skills/`；`custom/` 为用户自定义目录
 
 ```markdown
 ---
-name: continue
-description: 基于上下文续写下一段正文
+name: 续写
+description: 基于上下文续写下一段正文。手动调用：/续写
 kind: quick_action
 disable-model-invocation: true
 system: |
@@ -198,8 +198,8 @@ $current_content
 
 ```markdown
 ---
-name: scene-beat
-description: 根据情节点列出场景节拍。手动调用：/scene-beat
+name: 场景节拍
+description: 根据情节点列出场景节拍。手动调用：/场景节拍
 kind: skill
 disable-model-invocation: true
 ---
@@ -246,6 +246,8 @@ $user_input
 | `POST /api/projects/{id}/generate` | AI 生成（续写/润色等） |
 | `GET /api/skills` | 技能列表（可按 kind 过滤） |
 | `GET /api/skills/{name}` | 技能详情 |
+| `PUT /api/skills/{name}` | 新建/更新自定义技能（写入 `data/skills/`） |
+| `DELETE /api/skills/{name}` | 删除自定义技能 |
 | `GET /api/config` | 读取模型配置 |
 | `POST /api/config` | 保存模型配置 |
 | `POST /api/config/test` | 测试模型连接 |
