@@ -12,6 +12,10 @@ export function EditorRightRail({
   mode,
   projectId,
   tempRules,
+  chapterId,
+  currentContent,
+  selectedText,
+  setAiDraft,
   draft,
   onApplyDraft,
   onDiscardDraft,
@@ -50,6 +54,10 @@ export function EditorRightRail({
         <AgentPanel
           projectId={projectId}
           tempRules={tempRules}
+          chapterId={chapterId}
+          currentContent={currentContent}
+          selectedText={selectedText}
+          setAiDraft={setAiDraft}
           draft={draft}
           onApplyDraft={onApplyDraft}
           onDiscardDraft={onDiscardDraft}

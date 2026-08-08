@@ -156,6 +156,17 @@
 
 ## 五、核心创作流程打通（第 5–6 天）
 
+### 5.0 Agent 链路（传输 / 会话 / API 索引）
+
+> 架构决策：`docs/build/06-Agent生成与会话链路.md`；路由索引：`backend/app/api_catalog.py`。
+
+- [x] 传输层：HTTP SSE（`POST /api/projects/{id}/generate`），不用全双工 WS
+- [x] 会话落盘：`data/projects/{id}/agent/`；列表 / 新建 / 切换 / 删除 REST
+- [x] `session_store` + `generation_service`；生成请求带 `session_id`
+- [x] `api_catalog.py` 集中注册与 API 索引
+- [x] 前端 `api/generate.js` + `api/sessions.js`；流式写气泡与 `aiDraft`；切换前 abort
+- [ ] 端到端联调验收（依赖模型 API 配置）：续写 → 流式 → 插入文末 → 保存（见 §5.1）
+
 ### 5.1 续写流程
 
 - [ ] 编辑页点击"续写"
@@ -172,9 +183,9 @@
 
 ### 5.3 上下文组装
 
-- [ ] 读取最近 3 章正文
-- [ ] 读取全局规则
-- [ ] 读取长期记忆并注入 prompt
+- [x] 读取最近 3 章正文（`prompt_builder` / generate 链路已注入）
+- [x] 读取全局规则
+- [x] 读取长期记忆并注入 prompt
 - [ ] 控制 token 长度，必要时做摘要或截断
 
 ---

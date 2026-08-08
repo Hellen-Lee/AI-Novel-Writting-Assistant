@@ -4,28 +4,54 @@ import { parseCommand } from '../utils/parseCommand'
 import { useAgentGenerate } from './useAgentGenerate'
 import { useAgentSessions } from './useAgentSessions'
 
-export function useAgentPanel({ projectId, tempRules = '' }) {
+export function useAgentPanel({
+  projectId,
+  tempRules = '',
+  chapterId,
+  currentContent = '',
+  selectedText = '',
+  draft = null,
+  setAiDraft,
+}) {
   const [panelMode, setPanelMode] = useState('chat') // chat | history
   const [selectedSkill, setSelectedSkill] = useState('续写')
   const [input, setInput] = useState('')
   const [modelId, setModelId] = useState(MODEL_OPTIONS[0].id)
   const [modelOpen, setModelOpen] = useState(false)
   const messagesEndRef = useRef(null)
+  const abortRef = useRef(null)
 
-  const sessionsApi = useAgentSessions()
+  const sessionsApi = useAgentSessions({
+    projectId,
+    onBeforeSwitch: () => abortRef.current?.(),
+  })
   const {
     sessions,
     activeSessionId,
     activeSession,
+    loading: sessionsLoading,
+    loadError,
     updateActiveSession,
+    updateSessionById,
     handleNewChat: newChat,
     handleSelectSession: selectSession,
+    setLoadError,
   } = sessionsApi
+
+  const sessionIdRef = useRef(activeSessionId)
+  useEffect(() => {
+    sessionIdRef.current = activeSessionId
+  }, [activeSessionId])
 
   const generateApi = useAgentGenerate({
     projectId,
     tempRules,
-    updateActiveSession,
+    chapterId,
+    currentContent,
+    selectedText,
+    getSessionId: () => sessionIdRef.current,
+    updateSessionById,
+    setAiDraft,
     onInputClear: () => setInput(''),
   })
   const {
@@ -36,7 +62,12 @@ export function useAgentPanel({ projectId, tempRules = '' }) {
     handleTriggerGenerate,
     handleStop,
     handleRetry,
+    abortGenerate,
   } = generateApi
+
+  useEffect(() => {
+    abortRef.current = abortGenerate
+  }, [abortGenerate])
 
   const selectedModel =
     MODEL_OPTIONS.find((m) => m.id === modelId) || MODEL_OPTIONS[0]
@@ -56,14 +87,35 @@ export function useAgentPanel({ projectId, tempRules = '' }) {
     return () => document.removeEventListener('pointerdown', onPointerDown)
   }, [modelOpen])
 
-  const handleNewChat = () => {
-    newChat()
+  useEffect(() => {
+    if (loadError) showNotice(loadError)
+  }, [loadError]) // eslint-disable-line react-hooks/exhaustive-deps -- surface once per error
+
+  const prevDraftRef = useRef(draft)
+  useEffect(() => {
+    const prev = prevDraftRef.current
+    prevDraftRef.current = draft
+    if (prev && !draft) {
+      updateActiveSession((s) => ({
+        ...s,
+        messages: s.messages.map((m) =>
+          m.role === 'assistant' && m.pending
+            ? { ...m, pending: false }
+            : m,
+        ),
+      }))
+    }
+  }, [draft, updateActiveSession])
+
+  const handleNewChat = async () => {
+    await newChat()
     setPanelMode('chat')
     setNotice('')
+    setLoadError('')
   }
 
-  const handleSelectSession = (id) => {
-    selectSession(id)
+  const handleSelectSession = async (id) => {
+    await selectSession(id)
     setPanelMode('chat')
   }
 
@@ -87,12 +139,33 @@ export function useAgentPanel({ projectId, tempRules = '' }) {
     handleTriggerGenerate(id, `请${label}`)
   }
 
+  const clearPendingActions = () => {
+    updateActiveSession((s) => ({
+      ...s,
+      messages: s.messages.map((m) =>
+        m.role === 'assistant' && m.pending
+          ? { ...m, pending: false }
+          : m,
+      ),
+    }))
+  }
+
+  const handleDiscardDraft = () => {
+    clearPendingActions()
+    setAiDraft?.(null)
+  }
+
+  const handleApplyDraft = () => {
+    clearPendingActions()
+  }
+
   return {
     panelMode,
     setPanelMode,
     sessions,
     activeSessionId,
     activeSession,
+    sessionsLoading,
     messagesEndRef,
     selectedSkill,
     input,
@@ -110,6 +183,8 @@ export function useAgentPanel({ projectId, tempRules = '' }) {
     handleStop,
     handleRetry,
     handleQuickAction,
+    handleApplyDraft,
+    handleDiscardDraft,
     setModelOpen,
     setModelId,
   }

@@ -247,3 +247,53 @@ class SkillListResponse(BaseModel):
     skills: list[SkillSummary] = Field(default_factory=list)
     count: int = 0
     load_errors: list[str] = Field(default_factory=list)
+
+
+# --- Agent sessions & generation ---
+
+
+class AgentMessage(BaseModel):
+    id: str
+    role: str
+    content: str = ""
+    skill: str = ""
+    pending: bool = False
+    error: str = ""
+    created_at: str = ""
+
+
+class SessionSummary(BaseModel):
+    id: str
+    title: str = "新对话"
+    updated_at: int = 0
+    message_count: int = 0
+    status: str = "idle"
+
+
+class SessionDetail(BaseModel):
+    id: str
+    title: str = "新对话"
+    messages: list[AgentMessage] = Field(default_factory=list)
+    status: str = "idle"
+    created_at: str = ""
+    updated_at: int = 0
+
+
+class SessionCreateRequest(BaseModel):
+    title: str = "新对话"
+
+
+class SessionListResponse(BaseModel):
+    sessions: list[SessionSummary] = Field(default_factory=list)
+    count: int = 0
+
+
+class GenerateRequest(BaseModel):
+    session_id: str = Field(..., min_length=1)
+    skill_name: str = Field(..., min_length=1)
+    chapter_id: Optional[str] = None
+    current_content: str = ""
+    selected_text: str = ""
+    user_input: str = ""
+    chapter_rules: str = ""
+    model: Optional[str] = None

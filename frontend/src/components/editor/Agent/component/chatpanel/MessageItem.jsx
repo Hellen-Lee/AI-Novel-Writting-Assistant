@@ -24,13 +24,16 @@ export function MessageItem({
         ) : null}
       </div>
       <div className="agent-panel__bubble agent-panel__bubble--ai">
-        <p>{message.content}</p>
-        {message.pending ? (
+        <p>
+          {message.content ||
+            (message.pending ? '正在生成…' : message.error || '')}
+        </p>
+        {message.pending && !message.error ? (
           <div className="agent-panel__msg-actions">
             <button
               type="button"
               className="agent-panel__mini-btn agent-panel__mini-btn--primary"
-              disabled={!draft}
+              disabled={!draft?.text || draft.status === 'streaming'}
               onClick={() => onApplyDraft?.()}
             >
               插入文末
@@ -38,6 +41,7 @@ export function MessageItem({
             <button
               type="button"
               className="agent-panel__mini-btn"
+              disabled={draft?.status === 'streaming'}
               onClick={onRetry}
             >
               重写
@@ -45,6 +49,7 @@ export function MessageItem({
             <button
               type="button"
               className="agent-panel__mini-btn agent-panel__mini-btn--ghost"
+              disabled={draft?.status === 'streaming'}
               onClick={() => onDiscardDraft?.()}
             >
               弃用

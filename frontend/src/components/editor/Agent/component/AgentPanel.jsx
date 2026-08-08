@@ -11,12 +11,16 @@ import { InputBar } from './inputbar/InputBar'
 import { HistoryPanel } from './shell/HistoryPanel'
 
 /**
- * 右侧 AI Agent 栏（仅界面；生成走后续链路）
+ * 右侧 AI Agent 栏（SSE 生成 + 会话落盘）
  * 设计对照：d7ubn Sidebar/Agent；历史 UI 壳 OckRz
  */
 export function AgentPanel({
   projectId,
   tempRules = '',
+  chapterId,
+  currentContent = '',
+  selectedText = '',
+  setAiDraft,
   onApplyDraft,
   onDiscardDraft,
   onCollapse,
@@ -28,6 +32,7 @@ export function AgentPanel({
     sessions,
     activeSessionId,
     activeSession,
+    sessionsLoading,
     messagesEndRef,
     input,
     setInput,
@@ -44,9 +49,29 @@ export function AgentPanel({
     handleStop,
     handleRetry,
     handleQuickAction,
+    handleApplyDraft,
+    handleDiscardDraft,
     setModelOpen,
     setModelId,
-  } = useAgentPanel({ projectId, tempRules })
+  } = useAgentPanel({
+    projectId,
+    tempRules,
+    chapterId,
+    currentContent,
+    selectedText,
+    draft,
+    setAiDraft,
+  })
+
+  const apply = () => {
+    handleApplyDraft()
+    onApplyDraft?.()
+  }
+
+  const discard = () => {
+    handleDiscardDraft()
+    onDiscardDraft?.()
+  }
 
   return (
     <aside className="agent-panel">
@@ -101,19 +126,19 @@ export function AgentPanel({
       ) : (
         <>
           <ChatPanel
-            messages={activeSession.messages}
+            messages={activeSession?.messages || []}
             messagesEndRef={messagesEndRef}
             draft={draft}
-            onApplyDraft={onApplyDraft}
-            onDiscardDraft={onDiscardDraft}
+            onApplyDraft={apply}
+            onDiscardDraft={discard}
             onRetry={handleRetry}
             onQuickAction={handleQuickAction}
-            generating={generating}
+            generating={generating || sessionsLoading}
           />
           <InputBar
             notice={notice}
             onDismissNotice={() => setNotice('')}
-            generating={generating}
+            generating={generating || sessionsLoading}
             input={input}
             onInputChange={setInput}
             onSend={handleSend}

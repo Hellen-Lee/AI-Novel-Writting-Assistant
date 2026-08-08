@@ -48,7 +48,7 @@ export function AgentPanel() {
 | `EditorRightRail.jsx` | 按 `rightPanel.mode` 展示 Agent 或创作规则侧栏 |
 | `Agent/component/` | UI：`AgentPanel` 编排；`shell/`（历史壳、规则侧栏、快捷指令）；`chatpanel/`；`inputbar/` |
 | `Agent/hook/` | 会话 / 生成（`useAgentPanel`）；`useAgentRules` 由 **EditorPage** 调用并上提 `tempRules` |
-| `Agent/service/` | Agent 域数据链路（封装 `api/`、占位/真实 generate）；不依赖 React |
+| `Agent/service/` | Agent 域数据链路（封装 `api/generate` SSE、`api/sessions`）；不依赖 React |
 | `Agent/utils/` | 纯函数与常量 |
 | `Agent/index.jsx` | Agent 域出口：`export { AgentPanel }`（页面经 `EditorRightRail` 间接使用） |
 

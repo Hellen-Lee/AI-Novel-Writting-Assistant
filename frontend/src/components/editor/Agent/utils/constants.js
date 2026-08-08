@@ -1,7 +1,6 @@
 import { BookOpen, Maximize2, Sparkles, WandSparkles } from 'lucide-react'
 
-export const AI_PLACEHOLDER =
-  'AI 生成将在生成链路联调后接入；当前可编辑临时规则与会话界面。'
+export const AI_PLACEHOLDER = '正在生成…'
 
 export const QUICK_ACTIONS = [
   {

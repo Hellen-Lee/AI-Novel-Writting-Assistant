@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api_catalog import register_routers
 from app.config import ensure_data_dir
-from app.routers import chapters, config, health, memory, projects, skills
 from app.services import skill_loader
 
 ensure_data_dir()
@@ -18,12 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(health.router, prefix="/api", tags=["health"])
-app.include_router(config.router, prefix="/api", tags=["config"])
-app.include_router(projects.router, prefix="/api", tags=["projects"])
-app.include_router(chapters.router, prefix="/api", tags=["chapters"])
-app.include_router(memory.router, prefix="/api", tags=["memory"])
-app.include_router(skills.router, prefix="/api", tags=["skills"])
+register_routers(app)
 
 
 @app.get("/")

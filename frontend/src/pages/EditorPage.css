@@ -314,10 +314,12 @@
 .editor-page__textarea {
   width: 100%;
   min-height: 280px;
-  flex: 1;
+  flex: 0 0 auto;
   border: none;
   outline: none;
   resize: none;
+  overflow: hidden;
+  field-sizing: content;
   background: transparent;
   font-family: var(--font-display);
   font-size: var(--text-body-lg);

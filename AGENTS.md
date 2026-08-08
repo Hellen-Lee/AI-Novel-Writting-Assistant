@@ -57,19 +57,23 @@ AINovel/
 ├── backend/                  # FastAPI 后端
 │   ├── app/
 │   │   ├── __init__.py
-│   │   ├── main.py           # FastAPI 入口
+│   │   ├── main.py           # FastAPI 入口（挂载 api_catalog）
+│   │   ├── api_catalog.py    # 全部 API 索引 + include_router 唯一挂载点
 │   │   ├── config.py         # 配置读取
-│   │   ├── routers/          # API 路由
+│   │   ├── routers/          # 薄 HTTP 路由（按域拆分）
 │   │   │   ├── projects.py
 │   │   │   ├── chapters.py
 │   │   │   ├── memory.py
-│   │   │   ├── rules.py
-│   │   │   └── generation.py
+│   │   │   ├── skills.py
+│   │   │   ├── sessions.py   # Agent 会话 CRUD
+│   │   │   └── generation.py # POST generate（SSE）
 │   │   ├── services/         # 业务逻辑
 │   │   │   ├── model_client.py
 │   │   │   ├── prompt_builder.py
 │   │   │   ├── memory_store.py
-│   │   │   └── skill_loader.py
+│   │   │   ├── skill_loader.py
+│   │   │   ├── session_store.py
+│   │   │   └── generation_service.py
 │   │   └── skills/           # 内置 SKILL.md（随仓库分发，只读）
 │   │       ├── 续写.md              # kind: quick_action
 │   │       ├── 润色.md
@@ -88,6 +92,9 @@ AINovel/
             ├── settings.json
             ├── memory.json
             ├── outline.json
+            ├── agent/                # Agent 会话
+            │   ├── sessions.json
+            │   └── sessions/{sid}.json
             └── chapters/
                 └── chapter_01.md
 ```
@@ -107,12 +114,16 @@ AINovel/
 │  - 提示词组装 (prompt_builder)       │
 │  - 记忆读写 (memory_store)           │
 │  - SKILL 加载 (skill_loader)         │
+│  - Agent 会话 (session_store)        │
+│  - 流式生成 (generation_service/SSE) │
 ├─────────────────────────────────────┤
 │  本地存储：SQLite / JSON            │
 ├─────────────────────────────────────┤
 │  外部：用户自备大模型 API            │
 └─────────────────────────────────────┘
 ```
+
+> HTTP 路由索引入口：`backend/app/api_catalog.py`（`API_INDEX` + `register_routers`）。架构说明见 `docs/build/06-Agent生成与会话链路.md`。
 
 ---
 
@@ -233,6 +244,8 @@ $user_input
 
 ## 6. API 路由规划（初步）
 
+> 完整 METHOD + path 索引见 [`backend/app/api_catalog.py`](backend/app/api_catalog.py) 顶部 `API_INDEX`。
+
 | 路由 | 说明 |
 | --- | --- |
 | `GET /api/projects` | 项目列表 |
@@ -243,7 +256,11 @@ $user_input
 | `GET /api/projects/{id}/chapters/{cid}` | 章节正文 |
 | `GET /api/projects/{id}/memory` | 获取记忆 |
 | `PUT /api/projects/{id}/memory` | 更新记忆 |
-| `POST /api/projects/{id}/generate` | AI 生成（续写/润色等） |
+| `GET /api/projects/{id}/agent/sessions` | Agent 会话列表 |
+| `POST /api/projects/{id}/agent/sessions` | 新建 Agent 会话 |
+| `GET /api/projects/{id}/agent/sessions/{sid}` | 会话详情（含消息） |
+| `DELETE /api/projects/{id}/agent/sessions/{sid}` | 删除会话 |
+| `POST /api/projects/{id}/generate` | AI 流式生成（SSE；续写/润色等） |
 | `GET /api/skills` | 技能列表（可按 kind 过滤） |
 | `GET /api/skills/{name}` | 技能详情 |
 | `PUT /api/skills/{name}` | 新建/更新自定义技能（写入 `data/skills/`） |

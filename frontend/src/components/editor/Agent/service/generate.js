@@ -1,29 +1,46 @@
-import { AI_PLACEHOLDER } from '../utils/constants'
+import { streamGenerate } from '../../../../api/generate'
 
 /**
- * Agent 生成调用（占位）。
- * 后续改为流式 generate + AbortController（signal.abort()）。
+ * Agent 生成：调用后端 SSE，经 onEvent / onDelta 回写 UI。
  */
 export async function runAgentGenerate({
-  projectId: _projectId,
-  skillName: _skillName,
-  userInput: _userInput,
-  tempRules: _tempRules,
+  projectId,
+  sessionId,
+  skillName,
+  userInput,
+  tempRules = '',
+  chapterId,
+  currentContent = '',
+  selectedText = '',
+  model,
   signal,
+  onEvent,
+  onDelta,
 }) {
-  await new Promise((resolve, reject) => {
-    const timer = window.setTimeout(resolve, 600)
-    if (!signal) return
-    const onAbort = () => {
-      window.clearTimeout(timer)
-      reject(new DOMException('Aborted', 'AbortError'))
-    }
-    if (signal.aborted) {
-      onAbort()
-      return
-    }
-    signal.addEventListener('abort', onAbort, { once: true })
+  const result = await streamGenerate({
+    projectId,
+    body: {
+      session_id: sessionId,
+      skill_name: skillName,
+      chapter_id: chapterId || undefined,
+      current_content: currentContent,
+      selected_text: selectedText,
+      user_input: userInput,
+      chapter_rules: tempRules || '',
+      model: model || undefined,
+    },
+    signal,
+    onEvent: (ev) => {
+      onEvent?.(ev)
+      if (ev?.type === 'content' && ev.content) {
+        onDelta?.(ev.content)
+      }
+    },
   })
 
-  return { content: AI_PLACEHOLDER, pending: true }
+  if (result.error && !result.content) {
+    throw new Error(result.error)
+  }
+
+  return result
 }

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { LoaderCircle, Plus, Sparkles } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
@@ -101,6 +109,16 @@ function ChapterMain({
   onDiscardDraft,
   toolbar,
 }) {
+  const textareaRef = useRef(null)
+
+  // 正文增高由 canvas 滚动；textarea 自身不出现滚动条
+  useLayoutEffect(() => {
+    const el = textareaRef.current
+    if (!el) return
+    el.style.height = 'auto'
+    el.style.height = `${Math.max(el.scrollHeight, 280)}px`
+  }, [content, loadingChapter, aiDraft])
+
   return (
     <section className="editor-page__main">
       {toolbar}
@@ -180,6 +198,7 @@ function ChapterMain({
             ) : (
               <>
                 <textarea
+                  ref={textareaRef}
                   className="editor-page__textarea"
                   value={content}
                   onChange={(e) => onContentChange(e.target.value)}
@@ -598,6 +617,10 @@ export default function EditorPage() {
         mode={rightPanel.mode}
         projectId={projectId}
         tempRules={tempRules}
+        chapterId={activeChapterId}
+        currentContent={content}
+        selectedText=""
+        setAiDraft={setAiDraft}
         draft={aiDraft}
         onApplyDraft={handleApplyDraft}
         onDiscardDraft={handleDiscardDraft}
