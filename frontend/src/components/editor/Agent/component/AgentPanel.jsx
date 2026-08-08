@@ -9,7 +9,6 @@ import '../styles/AgentPanel.css'
 import { ChatPanel } from './chatpanel/ChatPanel'
 import { InputBar } from './inputbar/InputBar'
 import { HistoryPanel } from './shell/HistoryPanel'
-import { QuickActions } from './shell/QuickActions'
 
 /**
  * 右侧 AI Agent 栏（仅界面；生成走后续链路）
@@ -30,7 +29,6 @@ export function AgentPanel({
     activeSessionId,
     activeSession,
     messagesEndRef,
-    selectedSkill,
     input,
     setInput,
     notice,
@@ -109,17 +107,12 @@ export function AgentPanel({
             onApplyDraft={onApplyDraft}
             onDiscardDraft={onDiscardDraft}
             onRetry={handleRetry}
+            onQuickAction={handleQuickAction}
+            generating={generating}
           />
           <InputBar
             notice={notice}
             onDismissNotice={() => setNotice('')}
-            actions={
-              <QuickActions
-                selectedSkill={selectedSkill}
-                onQuickAction={handleQuickAction}
-                generating={generating}
-              />
-            }
             generating={generating}
             input={input}
             onInputChange={setInput}

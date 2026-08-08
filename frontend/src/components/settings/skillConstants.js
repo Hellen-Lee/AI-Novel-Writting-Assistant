@@ -1,5 +1,5 @@
 import {
-  Bookmark,
+  BookOpen,
   Maximize2,
   PenLine,
   Puzzle,
@@ -24,7 +24,7 @@ const NAME_ICON = {
   续写: PenLine,
   润色: Sparkles,
   扩写: Maximize2,
-  生成设定: Bookmark,
+  生成设定: BookOpen,
 }
 
 export function skillIcon(name) {

@@ -2,14 +2,10 @@ import { ArrowUp, Plus, Square, X } from 'lucide-react'
 import '../../styles/InputBar.css'
 import { ModelPicker } from './ModelPicker'
 
-/**
- * 底栏：notice + 可选 actions 槽（快捷指令）+ 输入区。
- * actions 由 AgentPanel 传入 shell/QuickActions，保持原 footer 视觉顺序。
- */
+/** 底栏：notice + 输入区（快捷指令仅出现在无消息空态） */
 export function InputBar({
   notice,
   onDismissNotice,
-  actions = null,
   generating,
   input,
   onInputChange,
@@ -37,8 +33,6 @@ export function InputBar({
           </button>
         </div>
       ) : null}
-
-      {actions}
 
       <div className="agent-panel__composer">
         <textarea

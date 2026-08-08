@@ -1,7 +1,7 @@
 import '../../styles/ChatPanel.css'
 import { MessageList } from './MessageList'
 
-/** 仅消息区；底栏由 AgentPanel 组装 QuickActions + InputBar */
+/** 消息区；无消息时展示空态引导与快捷指令 */
 export function ChatPanel({
   messages,
   messagesEndRef,
@@ -9,6 +9,8 @@ export function ChatPanel({
   onApplyDraft,
   onDiscardDraft,
   onRetry,
+  onQuickAction,
+  generating,
 }) {
   return (
     <MessageList
@@ -18,6 +20,8 @@ export function ChatPanel({
       onApplyDraft={onApplyDraft}
       onDiscardDraft={onDiscardDraft}
       onRetry={onRetry}
+      onQuickAction={onQuickAction}
+      generating={generating}
     />
   )
 }

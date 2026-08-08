@@ -53,7 +53,7 @@ export function AgentPanel() {
 | `Agent/index.jsx` | Agent 域出口：`export { AgentPanel }`（页面经 `EditorRightRail` 间接使用） |
 
 - 页面编排：`EditorPage` 持有 `rightPanel` + `useAgentRules`，组合 `EditorToolbar` 与 `EditorRightRail`。
-- 快捷指令属壳层（`shell/QuickActions`），不属于 `inputbar`。
+- 快捷指令属壳层（`shell/QuickActions`），仅在无消息空态由 `MessageList` 展示；有消息时不出现在底栏。
 - 头栏入口较少时可内联在 `AgentPanel`，不必再抽 Header 文件。
 - 样式：工具栏 / 右栏与组件同目录；Agent 样式放在 `Agent/styles/`，按 UI 块拆分。
 
@@ -73,9 +73,9 @@ export function AgentPanel() {
 
 ---
 
-## 5. 设定库卡片布局（硬约束）
+## 5. UI卡片布局（硬约束）
 
-适用于 `MemoryPage` / `components/memory/` 卡片工作区：
+适用于所有界面卡片布局：
 
 1. **禁止卡片固定宽度**（如 `width: 584px`）。卡片一律 `width: 100%`，网格用 `minmax(0, 1fr)` 自适应容器。
 2. **同行最多两张同类型卡片**：双列网格 `repeat(2, minmax(0, 1fr))`；容器过窄（`max-width: 960px`）降为单列。设计为单列的分类（`story_core`、`outline`、世界观主卡）保持纵向堆叠，不强制凑双列。
