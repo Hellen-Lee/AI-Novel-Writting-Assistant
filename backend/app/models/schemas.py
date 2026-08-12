@@ -275,6 +275,7 @@ class SessionDetail(BaseModel):
     title: str = "新对话"
     messages: list[AgentMessage] = Field(default_factory=list)
     status: str = "idle"
+    summary: str = ""
     created_at: str = ""
     updated_at: int = 0
 
@@ -290,10 +291,12 @@ class SessionListResponse(BaseModel):
 
 class GenerateRequest(BaseModel):
     session_id: str = Field(..., min_length=1)
-    skill_name: str = Field(..., min_length=1)
+    # Omit / null → Router (auto skill or chat). Explicit → skip Router.
+    skill_name: Optional[str] = None
     chapter_id: Optional[str] = None
     current_content: str = ""
     selected_text: str = ""
     user_input: str = ""
     chapter_rules: str = ""
     model: Optional[str] = None
+    # Future (not wired this phase): ask_reply: { ask_id, option_id | text }

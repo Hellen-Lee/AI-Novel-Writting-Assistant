@@ -43,7 +43,7 @@ export function InputBar({
           placeholder={
             generating
               ? '正在生成回复，可点击终止…'
-              : '输入 / 调用技能，或直接对话…'
+              : '直接对话，或输入 /技能名、点下方快捷指令…'
           }
           onChange={(e) => onInputChange(e.target.value)}
           onKeyDown={(e) => {

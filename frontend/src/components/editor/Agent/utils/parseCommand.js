@@ -5,24 +5,22 @@ const SLASH_NAME_RE =
 
 /**
  * 解析 Composer 输入中的 `/name` 技能调用。
- * @returns {{ skillId: string, userText: string, matched: boolean }}
+ * 未匹配 `/` 时 skillId 为 null（走后端 Router / 闲聊）。
+ * @returns {{ skillId: string|null, userText: string, matched: boolean, label: string }}
  */
-export function parseCommand(raw, fallbackSkillId) {
+export function parseCommand(raw) {
   const text = (raw || '').trim()
   const slash = text.match(SLASH_NAME_RE)
   if (!slash) {
-    return { skillId: fallbackSkillId, userText: text, matched: false }
+    return { skillId: null, userText: text, matched: false, label: '' }
   }
 
   const name = slash[1]
   const mapped = QUICK_ACTIONS.find((q) => q.id === name)
-  if (!mapped) {
-    return { skillId: fallbackSkillId, userText: text, matched: false }
-  }
-
   return {
-    skillId: mapped.id,
-    userText: slash[2].trim() || `/${mapped.id}`,
+    skillId: mapped?.id || name,
+    userText: slash[2].trim() || `/${mapped?.id || name}`,
     matched: true,
+    label: mapped?.label || name,
   }
 }

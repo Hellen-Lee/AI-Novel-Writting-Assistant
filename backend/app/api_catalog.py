@@ -57,7 +57,7 @@ API_INDEX: list[tuple[str, str, str]] = [
     ("GET", "/api/projects/{id}/agent/sessions/{sid}", "会话详情（含消息）"),
     ("DELETE", "/api/projects/{id}/agent/sessions/{sid}", "删除会话"),
     # generation (SSE)
-    ("POST", "/api/projects/{id}/generate", "技能流式生成（SSE）"),
+    ("POST", "/api/projects/{id}/generate", "Agent 流式生成（SSE；可选 skill_name / Router）"),
 ]
 
 

@@ -2,11 +2,35 @@
 
 from __future__ import annotations
 
+import json
 from string import Template
 from typing import Any, Optional
 
-from app.services import memory_store, project_store, skill_loader
+from app.services import memory_store, project_store, session_store, skill_loader
 from app.services.skill_loader import KIND_QUICK_ACTION, KIND_SKILL
+
+# L0 / history defaults (see docs/build/07)
+THIN_CHAPTER_TAIL_CHARS = 2000
+THIN_GLOBAL_RULES_CHARS = 800
+CONVERSATION_NOTE_MAX_CHARS = 500
+HISTORY_KEEP_ROUNDS = session_store.HISTORY_KEEP_ROUNDS
+
+CHAT_SYSTEM = (
+    "你是本地小说创作助手。用简洁中文与用户讨论设定、情节与写法。"
+    "不要擅自输出大段成章正文去替换章节，除非用户明确要求续写/润色类产出；"
+    "若用户意图不清，先简短澄清。可提示对方使用快捷按钮或 /技能名。"
+)
+
+ROUTER_SYSTEM = (
+    "你是路由助手。根据用户意图，在候选 skill 中选一个，或判定为闲聊/需澄清。"
+    "只输出一个 JSON 对象，不要其它文字。格式：\n"
+    '{"decision":"skill"|"chat"|"clarify","skill_name":"","reason":""}\n'
+    "规则：\n"
+    "- decision=skill 时 skill_name 必须是候选列表中的 name；\n"
+    "- 无法匹配或只需讨论时用 chat；\n"
+    "- 意图模糊时用 clarify；\n"
+    "- 不要选择列表外的 skill。"
+)
 
 
 def _format_tags(tags: Any) -> str:
@@ -242,3 +266,262 @@ def build_from_project(
         extra=extra,
     )
     return build(skill_name, context)
+
+
+def _truncate(text: str, max_chars: int) -> str:
+    text = text or ""
+    if max_chars <= 0 or len(text) <= max_chars:
+        return text
+    return text[: max_chars - 10] + "…（截断）"
+
+
+def _chapter_title(
+    project_id: str, chapter_id: Optional[str]
+) -> str:
+    if not chapter_id:
+        return ""
+    try:
+        chapter = project_store.get_chapter(project_id, chapter_id)
+        return str(chapter.get("title") or chapter_id)
+    except FileNotFoundError:
+        return chapter_id or ""
+
+
+def build_thin_context(
+    project_id: str,
+    *,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    chapter_rules: str = "",
+    chapter_tail_chars: int = THIN_CHAPTER_TAIL_CHARS,
+) -> str:
+    """
+    L0 thin project context for Router / chat.
+    No full memory dump, no previous 3 chapters.
+    """
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    meta = project_store.load_meta(project_id)
+    settings = project_store.load_settings(project_id)
+    name = str(meta.get("name") or "").strip() or "未命名项目"
+    genre = str(meta.get("genre") or "").strip() or "（未设题材）"
+    global_rules = _truncate(
+        str(settings.get("global_rules") or "").strip(),
+        THIN_GLOBAL_RULES_CHARS,
+    ) or "（无）"
+    style = str(settings.get("style_preference") or "").strip() or "（无）"
+
+    content = current_content or ""
+    if not content and chapter_id:
+        try:
+            chapter = project_store.get_chapter(project_id, chapter_id)
+            content = str(chapter.get("content") or "")
+        except FileNotFoundError:
+            content = ""
+    title = _chapter_title(project_id, chapter_id) or "（当前章）"
+    tail = content[-chapter_tail_chars:] if content else "（空）"
+    if content and len(content) > chapter_tail_chars:
+        tail = "…（章末窗口）\n" + tail
+
+    rules_line = (chapter_rules or "").strip() or "（无）"
+
+    return (
+        f"书名：{name}\n"
+        f"题材：{genre}\n"
+        f"全局规则摘要：{global_rules}\n"
+        f"文风偏好：{style}\n"
+        f"当前章：{title}\n"
+        f"单章规则：{rules_line}\n"
+        f"当前章末尾：\n{tail}"
+    )
+
+
+def build_history_block(
+    session: dict[str, Any],
+    *,
+    keep_rounds: int = HISTORY_KEEP_ROUNDS,
+    include_pending: bool = False,
+) -> str:
+    """summary + recent K rounds (exclude empty pending assistant if desired)."""
+    summary = str(session.get("summary") or "").strip()
+    messages = session.get("messages") or []
+    if not isinstance(messages, list):
+        messages = []
+
+    usable: list[dict[str, Any]] = []
+    for msg in messages:
+        if not isinstance(msg, dict):
+            continue
+        if not include_pending and msg.get("pending") and not str(msg.get("content") or "").strip():
+            continue
+        usable.append(msg)
+
+    _older, recent = session_store.messages_for_history(
+        usable, keep_rounds=keep_rounds
+    )
+    parts: list[str] = []
+    if summary:
+        parts.append("【对话摘要】\n" + summary)
+    if recent:
+        parts.append(
+            "【最近对话】\n"
+            + session_store.format_messages_for_summary(recent, max_chars=8000)
+        )
+    return "\n\n".join(parts) if parts else "（暂无历史）"
+
+
+def conversation_note_from_session(
+    session: dict[str, Any],
+    *,
+    max_chars: int = CONVERSATION_NOTE_MAX_CHARS,
+) -> str:
+    """Ultra-short note for skill path so chat history does not dominate."""
+    summary = str(session.get("summary") or "").strip()
+    if summary:
+        return _truncate(summary, max_chars)
+    _older, recent = session_store.messages_for_history(
+        session.get("messages") or [], keep_rounds=2
+    )
+    if not recent:
+        return ""
+    return _truncate(
+        session_store.format_messages_for_summary(recent, max_chars=max_chars),
+        max_chars,
+    )
+
+
+def build_router_prompt(
+    project_id: str,
+    *,
+    session: dict[str, Any],
+    user_input: str,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    chapter_rules: str = "",
+    candidate_skills: Optional[list[dict[str, Any]]] = None,
+) -> tuple[str, str]:
+    thin = build_thin_context(
+        project_id,
+        chapter_id=chapter_id,
+        current_content=current_content,
+        chapter_rules=chapter_rules,
+    )
+    history = build_history_block(session)
+    skills = candidate_skills
+    if skills is None:
+        skills = skill_loader.list_skills(include_auto_invocable_only=True)
+    catalog_lines: list[str] = []
+    for s in skills:
+        name = str(s.get("name") or "").strip()
+        desc = str(s.get("description") or "").strip()
+        if name:
+            catalog_lines.append(f"- {name}：{desc or '（无描述）'}")
+    catalog = "\n".join(catalog_lines) if catalog_lines else "（无可自动调用的 skill）"
+
+    user = (
+        f"{thin}\n\n"
+        f"{history}\n\n"
+        f"【可自动调用的 skill】\n{catalog}\n\n"
+        f"【用户本轮输入】\n{(user_input or '').strip() or '（空）'}\n\n"
+        "请输出 JSON 决策。"
+    )
+    return ROUTER_SYSTEM, user
+
+
+def build_chat_prompt(
+    project_id: str,
+    *,
+    session: dict[str, Any],
+    user_input: str,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    chapter_rules: str = "",
+    clarify: bool = False,
+) -> tuple[str, str, str]:
+    """
+    Returns (system, user_without_history_merged, history_block).
+    Caller may run budget on history separately then concatenate.
+    """
+    thin = build_thin_context(
+        project_id,
+        chapter_id=chapter_id,
+        current_content=current_content,
+        chapter_rules=chapter_rules,
+    )
+    history = build_history_block(session)
+    clarify_hint = (
+        "用户意图可能不清晰，请先用一两句澄清想做什么"
+        "（续写 / 润色 / 讨论设定等），并可提示使用快捷按钮或 /技能名。\n\n"
+        if clarify
+        else ""
+    )
+    user_core = (
+        f"{thin}\n\n"
+        f"{clarify_hint}"
+        f"【用户本轮输入】\n{(user_input or '').strip() or '（空）'}\n\n"
+        "请回复用户。"
+    )
+    return CHAT_SYSTEM, user_core, history
+
+
+def merge_history_into_user(history: str, user_core: str) -> str:
+    hist = (history or "").strip()
+    if not hist or hist == "（暂无历史）":
+        return user_core
+    return f"{hist}\n\n{user_core}"
+
+
+def append_conversation_note(user_prompt: str, note: str) -> str:
+    note = (note or "").strip()
+    if not note:
+        return user_prompt
+    return (
+        f"{user_prompt}\n\n"
+        f"【对话备忘（极短，勿被其带偏主任务）】\n{note}"
+    )
+
+
+def parse_router_response(
+    raw: str,
+    *,
+    allowed_names: set[str],
+) -> dict[str, str]:
+    """Parse router JSON; degrade to chat on failure."""
+    text = (raw or "").strip()
+    if not text:
+        return {"decision": "chat", "skill_name": "", "reason": "empty_router"}
+
+    # Extract first JSON object if model wrapped it in markdown
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        text = text[start : end + 1]
+
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        return {"decision": "chat", "skill_name": "", "reason": "parse_error"}
+
+    if not isinstance(data, dict):
+        return {"decision": "chat", "skill_name": "", "reason": "parse_error"}
+
+    decision = str(data.get("decision") or "").strip().lower()
+    skill_name = str(data.get("skill_name") or "").strip()
+    reason = str(data.get("reason") or "").strip()
+
+    if decision == "skill":
+        if skill_name in allowed_names:
+            return {
+                "decision": "skill",
+                "skill_name": skill_name,
+                "reason": reason,
+            }
+        return {
+            "decision": "chat",
+            "skill_name": "",
+            "reason": reason or "skill_not_allowed",
+        }
+    if decision == "clarify":
+        return {"decision": "clarify", "skill_name": "", "reason": reason}
+    return {"decision": "chat", "skill_name": "", "reason": reason or "chat"}

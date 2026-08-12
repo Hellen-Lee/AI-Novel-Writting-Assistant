@@ -123,6 +123,8 @@ def get_session(project_id: str, session_id: str) -> dict[str, Any]:
     data.setdefault("messages", [])
     data.setdefault("title", "新对话")
     data.setdefault("status", "idle")
+    data.setdefault("summary", "")
+    data.setdefault("summary_at_round_count", 0)
     data.setdefault("updated_at", _now_ms())
     return data
 
@@ -134,6 +136,8 @@ def create_session(project_id: str, title: str = "新对话") -> dict[str, Any]:
         "id": _new_session_id(),
         "title": clean_title[:64],
         "messages": [],
+        "summary": "",
+        "summary_at_round_count": 0,
         "status": "idle",
         "created_at": _now_iso(),
         "updated_at": _now_ms(),
@@ -190,6 +194,119 @@ def append_messages(
     if status is not None:
         session["status"] = status
     return save_session(project_id, session)
+
+
+def update_session_fields(
+    project_id: str,
+    session_id: str,
+    *,
+    summary: Optional[str] = None,
+    summary_at_round_count: Optional[int] = None,
+    status: Optional[str] = None,
+) -> dict[str, Any]:
+    """Patch session-level fields (summary / status). Future: pending_run, waiting_user."""
+    session = get_session(project_id, session_id)
+    if summary is not None:
+        session["summary"] = summary
+    if summary_at_round_count is not None:
+        session["summary_at_round_count"] = int(summary_at_round_count)
+    if status is not None:
+        session["status"] = status
+    return save_session(project_id, session)
+
+
+# --- Conversation rounds / summary helpers ---
+
+# Defaults used by generation_service (keep in sync with docs/build/07)
+HISTORY_KEEP_ROUNDS = 3
+SUMMARY_TRIGGER_ROUNDS = 6
+SUMMARY_MIN_NEW_ROUNDS = 2
+
+
+def count_rounds(messages: list[Any]) -> int:
+    """Count user+assistant pairs (orphan trailing user counts as a round)."""
+    if not isinstance(messages, list):
+        return 0
+    users = sum(1 for m in messages if isinstance(m, dict) and m.get("role") == "user")
+    return users
+
+
+def iter_rounds(messages: list[Any]) -> list[list[dict[str, Any]]]:
+    """Group messages into rounds starting at each user message."""
+    if not isinstance(messages, list):
+        return []
+    rounds: list[list[dict[str, Any]]] = []
+    current: list[dict[str, Any]] = []
+    for msg in messages:
+        if not isinstance(msg, dict):
+            continue
+        role = msg.get("role")
+        if role == "user":
+            if current:
+                rounds.append(current)
+            current = [msg]
+        elif current:
+            current.append(msg)
+    if current:
+        rounds.append(current)
+    return rounds
+
+
+def messages_for_history(
+    messages: list[Any],
+    *,
+    keep_rounds: int = HISTORY_KEEP_ROUNDS,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """
+    Split into (older_rounds_flat, recent_rounds_flat).
+    Recent = last keep_rounds; older = everything before (for summarization input).
+    """
+    rounds = iter_rounds(messages)
+    if keep_rounds <= 0 or len(rounds) <= keep_rounds:
+        recent: list[dict[str, Any]] = []
+        for r in rounds:
+            recent.extend(r)
+        return [], recent
+    older_rounds = rounds[:-keep_rounds]
+    recent_rounds = rounds[-keep_rounds:]
+    older: list[dict[str, Any]] = []
+    for r in older_rounds:
+        older.extend(r)
+    recent = []
+    for r in recent_rounds:
+        recent.extend(r)
+    return older, recent
+
+
+def should_refresh_summary(
+    session: dict[str, Any],
+    *,
+    trigger_rounds: int = SUMMARY_TRIGGER_ROUNDS,
+    min_new_rounds: int = SUMMARY_MIN_NEW_ROUNDS,
+) -> bool:
+    messages = session.get("messages") or []
+    rounds = count_rounds(messages)
+    if rounds <= trigger_rounds:
+        return False
+    prev = int(session.get("summary_at_round_count") or 0)
+    return (rounds - prev) >= min_new_rounds
+
+
+def format_messages_for_summary(messages: list[dict[str, Any]], *, max_chars: int = 6000) -> str:
+    lines: list[str] = []
+    for msg in messages:
+        role = str(msg.get("role") or "")
+        content = str(msg.get("content") or "").strip()
+        if not content:
+            continue
+        label = "用户" if role == "user" else "助手"
+        skill = str(msg.get("skill") or "").strip()
+        prefix = f"{label}" + (f"[{skill}]" if skill else "")
+        lines.append(f"{prefix}：{content}")
+    text = "\n".join(lines)
+    if len(text) > max_chars:
+        return text[: max_chars - 20] + "\n…（已截断）"
+    return text
 
 
 def update_message(

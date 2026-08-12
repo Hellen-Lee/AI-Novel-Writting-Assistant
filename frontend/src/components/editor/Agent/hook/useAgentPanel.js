@@ -123,15 +123,18 @@ export function useAgentPanel({
     if (generating) return
     const raw = input.trim()
     if (!raw) {
-      showNotice('请输入指令，或点击快捷指令。')
+      showNotice('请输入内容，或点击快捷指令 / 输入 /技能名。')
       return
     }
 
-    const { skillId, userText, matched } = parseCommand(raw, selectedSkill)
-    if (matched) {
+    const { skillId, userText, matched } = parseCommand(raw)
+    if (matched && skillId) {
       setSelectedSkill(skillId)
+      handleTriggerGenerate(skillId, userText)
+      return
     }
-    handleTriggerGenerate(skillId, userText)
+    // Free text → omit skill_name (Router / chat)
+    handleTriggerGenerate(null, userText)
   }
 
   const handleQuickAction = (id, label) => {

@@ -1,0 +1,374 @@
+# 轻量通用 Agent 开发方向（初步方案）
+
+> 状态：本期 L1 已排期落地（见 [`docs/build/07-轻量Agent闲聊与Router.md`](build/07-轻量Agent闲聊与Router.md)）  
+> 前置现状：[`docs/build/06-Agent生成与会话链路.md`](build/06-Agent生成与会话链路.md)、[`docs/记忆规则与提示词组装.md`](记忆规则与提示词组装.md)  
+> 相关代码：`prompt_builder`、`generation_service`、`session_store`、`context_budget`、`run_store`、`skill_loader`；前端 `components/editor/Agent/`
+
+**标记约定**
+
+| 标记 | 含义 |
+| --- | --- |
+| `【本期】` | 本期做：P0 + P1（闲聊 / 摘要 / Router / 分流）；含最小 run 落盘挂点 |
+| `【后续】` | 本期不做，排到 P2 / P3 |
+| `【不做】` | 明确排除 |
+| `【另案】` | Agent Viewer UI：不进本期，另起 plan；消费本期 `agent/runs/` |
+
+本期范围一句话：**闲聊 + 摘要截断 + Router 自动选 skill + 上下文分流 + run 落盘挂点**；确认卡 / 工具 / Top-K 记忆 / Viewer UI 放到后续或另案。
+
+**Router 策略（已拍板）**：完全尊重 `disable-model-invocation`。仅字段为 `false` 的 skill 可被自动选；内置四个 quick_action 保持 `true`（按钮 / `/name`）；用户自定义可在设置中打开自动选。失败或无可选 skill → `chat`。
+
+---
+
+## 0. 一句话结论
+
+轻量通用 Agent **可以做**，且应做成「写小说的上下文形态」，而不是照搬 IDE Agent。
+
+核心不是堆更多模型能力，而是：
+
+**默认少塞 → 按 skill / 工具按需加厚 → 对话靠摘要 → 关键写入靠确认卡。**
+
+落地顺序建议：`P0 → P1 → P2`，与现有 SSE / `ask` 预留完全合拍；先不要上 LangGraph、多 Agent 或通用 tool loop。
+
+---
+
+## 1. 目标与非目标
+
+### 1.1 要做成什么样
+
+在编辑页 Agent 栏里，用户可以：
+
+1. `【本期】` **少点按钮**：自然语言输入后，系统自动判断该走某个 skill、闲聊，还是先澄清。
+2. `【后续】` **关键操作可确认**：写入设定、选定剧情分支、采用大段改写前，弹出确认卡片（`ask`）。
+3. `【后续】` **按需读项目**：少量小说专用工具拉取章节 / 记忆 / 大纲，而不是每轮全量注入。
+
+产品气质仍然是「小说写作助手」，不是「半个 Cursor」。
+
+### 1.2 能力分层（只做前两层）
+
+| 层 | 能力 | 写小说价值 | 标记 |
+| --- | --- | --- | --- |
+| **L1** | 自动选 skill + 多轮闲聊 | 高：少点按钮 | `【本期】` |
+| **L2** | 确认卡片（`ask`）+ 少量白名单工具 | 高：定调、选分支、写入设定前确认 | `【后续】` |
+| **L3** | 任意工具 / 多步规划 / 浏览器 / shell | 低：成本与复杂度陡增 | `【不做】` |
+
+### 1.3 明确不做 `【不做】`
+
+- 通用 shell、任意文件树、浏览器自动化。
+- 开放式 ReAct / 无限 tool 循环。
+- 一上来 LangGraph、多 Agent 分工框架。
+- 每轮把「完整 system + user 历史 prompt」原样累加。
+- 「近 3 章全文 + 全量记忆 + 长对话」三件套常驻。
+
+---
+
+## 2. 现状与痛点
+
+### 2.1 今天怎么工作
+
+见 `06-Agent生成与会话链路.md`：
+
+- `POST /generate` → HTTP SSE 流式正文。
+- 用户显式指定 `skill_name`（按钮或 `/name`）。
+- `prompt_builder.build_from_project` 一次注入：记忆 + 近 3 章 + 当前章 + 规则 + skill 模板。
+- 会话消息落盘供人回看；**尚未**把 chat history 注入模型。
+- `type: ask`、自动选 skill、tool calling 均在契约或规划中预留，未实现。
+
+### 2.2 直接做成「通用 Agent」会炸在哪里
+
+若在现有 skill 全量注入之上，再叠加：
+
+- 多轮 chat history
+- Router 中间结果
+- 工具返回文本
+
+上下文会迅速膨胀，续写质量与成本都会失控。  
+因此 **「怎么压上下文」比「怎么加 Agent 能力」更优先**。
+
+---
+
+## 3. 上下文策略（主方案）
+
+### 3.1 分层上下文
+
+```text
+L0 常驻（短）     书名/题材、全局规则摘要、当前章标题 + 末尾 N 字
+L1 按需拉取       某个人物卡片、某一章、某卷纲（工具或检索）
+L2 本轮对话       最近 K 轮摘要 + 当前 user
+L3 Skill 正文     选中 skill 后才展开完整模板变量
+```
+
+原则：**默认薄，需要时再厚。**
+
+| 调用类型 | 建议装载 | 标记 |
+| --- | --- | --- |
+| Router（自动选 skill） | 仅 L0 + L2 + skill 的 `name/description` 列表 | `【本期】` |
+| 纯闲聊 | L0 + L2（项目上下文保持薄） | `【本期】` |
+| 执行 skill（续写/润色等） | L0 + 该 skill 需要的变量 + 极短对话摘要（本期可先薄化，不必一次上齐所有按需策略） | `【本期】` |
+| 工具补充后再生 | 在本轮 messages 中追加工具结果，再生成；仍受预算约束 | `【后续】` |
+
+### 3.2 压缩手段（按性价比）
+
+#### ① 滑动窗口 + 对话摘要（收益最大）`【本期】`
+
+- 会话超过 N 轮：旧轮压成一段「对话摘要」写入 session（如 `summary` 字段）。
+- 模型只看：摘要 + 最近 2～4 轮原文。
+- 改动中等，对闲聊与多轮澄清最有效。
+
+#### ② 章节不要整章常驻 `【后续】`（本期可先保留现状，或仅做「当前章末窗口」小步）
+
+- **续写默认**：当前章末 2k～4k 字 +「前序章一句话摘要」（可预计算进 `outline` / 章 meta）。
+- 今日「最近 3 章全文」改为工具 `read_chapter`：模型需要对比前文时再拉。
+- 润色 / 扩写：以 `$selected_text` 或当前段为主，不必带三章全文。
+
+#### ③ 记忆按相关性注入 `【后续】`（P3）
+
+- 不要每次 dump 全部 `characters` / `worldview`。
+- MVP 可用：关键词 + 当前章出现的人名 → Top-K 条目；其余走 `search_memory`。
+- 向量库放到更后期；简单匹配先够用。
+
+#### ④ Skill 分流加载 `【本期】`
+
+- **Router 调用**：只给 skill `name + description`（尊重 `disable-model-invocation`）。
+- **执行调用**：再 `build_from_project`（或演进后的按需组装）拼完整 prompt。
+- 禁止「选 skill 的那一跳」就带上三章正文与全量记忆。
+
+#### ⑤ 确认卡片打断时冻结上下文 `【后续】`（随 `ask`）
+
+- `ask` 暂停时，把本轮已组装的 **prompt 指纹 / `run_id`** 挂在 session（`waiting_user`）。
+- 用户选完只追加答案再 continue，不必整包重算（除非章节/记忆在等待期间已改）。
+
+#### ⑥ 预算会计 `【本期】`（可先粗估；数据写入 run，Viewer 另案验收）
+
+用设置里已有的 `context_window` 做硬预算：
+
+```text
+system + history + tool_results + skill_body  ≤  0.7 × context_window
+```
+
+预留 completion。超限砍序建议：
+
+1. 更早的对话轮次（保留摘要）
+2. 次要记忆条目
+3. 当前章前部（保留末尾窗口）
+
+Token 估算不必一开始就精确到 tokenizer；字符粗估 + 观测日志即可起步。
+
+---
+
+## 4. 运行时设计（适合 SSE，不必上 WS）
+
+与 `06` 文档一致：多轮 HTTP + SSE 事件类型即可。
+
+```text
+用户输入
+  → (可选) Router：skill / chat / clarify / tool_hint
+  → 若需确认 → SSE type=ask → 本轮结束（session=waiting_user）
+  → 用户选项 → POST continue / 再次 generate
+  → 执行 skill 或 chat 或 1～2 跳工具
+  → SSE content… → [DONE]
+```
+
+### 4.1 自动选 skill（Router）`【本期】`
+
+- 一次**短** structured 输出，例如：`skill_name | chat | clarify`（可选附带一句 reason）。
+- 输入仅 L0 + L2 + 可选 skill 目录（name/description）。
+- 失败降级：走 chat，或提示用户点快捷按钮 / 输入 `/name`。
+- **已拍板**：完全尊重 `disable-model-invocation`；内置续写等保持默认 `true`（不可自动选）。
+
+### 4.2 工具（白名单、小说专用、少步骤）`【后续】`
+
+建议首批：
+
+| 工具 | 读写 | 用途 |
+| --- | --- | --- |
+| `read_chapter` | 读 | 按章拉取正文（可带 offset/limit） |
+| `get_outline` | 读 | 卷纲 / 章列表 / 章摘要 |
+| `search_memory` | 读 | 按关键词检索人物/世界观/故事内核 |
+| `propose_memory_write` | 提议写 | 生成待写入草案，**必须经 ask 确认**后才落 `memory.json` |
+
+约束：
+
+- 同步执行，最多 **1～2 跳**，结果写入本轮 messages 再生成。
+- 不做开放式多步规划；超步数则 clarify 或交还用户。
+
+### 4.3 确认卡片（`ask`）`【后续】`
+
+优先场景（比通用 tool approval 更贴小说）：
+
+1. **写入记忆**（人物/世界观/故事内核）
+2. **选定剧情分支**（A/B/C 定调）
+3. **采用大段改写**（润色/扩写结果是否替换选区）
+
+传输仍用现有预留：
+
+```text
+SSE: {"type":"ask", "ask_id", "title", "options":[...], ...}
+session 标记 waiting_user + 冻结 run 上下文
+用户选择 → continue → 继续 content 或落盘
+```
+
+---
+
+## 5. 与「写小说为主」对齐的产品规则
+
+| 场景 | 上下文策略 | 结果去向 | 标记 |
+| --- | --- | --- | --- |
+| 明确 skill（按钮 / `/` / Router 选中） | **以 skill 模板为主**；chat history 只带极短摘要 | 续写/润色类可进 `aiDraft`；设定类走确认后入库 | `【本期】` |
+| 纯闲聊 | history 为主 + **薄**项目上下文（L0） | 默认**不进** `aiDraft`，只留在会话气泡 | `【本期】` |
+| 工具写设定 | 必须 `ask` 确认 | 确认后写 `memory.json` | `【后续】` |
+| Router | 尊重 `disable-model-invocation` | 不可自动选的 skill 仍靠按钮/`/` | `【本期】` |
+
+可复现性要求：同一章、同一 skill、相近输入，续写结果不应因「闲聊历史很长」而漂到不可控；故 skill 执行路径要刻意压低 history 权重。
+
+---
+
+## 6. 模块演进建议（相对现状）
+
+在不大拆现有结构的前提下，建议增量演进：
+
+| 模块 | 现状 | 演进方向 | 标记 |
+| --- | --- | --- | --- |
+| `prompt_builder` | 全量 `build_from_project` | 拆出 `build_thin_context` / `build_skill_context`（Top-K / 章末窗口可后置） | `【本期】` 分流；`【后续】` Top-K |
+| `generation_service` | skill → 流式 → 落盘 | 增加 mode：`router` / `chat` / `skill`；`continue_ask` 与工具环后置 | `【本期】` router/chat/skill |
+| `session_store` | messages 列表 | 增加 `summary`；`waiting_user` / `pending_run` 随 ask 后置 | `【本期】` summary |
+| `skill_loader` | 列表与详情 | Router 只暴露可自动调用的子集 | `【本期】` |
+| 新：`context_budget`（可先内嵌） | 无 | 按 `context_window` 截断与记账；数据写入 run | `【本期】` |
+| 新：只读/提议工具 | 无 | 薄封装，复用 chapter/memory/outline store | `【后续】` |
+| 前端 Agent | 气泡 + draft + 快捷按钮 | 闲聊与 skill 结果分流；`ask` 卡片后置 | `【本期】` 分流展示 |
+| 新：`run_store` | 无 | `agent/runs/{run_id}.json` 最小落盘 | `【本期】` 挂点 |
+| 新：`agent-viewer` | 无 | 开发者调试页，读 runs | `【另案】` |
+
+观测（本期只落盘，Viewer 另案）：
+
+- 每轮记录：mode、选用 skill、各段 token/字符估算、是否截断。
+- 落盘 run 明细供日后 Agent Viewer；**先不要**上复杂 tracing 框架。
+
+---
+
+## 7. 落地阶段
+
+| 阶段 | 内容 | 难度 | 验收直觉 | 标记 |
+| --- | --- | --- | --- | --- |
+| **P0** | 会话摘要 + 历史截断 + 无 skill 闲聊 | 中小 | 多轮闲聊不爆窗；不点按钮也能对话 | `【本期】` |
+| **P0.5** | 最小 run 落盘（无 UI） | 小 | `agent/runs/` 有可被 Viewer 读取的 JSON | `【本期】` 挂点 |
+| **P0.5b** | Agent Viewer 开发者可视化页 | 中小 | 打开链接看 prompt / 回复 / token / 剩余% | `【另案】` |
+| **P1** | Router 自动选 skill + skill/chat 分流加载上下文 | 中 | 可自动调用的 skill 能被自然语言选中；闲聊走 chat；内置续写等仍靠按钮/`/` | `【本期】` |
+| **P2** | `ask` 确认卡 + 2～4 个只读/提议写入工具 | 中 | 提议写入人物前必须点确认；需要时再读某章 | `【后续】` |
+| **P3** | 记忆 Top-K / 章摘要预计算 /（可选）向量检索 | 中～大 | 长篇项目续写仍稳、费用可控 | `【后续】` |
+
+### 性价比最高的三件事（均属本期）
+
+1. **分层上下文（默认薄）** `【本期】`
+2. **对话摘要** `【本期】`
+3. **Router 与执行两次调用、上下文分量不同** `【本期】`
+
+另加观测挂点：**最小 run 落盘**（本期）；**Agent Viewer UI** 见 §7.1（另案）。
+
+### 7.1 另案：Agent Viewer `【另案】`
+
+本期只保证 `data/projects/{id}/agent/runs/{run_id}.json` 落盘（含 Router / 执行分 step）。Viewer UI（独立页或 `/dev/agent-viewer`）另起 plan，只读这些文件或经调试 API 拉取。
+
+建议能力摘要：运行列表、完整 prompt/回复、token 估算、剩余上下文%、mode / skill / 截断元信息。验收与实现细节留给 Viewer 专项 plan。
+
+### 建议不提前做的事
+
+- P0 阶段不要并行上工具循环。
+- P1 未稳定前不要做向量库。
+- 任何阶段都不要为了「更像 Cursor」引入通用 shell。
+
+---
+
+## 8. 与现有契约的衔接（草案）
+
+在现有 generate SSE 上扩展即可，无需先换传输层：
+
+```text
+# 请求（增量字段，示意）
+POST /api/projects/{id}/generate
+{
+  session_id,
+  skill_name?,          # 有则跳过 Router；无则走自动选 / chat
+  user_input?,
+  chapter_id?, current_content?, selected_text?,
+  chapter_rules?,
+  ask_reply?: { ask_id, option_id | text },
+  model?
+}
+
+# SSE 事件（增量）
+meta | content | error | [DONE]
+ask          # 确认卡片（P2）
+# 可选后续：router_meta（选用了哪个 skill / 为何 chat）仅供 UI 展示
+```
+
+会话文件可增字段（示意）：
+
+```json
+{
+  "id": "sess_...",
+  "summary": "……",
+  "status": "idle | generating | waiting_user",
+  "pending_run": {
+    "run_id": "...",
+    "mode": "skill | chat | tool",
+    "skill_name": "续写",
+    "prompt_fingerprint": "...",
+    "ask": { }
+  },
+  "messages": [ ]
+}
+```
+
+具体字段以实施时 API 设计为准；本文只定方向。
+
+---
+
+## 9. 风险与取舍
+
+| 风险 | 缓解 |
+| --- | --- |
+| Router 选错 skill | 降级 chat；UI 保留按钮与 `/`；错误可一键重跑指定 skill |
+| 摘要丢失关键约束 | 摘要模板强制保留「已定调/已否决」要点；重要结论可写入章节规则或记忆 |
+| 章末窗口导致前后矛盾 | `read_chapter` + 前序一句话摘要；设定冲突靠相关记忆 Top-K |
+| 确认卡打断后章节被用户改过 | continue 前比对 fingerprint / 章节 mtime，过期则重装上下文并提示 |
+| 成本（多一次 Router 调用） | Router 用短上下文 + 小 max_tokens；可配置「关闭自动选，仅手动 skill」 |
+
+---
+
+## 10. 下一步（若开始排期）
+
+### 本期 `【本期】`
+
+1. 冻结边界：L1（闲聊 + Router）+ run 落盘挂点；L2（`ask`/工具）与 Viewer UI 后置。
+2. **P0**：session `summary` + 闲聊 path + 历史截断；手动 skill 主路径行为接近现网。
+3. **P0.5**：`run_store` 最小落盘（无 Viewer UI）。
+4. **P1**：Router + 上下文分流；策略已拍板为「完全尊重 `disable-model-invocation`」。
+
+### 后续 / 另案
+
+5. **另案**：Agent Viewer 开发者页。
+6. **P2** `【后续】`：与设定库写入、草稿「采用」一起做 `ask` + 白名单工具。
+7. **P3** `【后续】`：记忆 Top-K / 章摘要预计算 /（可选）向量检索。
+
+---
+
+## 附录 A：和 IDE Agent 的差异（刻意为之）
+
+| 维度 | IDE Agent（如 Cursor） | 本项目轻量小说 Agent |
+| --- | --- | --- |
+| 主产物 | 补丁 / 命令 / 多文件编辑 | 章节正文、设定卡片、剧情选择 |
+| 工具面 | 广（读写工作区、终端） | 窄（章、纲、记忆） |
+| 上下文 | 代码检索 + 打开文件 | 分层书上下文 + skill 模板 |
+| 确认 | tool approval 偏执行风险 | `ask` 偏叙事/设定决策 |
+| 历史 | 长对话常有价值 | skill 路径应压历史，保证续写可复现 |
+
+---
+
+## 附录 B：反模式清单
+
+1. 每轮累加完整历史 prompt。
+2. Router 与执行共用同一份「三章 + 全记忆」巨包。
+3. 未确认就写入 `memory.json`。
+4. 为闲聊结果默认塞进 `aiDraft`。
+5. 引入通用 Agent 框架后再裁剪——应反过来：先薄运行时，不够再加。
+)

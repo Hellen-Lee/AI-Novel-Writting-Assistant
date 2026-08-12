@@ -28,7 +28,7 @@ export function MessageItem({
           {message.content ||
             (message.pending ? '正在生成…' : message.error || '')}
         </p>
-        {message.pending && !message.error ? (
+        {message.pending && !message.error && draft ? (
           <div className="agent-panel__msg-actions">
             <button
               type="button"

@@ -1,6 +1,6 @@
 /**
  * POST /projects/:id/generate — consume SSE stream.
- * Events: meta | content | error | [DONE]  (ask reserved)
+ * Events: router_meta | meta | content | error | [DONE]  (ask reserved)
  */
 
 function parseSseChunk(block) {
@@ -21,7 +21,7 @@ function parseSseChunk(block) {
  * @param {object} opts.body - GenerateRequest fields
  * @param {AbortSignal} [opts.signal]
  * @param {(ev: object) => void} [opts.onEvent]
- * @returns {Promise<{ content: string, meta: object|null, error: string|null }>}
+ * @returns {Promise<{ content: string, meta: object|null, routerMeta: object|null, error: string|null }>}
  */
 export async function streamGenerate({
   projectId,
@@ -61,6 +61,7 @@ export async function streamGenerate({
   let buffer = ''
   let content = ''
   let meta = null
+  let routerMeta = null
   let error = null
 
   const handleData = (raw) => {
@@ -74,7 +75,15 @@ export async function streamGenerate({
     }
     if (!ev || typeof ev !== 'object') return
 
-    const type = ev.type || (ev.content != null ? 'content' : ev.error != null ? 'error' : null)
+    const type =
+      ev.type ||
+      (ev.content != null ? 'content' : ev.error != null ? 'error' : null)
+
+    if (type === 'router_meta') {
+      routerMeta = ev
+      onEvent?.(ev)
+      return
+    }
     if (type === 'meta') {
       meta = ev
       onEvent?.(ev)
@@ -89,8 +98,8 @@ export async function streamGenerate({
     if (type === 'error' || ev.error != null) {
       error = String(ev.error || '生成失败')
       onEvent?.({ type: 'error', error })
+      return
     }
-    // type === 'ask' reserved for confirmation cards
     if (type === 'ask') {
       onEvent?.(ev)
     }
@@ -113,5 +122,5 @@ export async function streamGenerate({
     if (data != null) handleData(data)
   }
 
-  return { content, meta, error }
+  return { content, meta, routerMeta, error }
 }

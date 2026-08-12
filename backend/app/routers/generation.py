@@ -15,10 +15,11 @@ def generate(project_id: str, payload: GenerateRequest):
     if not project_exists(project_id):
         raise HTTPException(status_code=404, detail=f"项目不存在: {project_id}")
 
-    if skill_loader.get_skill(payload.skill_name) is None:
+    skill_name = (payload.skill_name or "").strip() or None
+    if skill_name is not None and skill_loader.get_skill(skill_name) is None:
         raise HTTPException(
             status_code=404,
-            detail=f"Skill not found: {payload.skill_name}",
+            detail=f"Skill not found: {skill_name}",
         )
 
     try:
@@ -30,7 +31,7 @@ def generate(project_id: str, payload: GenerateRequest):
         generation_service.iter_generate(
             project_id,
             session_id=payload.session_id,
-            skill_name=payload.skill_name,
+            skill_name=skill_name,
             chapter_id=payload.chapter_id,
             current_content=payload.current_content,
             selected_text=payload.selected_text,
