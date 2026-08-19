@@ -300,3 +300,26 @@ class GenerateRequest(BaseModel):
     chapter_rules: str = ""
     model: Optional[str] = None
     # Future (not wired this phase): ask_reply: { ask_id, option_id | text }
+
+
+# --- Agent Viewer (developer observation) ---
+
+
+class RunListItem(BaseModel):
+    run_id: str
+    session_id: str = ""
+    created_at: str = ""
+    model: str = ""
+    user_input: str = ""
+    modes: list[str] = Field(default_factory=list)
+    skill_names: list[str] = Field(default_factory=list)
+    tools: list[str] = Field(default_factory=list)
+    truncated: bool = False
+    remaining_pct: Optional[float] = None
+    latency_ms_total: int = 0
+    step_count: int = 0
+
+
+class RunListResponse(BaseModel):
+    runs: list[RunListItem] = Field(default_factory=list)
+    count: int = 0

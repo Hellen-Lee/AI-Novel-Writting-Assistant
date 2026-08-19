@@ -12,7 +12,7 @@
 
 | 做 | 不做 |
 | --- | --- |
-| 无 `skill_name` → Router → `chat` / 可自动调用的 skill | Agent Viewer UI（另案） |
+| 无 `skill_name` → Router → `chat` / 可自动调用的 skill | 不自动选 `disable-model-invocation=true` 的 skill |
 | 会话 `summary` + 最近 K 轮注入模型 | `ask` 确认卡、白名单工具 |
 | skill / chat 上下文分流；粗粒度预算截断 | Top-K 记忆、近 3 章改工具拉取 |
 | `agent/runs/{run_id}.json` 最小落盘 | 开放式 tool loop |
@@ -37,7 +37,7 @@
 | `generation_service` | 编排 mode：`router` → `chat` \| `skill`；SSE `router_meta` + `meta.mode` |
 | `session_store` | `summary` 字段；摘要压缩触发 |
 | `context_budget` | `0.7 × context_window` 字符粗估；砍对话侧 |
-| `run_store` | 每次 generate 落盘 steps，供日后 Viewer |
+| `run_store` | 每次 generate 落盘 steps，供 Agent Viewer |
 | 前端 Agent | 自由输入不传 `skill_name`；`chat` 不进 `aiDraft` |
 
 ---
@@ -47,4 +47,5 @@
 - 会话：`status: waiting_user`、`pending_run`（随 `ask`）。
 - 请求：`ask_reply`；SSE：`type: ask`。
 - 工具：在执行 path 上插 1～2 跳，结果进本轮 messages，仍受预算约束。
-- Viewer：只读 `agent/runs/` 或再加调试 API；本期只保证 JSON 形状可用。
+
+Viewer 已落地：`/dev/agent-viewer` 只读 `agent/runs/`（经 `/api/dev/...`）；见 [`08-AgentViewer.md`](08-AgentViewer.md)。

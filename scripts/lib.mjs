@@ -11,6 +11,11 @@ export const backendDir = path.join(root, 'backend')
 export const FRONTEND_DEV_URL = 'http://localhost:5173'
 export const FRONTEND_PREVIEW_URL = 'http://localhost:4173'
 export const BACKEND_URL = 'http://localhost:8001'
+export const AGENT_VIEWER_PATH = '/dev/agent-viewer'
+
+export function agentViewerUrl(origin) {
+  return `${String(origin).replace(/\/$/, '')}${AGENT_VIEWER_PATH}`
+}
 
 /** 终端可点击链接（OSC 8） */
 export function link(url, label = url) {

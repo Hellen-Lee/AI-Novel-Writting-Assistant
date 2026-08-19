@@ -33,6 +33,22 @@ def _sse_done() -> str:
     return "data: [DONE]\n\n"
 
 
+USER_INPUT_PREVIEW_LEN = 200
+
+
+def _skill_kind(name: str) -> str:
+    if not name:
+        return ""
+    skill = skill_loader.get_skill(name)
+    return str((skill or {}).get("kind") or "")
+
+
+def _skill_source(*, explicit: bool, skill_name: str) -> str:
+    if not skill_name:
+        return ""
+    return "explicit" if explicit else "router"
+
+
 def iter_generate(
     project_id: str,
     *,
@@ -141,6 +157,11 @@ def iter_generate(
         steps.append(
             run_store.make_step(
                 "router",
+                skill_name=resolved_skill,
+                skill_kind=_skill_kind(resolved_skill),
+                skill_source="router" if resolved_skill else "",
+                candidate_skills=sorted(allowed),
+                tools=[],
                 system=r_system,
                 user=r_user,
                 response=router_raw,
@@ -148,7 +169,6 @@ def iter_generate(
                 latency_ms=int((time.perf_counter() - t0) * 1000),
                 extra={
                     "decision": router_decision or "chat",
-                    "skill_name": resolved_skill,
                     "reason": router_reason,
                 },
             )
@@ -313,11 +333,18 @@ def iter_generate(
             session_id=session_id,
             run_id=run_id,
             model_name=model_name,
+            user_input=text,
             steps=steps
             + [
                 run_store.make_step(
                     mode,
                     skill_name=resolved_skill,
+                    skill_kind=_skill_kind(resolved_skill),
+                    skill_source=_skill_source(
+                        explicit=bool(explicit_skill),
+                        skill_name=resolved_skill,
+                    ),
+                    tools=[],
                     system=system,
                     user=user,
                     response=partial,
@@ -367,6 +394,12 @@ def iter_generate(
         run_store.make_step(
             mode,
             skill_name=resolved_skill,
+            skill_kind=_skill_kind(resolved_skill),
+            skill_source=_skill_source(
+                explicit=bool(explicit_skill),
+                skill_name=resolved_skill,
+            ),
+            tools=[],
             system=system,
             user=user,
             response=full,
@@ -375,16 +408,20 @@ def iter_generate(
             extra={"error": errored},
         )
     )
+
+    if not errored:
+        summary_step = _maybe_refresh_summary(project_id, session_id, client)
+        if summary_step:
+            steps.append(summary_step)
+
     _try_save_run(
         project_id,
         session_id=session_id,
         run_id=run_id,
         model_name=model_name,
+        user_input=text,
         steps=steps,
     )
-
-    if not errored:
-        _maybe_refresh_summary(project_id, session_id, client)
 
     yield _sse_done()
 
@@ -396,7 +433,11 @@ def _try_save_run(
     run_id: str,
     model_name: str,
     steps: list[dict[str, Any]],
+    user_input: str = "",
 ) -> None:
+    preview = (user_input or "").strip()
+    if len(preview) > USER_INPUT_PREVIEW_LEN:
+        preview = preview[:USER_INPUT_PREVIEW_LEN]
     try:
         run_store.save_run(
             project_id,
@@ -404,6 +445,7 @@ def _try_save_run(
             model=model_name,
             steps=steps,
             run_id=run_id,
+            extra={"user_input": preview},
         )
     except (FileNotFoundError, OSError, TypeError, ValueError):
         pass
@@ -413,18 +455,18 @@ def _maybe_refresh_summary(
     project_id: str,
     session_id: str,
     client: Any,
-) -> None:
+) -> Optional[dict[str, Any]]:
     try:
         session = session_store.get_session(project_id, session_id)
     except FileNotFoundError:
-        return
+        return None
     if not session_store.should_refresh_summary(session):
-        return
+        return None
 
     messages = session.get("messages") or []
     older, _recent = session_store.messages_for_history(messages)
     if not older:
-        return
+        return None
 
     prev_summary = str(session.get("summary") or "").strip()
     folded = session_store.format_messages_for_summary(older)
@@ -432,6 +474,8 @@ def _maybe_refresh_summary(
         (f"已有摘要：\n{prev_summary}\n\n" if prev_summary else "")
         + f"待压缩的旧对话：\n{folded}\n\n请输出更新后的摘要："
     )
+    t0 = time.perf_counter()
+    fallback = False
     try:
         new_summary = client.generate(
             system=SUMMARY_SYSTEM,
@@ -441,8 +485,10 @@ def _maybe_refresh_summary(
         new_summary = (new_summary or "").strip()
         if not new_summary:
             new_summary = _fallback_summary(prev_summary, folded)
+            fallback = True
     except ModelClientError:
         new_summary = _fallback_summary(prev_summary, folded)
+        fallback = True
 
     rounds = session_store.count_rounds(messages)
     try:
@@ -454,6 +500,16 @@ def _maybe_refresh_summary(
         )
     except (FileNotFoundError, OSError):
         pass
+
+    return run_store.make_step(
+        "summary",
+        tools=[],
+        system=SUMMARY_SYSTEM,
+        user=user_prompt,
+        response=new_summary,
+        latency_ms=int((time.perf_counter() - t0) * 1000),
+        extra={"fallback": fallback},
+    )
 
 
 def _fallback_summary(prev: str, folded: str) -> str:

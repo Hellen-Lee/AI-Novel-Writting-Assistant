@@ -18,6 +18,7 @@ import {
   BACKEND_URL,
   FRONTEND_DEV_URL,
   FRONTEND_PREVIEW_URL,
+  agentViewerUrl,
   backendDir,
   frontendDir,
   link,
@@ -116,6 +117,7 @@ const frontendUrl = isProd ? FRONTEND_PREVIEW_URL : FRONTEND_DEV_URL
 
 console.log(`[start] AINovel — ${modeLabel}模式（后端 + 前端）`)
 console.log(`  前端  ${link(frontendUrl)}`)
+console.log(`  观测  ${link(agentViewerUrl(frontendUrl))}`)
 console.log(`  后端  ${link(BACKEND_URL)}`)
 console.log('  停止  Ctrl+C\n')
 

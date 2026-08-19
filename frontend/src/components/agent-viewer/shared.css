@@ -1,0 +1,47 @@
+.agent-viewer-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.agent-viewer-chip--muted {
+  background: var(--color-bg-sidebar);
+  color: var(--color-text-secondary);
+}
+
+.agent-viewer-chip--warn {
+  background: #f8eed6;
+  color: var(--color-warning);
+}
+
+.agent-viewer-chip--tool {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.agent-viewer-chip--router {
+  background: #e8eef6;
+  color: #3d5a80;
+}
+
+.agent-viewer-chip--skill {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.agent-viewer-chip--chat {
+  background: #e7f3ee;
+  color: var(--color-ai);
+}
+
+.agent-viewer-chip--summary {
+  background: var(--color-bg-sidebar);
+  color: var(--color-text-secondary);
+}

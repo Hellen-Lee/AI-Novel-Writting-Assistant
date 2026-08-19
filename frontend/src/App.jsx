@@ -9,6 +9,7 @@ import OnboardingPage from './pages/OnboardingPage'
 import EditorPage from './pages/EditorPage'
 import MemoryPage from './pages/MemoryPage'
 import SettingsPage from './pages/SettingsPage'
+import AgentViewerPage from './pages/AgentViewerPage'
 
 function HomeLayout() {
   return (
@@ -66,6 +67,8 @@ export default function App() {
         </Route>
 
         <Route path="config" element={<Navigate to="/settings?tab=api" replace />} />
+
+        <Route path="dev/agent-viewer" element={<AgentViewerPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

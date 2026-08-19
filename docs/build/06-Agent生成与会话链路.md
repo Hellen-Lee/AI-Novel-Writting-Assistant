@@ -3,7 +3,7 @@
 > 对应计划：`docs/AI小说创作Agent_MVP开发计划.md` §5.0（链路）→ §5.1（续写验收）  
 > 轻量 Agent 本期：[`07-轻量Agent闲聊与Router.md`](07-轻量Agent闲聊与Router.md)、[`docs/轻量通用Agent开发方向.md`](../轻量通用Agent开发方向.md)  
 > 设计稿：编辑页 Agent 栏（`d7ubn`）/ 历史壳（`OckRz`）  
-> 代码：`backend/app/services/{session_store,generation_service,prompt_builder,context_budget,run_store}.py`、`routers/{sessions,generation}.py`、`api_catalog.py`；前端 `api/{generate,sessions}.js`、`components/editor/Agent/`
+> 代码：`backend/app/services/{session_store,generation_service,prompt_builder,context_budget,run_store}.py`、`routers/{sessions,generation,agent_viewer}.py`、`api_catalog.py`；前端 `api/{generate,sessions,agentViewer}.js`、`components/editor/Agent/`、`pages/AgentViewerPage.jsx`
 
 本文记录传输层、会话落盘与模块职责取舍；**不是**接口字段说明书。
 
@@ -16,7 +16,7 @@
 | `POST .../generate` HTTP SSE 流式生成 | 全双工 WebSocket |
 | 按项目落盘多会话；列表 / 新建 / 切换 / 删除 | 历史搜索、按日分组、重命名 |
 | 生成请求带 `session_id`；可选 `skill_name` | 开放式 tool loop |
-| 显式 `skill_name` → skill；省略 → Router → chat / 可自动 skill | Agent Viewer UI（另案；本期仅 `agent/runs` 落盘） |
+| 显式 `skill_name` → skill；省略 → Router → chat / 可自动 skill | Router 与执行不共用一份巨包上下文 |
 | 会话 `summary` + 最近轮次注入模型（chat / Router） | 确认卡片 `ask`（契约预留） |
 | 前端：闲聊不进 `aiDraft`；skill 仍可写草稿 | 白名单工具 / Top-K 记忆 |
 
@@ -36,7 +36,7 @@
 data/projects/{project_id}/agent/
   sessions.json                 # 索引：id, title, updated_at, message_count, status
   sessions/{session_id}.json    # messages[] + summary
-  runs/{run_id}.json            # 每次 generate 的 prompt/回复/预算（Viewer 另案消费）
+  runs/{run_id}.json            # 每次 generate 的 prompt/回复/预算（Agent Viewer 消费）
 ```
 
 - `session_id` 由服务端生成（`sess_...`）。
@@ -52,10 +52,10 @@ data/projects/{project_id}/agent/
 | --- | --- | --- |
 | 索引 | `backend/app/api_catalog.py` | 罗列 METHOD + path；`include_router` 唯一挂载点 |
 | 入口 | `main.py` | 调 `register_routers(app)` |
-| HTTP | `routers/sessions.py`、`routers/generation.py` | 薄校验与 StreamingResponse |
+| HTTP | `routers/sessions.py`、`routers/generation.py`、`routers/agent_viewer.py` | 薄校验与 StreamingResponse / 观测只读 |
 | 业务 | `session_store`、`generation_service` | 落盘、mode 编排、写会话 |
 | 上下文 | `prompt_builder`、`context_budget` | 分流组装与预算截断 |
-| 观测 | `run_store` | run JSON 落盘 |
+| 观测 | `run_store`、Agent Viewer | run JSON 落盘 + `/dev/agent-viewer` |
 | 复用 | `model_client`、`skill_loader` | 模型调用与 skill 列表 |
 
 ---

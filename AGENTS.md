@@ -66,14 +66,16 @@ AINovel/
 │   │   │   ├── memory.py
 │   │   │   ├── skills.py
 │   │   │   ├── sessions.py   # Agent 会话 CRUD
-│   │   │   └── generation.py # POST generate（SSE）
+│   │   │   ├── generation.py # POST generate（SSE）
+│   │   │   └── agent_viewer.py # 开发者观测 API（/api/dev/...）
 │   │   ├── services/         # 业务逻辑
 │   │   │   ├── model_client.py
 │   │   │   ├── prompt_builder.py
 │   │   │   ├── memory_store.py
 │   │   │   ├── skill_loader.py
 │   │   │   ├── session_store.py
-│   │   │   └── generation_service.py
+│   │   │   ├── generation_service.py
+│   │   │   └── run_store.py
 │   │   └── skills/           # 内置 SKILL.md（随仓库分发，只读）
 │   │       ├── 续写.md              # kind: quick_action
 │   │       ├── 润色.md
@@ -261,6 +263,8 @@ $user_input
 | `GET /api/projects/{id}/agent/sessions/{sid}` | 会话详情（含消息） |
 | `DELETE /api/projects/{id}/agent/sessions/{sid}` | 删除会话 |
 | `POST /api/projects/{id}/generate` | AI 流式生成（SSE；续写/润色等） |
+| `GET /api/dev/projects/{id}/agent/runs` | Agent Viewer：run 列表（无 prompt 正文） |
+| `GET /api/dev/projects/{id}/agent/runs/{run_id}` | Agent Viewer：run 详情（含 prompt/回复） |
 | `GET /api/skills` | 技能列表（可按 kind 过滤） |
 | `GET /api/skills/{name}` | 技能详情 |
 | `PUT /api/skills/{name}` | 新建/更新自定义技能（写入 `data/skills/`） |
@@ -282,6 +286,7 @@ npm run start
 ```
 
 - 前端：`http://localhost:5173`（Vite dev，`/api` 代理到后端）
+- 观测：`http://localhost:5173/dev/agent-viewer`（Agent Viewer，终端可点；产品页无入口）
 - 后端：`http://localhost:8001`（`python run.py`，带 reload）
 - 停止：`Ctrl+C`（同时结束两侧）
 
@@ -293,6 +298,7 @@ npm run start:prod   # 后端 uvicorn（无 reload）+ 前端 vite preview
 ```
 
 - 前端：`http://localhost:4173`
+- 观测：`http://localhost:4173/dev/agent-viewer`
 - 若尚无 `frontend/dist`，`start:prod` 会先自动执行一次 build
 
 ### 仅构建
