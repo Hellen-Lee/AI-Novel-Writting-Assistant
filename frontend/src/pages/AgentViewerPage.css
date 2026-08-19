@@ -57,7 +57,7 @@
 
 .agent-viewer-page__body {
   display: grid;
-  grid-template-columns: minmax(240px, 320px) minmax(0, 1fr);
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
   flex: 1;
   min-height: 0;
 }

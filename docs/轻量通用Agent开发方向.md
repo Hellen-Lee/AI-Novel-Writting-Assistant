@@ -238,7 +238,7 @@ session 标记 waiting_user + 冻结 run 上下文
 | 只读/提议工具 | 无 | 薄封装 store | `【后续】` |
 | 前端 Agent | 自由输入省略 `skill_name`；chat 不进 draft；`router_meta` 轻提示 | `ask` 卡片 | 分流 `【已完成】` |
 | `run_store` | `agent/runs/{run_id}.json`；list/get | — | 挂点 + 调试 API `【已完成】` |
-| `agent-viewer` | `/dev/agent-viewer` 只读可视化；按次 skill/工具 | P2 填 `tools[]` | `【已完成】` |
+| `agent-viewer` | `/dev/agent-viewer` 按会话看一轮对话与中间调用 | P2 填 `tools[]` | `【已完成】` |
 
 观测（已落盘并由 Viewer 展示）：
 
@@ -268,9 +268,9 @@ session 标记 waiting_user + 冻结 run 上下文
 
 ### 7.1 Agent Viewer `【已完成】`
 
-`data/projects/{id}/agent/runs/{run_id}.json` 落盘（Router / 执行 / 摘要分 step）。开发者页 `/dev/agent-viewer` 经 `GET /api/dev/projects/{id}/agent/runs` 只读拉取；入口只在 `npm run start` 终端打印，不进产品导航。
+`data/projects/{id}/agent/runs/{run_id}.json` 落盘（Router / 执行 / 摘要分 step）。开发者页 `/dev/agent-viewer` 按**会话**聚合一轮（用户 + Agent 同一框），框内展开各次模型调用；入口只在 `npm run start` 终端打印，不进产品导航。
 
-能力：运行列表、完整 prompt/回复、token 估算、剩余上下文%、mode / skill / 截断；**每次模型调用**展示 skill（kind、来源）、Router 候选 skill、`tools[]`（P2 接入后直接显示）。架构见 [`docs/build/08-AgentViewer.md`](build/08-AgentViewer.md)。
+能力：会话列表（item 内滚动消息流）、完整 prompt/回复、token 估算、剩余上下文%、mode / skill / 截断；模型调用展示 skill（kind、来源）、Router 候选、`tools[]`（P2 接入后直接显示）。架构见 [`docs/build/08-AgentViewer.md`](build/08-AgentViewer.md)。
 
 ### 建议不提前做的事
 

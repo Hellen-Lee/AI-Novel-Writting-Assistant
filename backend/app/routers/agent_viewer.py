@@ -29,3 +29,12 @@ def get_agent_run(project_id: str, run_id: str):
         return run_store.get_run(project_id, run_id)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/dev/projects/{project_id}/agent/sessions/{session_id}/runs")
+def list_session_agent_runs(project_id: str, session_id: str):
+    try:
+        runs = run_store.list_runs_for_session(project_id, session_id)
+        return {"session_id": session_id, "runs": runs, "count": len(runs)}
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

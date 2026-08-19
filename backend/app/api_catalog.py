@@ -62,6 +62,7 @@ API_INDEX: list[tuple[str, str, str]] = [
     # agent viewer (developer observation)
     ("GET", "/api/dev/projects/{id}/agent/runs", "Agent Viewer：run 列表（无 prompt 正文）"),
     ("GET", "/api/dev/projects/{id}/agent/runs/{run_id}", "Agent Viewer：run 详情（含 prompt/回复）"),
+    ("GET", "/api/dev/projects/{id}/agent/sessions/{sid}/runs", "Agent Viewer：某会话全部 run 详情"),
 ]
 
 

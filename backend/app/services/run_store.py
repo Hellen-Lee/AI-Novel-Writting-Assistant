@@ -136,14 +136,32 @@ def get_run(project_id: str, run_id: str) -> dict[str, Any]:
     data = _read_run_file(path)
     if data is None:
         raise FileNotFoundError(f"运行记录不存在: {run_id}")
+    return _hydrate_run(data, path=path, run_id=run_id)
 
-    data["steps"] = [_normalize_step(step) for step in (data.get("steps") or [])]
-    data.setdefault("run_id", run_id)
-    data.setdefault("session_id", "")
-    data.setdefault("created_at", _iso_from_mtime(path))
-    data.setdefault("model", "")
-    data.setdefault("user_input", "")
-    return data
+
+def list_runs_for_session(project_id: str, session_id: str) -> list[dict[str, Any]]:
+    """Full run payloads for one session, oldest first (conversation order)."""
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    sid = (session_id or "").strip()
+    if sid in {"__none__", "-", "none"}:
+        sid = ""
+    directory = _runs_dir(project_id)
+    if not directory.exists():
+        return []
+
+    items: list[dict[str, Any]] = []
+    for path in directory.glob("*.json"):
+        data = _read_run_file(path)
+        if data is None:
+            continue
+        if str(data.get("session_id") or "").strip() != sid:
+            continue
+        items.append(_hydrate_run(data, path=path))
+
+    items.sort(key=lambda row: str(row.get("created_at") or ""))
+    return items
 
 
 def summarize_run(
@@ -159,6 +177,7 @@ def summarize_run(
     exec_remaining: Optional[float] = None
     last_remaining: Optional[float] = None
     latency_total = 0
+    response_preview = ""
 
     for step in steps:
         mode = str(step.get("mode") or "")
@@ -183,15 +202,13 @@ def summarize_run(
                 last_remaining = pct
                 if mode in {"skill", "chat"}:
                     exec_remaining = pct
+        if mode in {"skill", "chat"}:
+            response_preview = str(step.get("response") or "")
         latency_total += int(step.get("latency_ms") or 0)
 
     created = str(data.get("created_at") or "")
     if not created and path is not None:
         created = _iso_from_mtime(path)
-
-    preview = str(data.get("user_input") or "")
-    if len(preview) > USER_INPUT_PREVIEW_LEN:
-        preview = preview[:USER_INPUT_PREVIEW_LEN]
 
     remaining = exec_remaining if exec_remaining is not None else last_remaining
     return {
@@ -199,7 +216,8 @@ def summarize_run(
         "session_id": str(data.get("session_id") or ""),
         "created_at": created,
         "model": str(data.get("model") or ""),
-        "user_input": preview,
+        "user_input": _clip(data.get("user_input") or ""),
+        "response_preview": _clip(response_preview),
         "modes": modes,
         "skill_names": skill_names,
         "tools": tool_names,
@@ -208,6 +226,28 @@ def summarize_run(
         "latency_ms_total": latency_total,
         "step_count": len(steps),
     }
+
+
+def _hydrate_run(
+    data: dict[str, Any],
+    *,
+    path: Path,
+    run_id: str = "",
+) -> dict[str, Any]:
+    data["steps"] = [_normalize_step(step) for step in (data.get("steps") or [])]
+    data.setdefault("run_id", run_id or path.stem)
+    data.setdefault("session_id", "")
+    data.setdefault("created_at", _iso_from_mtime(path))
+    data.setdefault("model", "")
+    data.setdefault("user_input", "")
+    return data
+
+
+def _clip(text: Any, limit: int = USER_INPUT_PREVIEW_LEN) -> str:
+    preview = str(text or "")
+    if len(preview) > limit:
+        return preview[:limit]
+    return preview
 
 
 def _read_run_file(path: Path) -> Optional[dict[str, Any]]:

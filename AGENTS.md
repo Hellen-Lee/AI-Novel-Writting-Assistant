@@ -265,6 +265,7 @@ $user_input
 | `POST /api/projects/{id}/generate` | AI 流式生成（SSE；续写/润色等） |
 | `GET /api/dev/projects/{id}/agent/runs` | Agent Viewer：run 列表（无 prompt 正文） |
 | `GET /api/dev/projects/{id}/agent/runs/{run_id}` | Agent Viewer：run 详情（含 prompt/回复） |
+| `GET /api/dev/projects/{id}/agent/sessions/{sid}/runs` | Agent Viewer：某会话全部 run 详情 |
 | `GET /api/skills` | 技能列表（可按 kind 过滤） |
 | `GET /api/skills/{name}` | 技能详情 |
 | `PUT /api/skills/{name}` | 新建/更新自定义技能（写入 `data/skills/`） |

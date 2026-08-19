@@ -6,9 +6,11 @@ export const MODE_LABEL = {
 }
 
 export const SOURCE_LABEL = {
-  explicit: '显式',
-  router: 'Router',
+  explicit: '命令指定',
+  router: '自动选择',
 }
+
+export const NONE_SESSION_ID = '__none__'
 
 export function formatRunTime(iso) {
   if (!iso) return '—'
@@ -26,6 +28,15 @@ export function formatMs(ms) {
 export function formatPct(value) {
   if (value == null || Number.isNaN(Number(value))) return '—'
   return `${Number(value).toFixed(1)}%`
+}
+
+export function previewText(text, max = 72) {
+  const value = String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!value) return ''
+  if (value.length <= max) return value
+  return `${value.slice(0, max)}…`
 }
 
 export function toolNames(tools) {

@@ -311,6 +311,7 @@ class RunListItem(BaseModel):
     created_at: str = ""
     model: str = ""
     user_input: str = ""
+    response_preview: str = ""
     modes: list[str] = Field(default_factory=list)
     skill_names: list[str] = Field(default_factory=list)
     tools: list[str] = Field(default_factory=list)
