@@ -10,6 +10,8 @@ import httpx
 
 from app.config import is_masked_api_key, load_config, mask_api_key
 
+TOOL_CALL_DONE = {"type": "done", "finish_reason": ""}
+
 
 class ModelClientError(Exception):
     """Raised when the upstream model API call fails."""
@@ -151,6 +153,8 @@ class ModelClient:
         params: Optional[dict[str, Any]] = None,
         *,
         stream: bool = False,
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[Any] = None,
     ) -> dict[str, Any]:
         params = params or {}
         if not self.config.get("api_key"):
@@ -168,6 +172,10 @@ class ModelClient:
             ),
             "stream": stream,
         }
+        if tools:
+            payload["tools"] = tools
+        if tool_choice is not None:
+            payload["tool_choice"] = tool_choice
         return payload
 
     def list_models(self) -> list[dict[str, Any]]:
@@ -278,6 +286,149 @@ class ModelClient:
         except (KeyError, IndexError, TypeError) as exc:
             raise ModelClientError("模型响应格式无效，未找到生成内容") from exc
 
+    def chat(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, Any]]] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[Any] = None,
+        params: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
+        """
+        Non-streaming completion with optional native function-calling.
+
+        Returns the full assistant message dict:
+          {"content": str|None, "tool_calls": [{"id","type","function":{"name","arguments"}}]|None}
+        When no tools are given (or none invoked), returns
+          {"content": <str>, "tool_calls": []} for call-site convenience.
+        """
+        payload = self._build_chat_payload(
+            system, messages, params, stream=False, tools=tools, tool_choice=tool_choice
+        )
+        data = self._request(
+            "POST",
+            "/chat/completions",
+            json=payload,
+            timeout=120.0,
+        )
+        try:
+            message = data["choices"][0]["message"]
+        except (KeyError, IndexError, TypeError) as exc:
+            raise ModelClientError("模型响应格式无效，未找到生成内容") from exc
+        if not isinstance(message, dict):
+            raise ModelClientError("模型响应格式无效，未找到生成内容")
+        tool_calls = message.get("tool_calls") or []
+        if not tool_calls:
+            return {
+                "content": message.get("content") or "",
+                "tool_calls": [],
+            }
+        return {
+            "content": message.get("content") or "",
+            "tool_calls": list(tool_calls),
+        }
+
+    def chat_stream(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, Any]]] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[Any] = None,
+        params: Optional[dict[str, Any]] = None,
+    ) -> Iterator[dict[str, Any]]:
+        """
+        Streaming completion supporting both content and tool_call deltas.
+
+        Yields per-chunk dicts:
+          {"type":"content","text":"..."}
+          {"type":"tool_call","index":0,"id":"call_..","name":"fn","arguments":"..."}
+        and a final {"type":"done","finish_reason":"stop"|"tool_calls"}.
+        """
+        payload = self._build_chat_payload(
+            system, messages, params, stream=True, tools=tools, tool_choice=tool_choice
+        )
+        url = f"{self.base_url}/chat/completions"
+        timeout = httpx.Timeout(120.0, connect=30.0)
+
+        try:
+            with httpx.Client(timeout=timeout) as client:
+                with client.stream(
+                    "POST",
+                    url,
+                    headers=self._headers(),
+                    json=payload,
+                ) as response:
+                    if response.status_code >= 400:
+                        body = response.read()
+                        raise ModelClientError(
+                            _extract_error_from_bytes(body, response.status_code),
+                            status_code=response.status_code,
+                        )
+                    yield from self._iter_chat_deltas(response)
+        except ModelClientError:
+            raise
+        except httpx.TimeoutException as exc:
+            raise ModelClientError("请求超时，请检查 API 地址或网络连接") from exc
+        except httpx.RequestError as exc:
+            raise ModelClientError(f"无法连接 API：{exc}") from exc
+
+    @staticmethod
+    def _iter_chat_deltas(response: httpx.Response) -> Iterator[dict[str, Any]]:
+        for line in response.iter_lines():
+            if not line:
+                continue
+            text = line.strip()
+            if not text.startswith("data:"):
+                continue
+            data = text[5:].strip()
+            if not data or data == "[DONE]":
+                yield TOOL_CALL_DONE
+                return
+            try:
+                chunk = json.loads(data)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(chunk, dict):
+                continue
+
+            err = chunk.get("error")
+            if err:
+                if isinstance(err, dict):
+                    message = str(err.get("message") or err)
+                else:
+                    message = str(err)
+                raise ModelClientError(f"API 错误: {message}")
+
+            choices = chunk.get("choices") or []
+            if not choices:
+                continue
+            choice = choices[0] if isinstance(choices[0], dict) else {}
+            delta = choice.get("delta") or {}
+            if not isinstance(delta, dict):
+                continue
+
+            content = delta.get("content")
+            if content:
+                yield {"type": "content", "text": str(content)}
+
+            for tc in delta.get("tool_calls") or []:
+                if not isinstance(tc, dict):
+                    continue
+                fn = tc.get("function") or {}
+                if not isinstance(fn, dict):
+                    fn = {}
+                yield {
+                    "type": "tool_call",
+                    "index": tc.get("index"),
+                    "id": tc.get("id"),
+                    "name": fn.get("name"),
+                    "arguments": fn.get("arguments") or "",
+                }
+
+            finish_reason = choice.get("finish_reason")
+            if finish_reason:
+                yield {"type": "done", "finish_reason": finish_reason}
+
     def generate_stream(
         self,
         system: str = "",
@@ -377,3 +528,54 @@ class ModelClient:
 def build_client(overrides: Optional[dict[str, Any]] = None) -> ModelClient:
     """Create a ModelClient from saved config plus optional request overrides."""
     return ModelClient(resolve_runtime_config(overrides))
+
+
+def aggregate_tool_calls(deltas: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Coalesce chunked streaming tool_call deltas (by index) into full calls.
+
+    Concatenates the split `arguments` fragments and JSON-parses them
+    (tolerating failures → empty dict). Returns
+    [{"id","name","arguments": dict}].
+    """
+    buckets: dict[Any, dict[str, Any]] = {}
+    order: list[Any] = []
+    for d in deltas:
+        if d.get("type") != "tool_call":
+            continue
+        index = d.get("index")
+        if index is None:
+            index = len(order)
+        bucket = buckets.get(index)
+        if bucket is None:
+            bucket = {"id": "", "name": "", "arguments": ""}
+            buckets[index] = bucket
+            order.append(index)
+        if d.get("id"):
+            bucket["id"] = d["id"]
+        if d.get("name"):
+            bucket["name"] = d["name"]
+        bucket["arguments"] += d.get("arguments") or ""
+
+    calls: list[dict[str, Any]] = []
+    for index in order:
+        bucket = buckets[index]
+        args_text = (bucket["arguments"] or "").strip()
+        try:
+            args = json.loads(args_text) if args_text else {}
+        except json.JSONDecodeError:
+            args = {}
+        if not isinstance(args, dict):
+            args = {}
+        calls.append(
+            {
+                "id": bucket["id"],
+                "name": bucket["name"],
+                "arguments": args,
+            }
+        )
+    return calls
+
+
+def message_has_tool_calls(message: Optional[dict[str, Any]]) -> bool:
+    return bool(message and (message.get("tool_calls") or []))

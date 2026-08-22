@@ -291,7 +291,7 @@ class SessionListResponse(BaseModel):
 
 class GenerateRequest(BaseModel):
     session_id: str = Field(..., min_length=1)
-    # Omit / null → Router (auto skill or chat). Explicit → skip Router.
+    # Omit / null → unified agentic free-text path. Explicit → preset intent.
     skill_name: Optional[str] = None
     chapter_id: Optional[str] = None
     current_content: str = ""

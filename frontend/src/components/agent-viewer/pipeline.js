@@ -48,7 +48,12 @@ export function splitPipeline(steps) {
   const list = Array.isArray(steps) ? steps : []
   const router = list.find((step) => step?.mode === 'router') || null
   const exec =
-    list.find((step) => step?.mode === 'skill' || step?.mode === 'chat') || null
+    list.find(
+      (step) =>
+        step?.mode === 'skill' ||
+        step?.mode === 'chat' ||
+        step?.mode === 'agent',
+    ) || null
   const summary = list.find((step) => step?.mode === 'summary') || null
   return { router, exec, summary, calls: list }
 }
@@ -60,6 +65,9 @@ export function routeLabel(run) {
   }
   const modes = run?.modes || []
   const skill = (run?.skill_names && run.skill_names[0]) || ''
+  if (modes.includes('agent')) {
+    return skill ? `Agent · ${skill}` : 'Agent'
+  }
   if (modes.includes('router')) {
     if (skill) return `Router → ${skill}`
     if (modes.includes('chat')) return 'Router → 闲聊'
@@ -71,11 +79,11 @@ export function routeLabel(run) {
 }
 
 export function pipelineNodes(run) {
-  const { router, exec, summary } = splitPipeline(run?.steps)
+  const { router, exec, summary, calls } = splitPipeline(run?.steps)
   const nodes = []
   if (router) {
     nodes.push({ id: 'router', label: 'Router', mode: 'router' })
-  } else if (exec?.skill_source === 'explicit') {
+  } else if (exec?.skill_source === 'explicit' && exec?.mode !== 'agent') {
     nodes.push({ id: 'explicit', label: '命令指定', mode: 'skill' })
   }
   if (exec?.mode === 'skill') {
@@ -91,11 +99,41 @@ export function pipelineNodes(run) {
       label: clarify ? '澄清闲聊' : '闲聊',
       mode: 'chat',
     })
+  } else if (exec?.mode === 'agent') {
+    const toolCalls = (calls || []).filter(
+      (step) => step?.mode === 'agent_tool',
+    )
+    for (const step of toolCalls) {
+      nodes.push({
+        id: `tool-${step.step_index ?? toolCalls.indexOf(step)}`,
+        label: toolStepLabel(step),
+        mode: 'agent_tool',
+      })
+    }
+    nodes.push({
+      id: 'exec',
+      label: exec.skill_name ? `Agent · ${exec.skill_name}` : 'Agent',
+      mode: 'agent',
+    })
   }
   if (summary) {
     nodes.push({ id: 'summary', label: '摘要', mode: 'summary' })
   }
   return nodes
+}
+
+function toolStepLabel(step) {
+  const tools = step?.tools
+  const first = Array.isArray(tools) ? tools[0] : null
+  const name =
+    first?.function?.name ||
+    first?.name ||
+    ''
+  const args = first?.function?.arguments
+  if (name && typeof args === 'string' && args.trim()) {
+    return `工具 · ${name}`
+  }
+  return name ? `工具 · ${name}` : '工具'
 }
 
 export function remainingFromSteps(steps) {
@@ -173,10 +211,25 @@ export function callSummary(step) {
     return `${step.skill_name || 'Skill'}${kind}`
   }
   if (mode === 'chat') return '写入对话气泡'
+  if (mode === 'agent') {
+    return step.skill_name ? `Agent · ${step.skill_name}` : 'Agent 生成正文'
+  }
+  if (mode === 'agent_tool') {
+    return toolSummary(step)
+  }
   if (mode === 'summary') {
     return step.fallback ? '摘要兜底（未调用模型）' : '压缩旧轮，不进气泡'
   }
   return mode || '调用'
+}
+
+function toolSummary(step) {
+  const tools = step?.tools
+  if (!Array.isArray(tools) || !tools.length) return '工具调用'
+  const names = tools
+    .map((t) => t?.function?.name || t?.name || '')
+    .filter(Boolean)
+  return `工具 · ${names.join('、')}`
 }
 
 function describeRoute(router, exec) {
@@ -187,6 +240,7 @@ function describeRoute(router, exec) {
     if (decision === 'clarify') return 'Router → 澄清'
     return 'Router → 闲聊'
   }
+  if (exec?.mode === 'agent') return skill ? `Agent · ${skill}` : 'Agent'
   if (exec?.skill_source === 'explicit' && skill) return `指定 → ${skill}`
   if (exec?.mode === 'skill') return skill || 'Skill'
   if (exec?.mode === 'chat') return '闲聊'

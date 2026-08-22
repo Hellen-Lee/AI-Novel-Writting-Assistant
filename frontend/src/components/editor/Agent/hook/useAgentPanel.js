@@ -133,7 +133,7 @@ export function useAgentPanel({
       handleTriggerGenerate(skillId, userText)
       return
     }
-    // Free text → omit skill_name (Router / chat)
+    // Free text → unified agentic path (model decides prose vs chat)
     handleTriggerGenerate(null, userText)
   }
 

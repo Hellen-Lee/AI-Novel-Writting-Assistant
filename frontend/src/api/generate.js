@@ -1,6 +1,6 @@
 /**
  * POST /projects/:id/generate — consume SSE stream.
- * Events: router_meta | meta | content | error | [DONE]  (ask reserved)
+ * Events: meta | tool_progress | content | error | [DONE]  (ask reserved)
  */
 
 function parseSseChunk(block) {

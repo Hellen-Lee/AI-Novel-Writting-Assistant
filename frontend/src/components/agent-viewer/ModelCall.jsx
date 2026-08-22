@@ -10,11 +10,25 @@ import {
 import { callSummary } from './pipeline'
 import './ModelCall.css'
 
+function agentToolCalls(tools) {
+  if (!Array.isArray(tools)) return []
+  return tools
+    .map((t) => {
+      const fn = t?.function || {}
+      return {
+        name: String(fn?.name || t?.name || '').trim(),
+        arguments: typeof fn?.arguments === 'string' ? fn.arguments : '',
+      }
+    })
+    .filter((t) => t.name)
+}
+
 export function ModelCall({ step, index }) {
   const [open, setOpen] = useState(false)
   const mode = step?.mode || 'unknown'
   const background = mode === 'summary'
   const tools = toolNames(step?.tools)
+  const agentTools = agentToolCalls(step?.tools)
   const candidates = Array.isArray(step?.candidate_skills)
     ? step.candidate_skills
     : []
@@ -70,6 +84,11 @@ export function ModelCall({ step, index }) {
               后台压缩旧对话，写入 session.summary，不进入聊天气泡。
             </p>
           ) : null}
+          {mode === 'agent' ? (
+            <p className="agent-viewer-call__note">
+              Agent 决定读取项目上下文后输出正文/回复。
+            </p>
+          ) : null}
           {candidates.length ? (
             <p className="agent-viewer-call__note">
               候选 skill：{candidates.join('、')}
@@ -80,11 +99,22 @@ export function ModelCall({ step, index }) {
               工具：{tools.join('、')}
             </p>
           ) : null}
+          {agentTools.length ? (
+            <div className="agent-viewer-call__note">
+              工具调用：
+              {agentTools.map((t) => (
+                <span key={t.name} className="agent-viewer-call__tool">
+                  {t.name}
+                  {t.arguments ? `(${t.arguments})` : ''}
+                </span>
+              ))}
+            </div>
+          ) : null}
           <TextPane label="system" text={step?.system || ''} />
           <TextPane label="user" text={step?.user || ''} />
           <TextPane
             label={
-              mode === 'skill' || mode === 'chat'
+              mode === 'skill' || mode === 'chat' || mode === 'agent'
                 ? 'response（Agent 回复）'
                 : 'response'
             }

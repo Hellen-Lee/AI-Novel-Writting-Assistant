@@ -3,6 +3,8 @@ export const MODE_LABEL = {
   skill: 'Skill',
   chat: '闲聊',
   summary: '摘要',
+  agent: 'Agent',
+  agent_tool: '工具调用',
 }
 
 export const SOURCE_LABEL = {

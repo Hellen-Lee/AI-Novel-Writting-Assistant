@@ -1,5 +1,7 @@
 # 轻量 Agent：闲聊、摘要与 Router
 
+> ⚠️ **已废弃**：Router 分流与全量上下文预塞已被 [`09-Agent原生工具调用.md`](09-Agent原生工具调用.md) 取代——现为统一 agentic function-calling 路径。本文仅作历史留档。
+>
 > 对应方向：[`docs/轻量通用Agent开发方向.md`](../轻量通用Agent开发方向.md) 本期 L1  
 > 前置：[`06-Agent生成与会话链路.md`](06-Agent生成与会话链路.md)  
 > 代码：`prompt_builder`、`generation_service`、`session_store`、`context_budget`、`run_store`；前端 `components/editor/Agent/`

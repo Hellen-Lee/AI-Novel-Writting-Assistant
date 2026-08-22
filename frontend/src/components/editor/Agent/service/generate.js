@@ -2,7 +2,7 @@ import { streamGenerate } from '../../../../api/generate'
 
 /**
  * Agent 生成：调用后端 SSE，经 onEvent / onDelta 回写 UI。
- * skillName 省略时由后端 Router 决定 chat / skill。
+ * skillName 省略时走统一 agentic 路径；显式时为「预设」注入意图。
  */
 export async function runAgentGenerate({
   projectId,

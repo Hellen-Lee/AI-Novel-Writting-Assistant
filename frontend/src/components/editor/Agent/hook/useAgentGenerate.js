@@ -40,7 +40,7 @@ export function useAgentGenerate({
   }
 
   /**
-   * @param {string|null|undefined} skillId - null/undefined → auto Router
+   * @param {string|null|undefined} skillId - null/undefined → unified agentic path
    * @param {string} userText
    */
   const handleTriggerGenerate = async (skillId, userText) => {
@@ -65,8 +65,8 @@ export function useAgentGenerate({
     const localAssistId = `m_local_a_${Date.now()}`
     let assistId = localAssistId
     let streamBuf = ''
-    let mode = explicitSkill ? 'skill' : 'chat'
-    let skillLabel = explicitSkill ? resolveSkillLabel(explicitSkill) : '闲聊'
+    let draftMode = false
+    let skillLabel = explicitSkill ? resolveSkillLabel(explicitSkill) : ''
 
     updateSessionById(sessionId, (s) => ({
       ...s,
@@ -87,17 +87,6 @@ export function useAgentGenerate({
     setGenerating(true)
     setNotice('')
 
-    // Only open draft card for explicit skill; auto mode waits for meta.mode
-    if (explicitSkill) {
-      setAiDraft?.({
-        text: '',
-        skill: skillLabel,
-        status: 'streaming',
-      })
-    } else {
-      setAiDraft?.(null)
-    }
-
     abortRef.current?.abort()
     const controller = new AbortController()
     abortRef.current = controller
@@ -112,7 +101,7 @@ export function useAgentGenerate({
     }
 
     const syncDraft = (chunkText, status) => {
-      if (mode !== 'skill') {
+      if (!draftMode) {
         setAiDraft?.(null)
         return
       }
@@ -135,53 +124,24 @@ export function useAgentGenerate({
         selectedText,
         signal: controller.signal,
         onEvent: (ev) => {
-          if (ev?.type === 'router_meta') {
-            const decision = ev.decision || 'chat'
-            if (decision === 'skill' && ev.skill_name) {
-              skillLabel = resolveSkillLabel(ev.skill_name)
-              mode = 'skill'
-              patchAssist({ skill: skillLabel })
-              showNotice(`已选用技能：${skillLabel}`)
+          if (ev?.type === 'meta') {
+            if (typeof ev.draft === 'boolean') {
+              draftMode = ev.draft
+            }
+            if (ev.preset || ev.skill_name) {
+              skillLabel = resolveSkillLabel(ev.preset || ev.skill_name)
+            }
+            if (!draftMode) {
+              skillLabel = skillLabel || '闲聊'
+            }
+            patchAssist({ skill: skillLabel, pending: draftMode })
+            if (draftMode) {
               setAiDraft?.({
                 text: streamBuf,
                 skill: skillLabel,
                 status: 'streaming',
               })
-            } else if (decision === 'clarify') {
-              mode = 'chat'
-              skillLabel = '澄清'
-              patchAssist({ skill: skillLabel })
-              setAiDraft?.(null)
             } else {
-              mode = 'chat'
-              skillLabel = '闲聊'
-              patchAssist({ skill: skillLabel })
-              setAiDraft?.(null)
-            }
-            return
-          }
-          if (ev?.type === 'meta') {
-            if (ev.mode === 'skill') {
-              mode = 'skill'
-              if (ev.skill_name) {
-                skillLabel = resolveSkillLabel(ev.skill_name)
-              }
-              patchAssist({ skill: skillLabel })
-              if (!streamBuf) {
-                setAiDraft?.({
-                  text: '',
-                  skill: skillLabel,
-                  status: 'streaming',
-                })
-              }
-            } else {
-              mode = 'chat'
-              if (!skillLabel || skillLabel === '闲聊') {
-                skillLabel = ev.skill_name
-                  ? resolveSkillLabel(ev.skill_name)
-                  : '闲聊'
-              }
-              patchAssist({ skill: skillLabel, pending: true })
               setAiDraft?.(null)
             }
             const serverAssist = ev.assistant_message_id
@@ -207,7 +167,7 @@ export function useAgentGenerate({
           streamBuf += chunk
           patchAssist({
             content: streamBuf,
-            pending: mode === 'skill',
+            pending: draftMode,
             skill: skillLabel,
           })
           syncDraft(streamBuf, 'streaming')
@@ -218,21 +178,22 @@ export function useAgentGenerate({
       if (result.error && finalText) {
         showNotice(result.error)
       }
-      const finalMode = result.meta?.mode || mode
-      mode = finalMode
-      if (result.meta?.skill_name) {
-        skillLabel = resolveSkillLabel(result.meta.skill_name)
-      } else if (finalMode === 'chat' && skillLabel !== '澄清') {
+      if (typeof result.meta?.draft === 'boolean') {
+        draftMode = result.meta.draft
+      }
+      if (result.meta?.preset || result.meta?.skill_name) {
+        skillLabel = resolveSkillLabel(result.meta.preset || result.meta.skill_name)
+      } else if (!draftMode) {
         skillLabel = skillLabel || '闲聊'
       }
 
       patchAssist({
         content: finalText,
-        pending: finalMode === 'skill',
+        pending: draftMode,
         skill: skillLabel,
         error: result.error || '',
       })
-      if (finalMode === 'skill') {
+      if (draftMode) {
         setAiDraft?.({
           text: finalText,
           skill: skillLabel,
@@ -245,11 +206,11 @@ export function useAgentGenerate({
       if (err?.name === 'AbortError') {
         patchAssist({
           content: streamBuf,
-          pending: mode === 'skill' && Boolean(streamBuf),
+          pending: draftMode && Boolean(streamBuf),
           error: streamBuf ? '' : '已中断',
           skill: skillLabel,
         })
-        if (mode === 'skill' && streamBuf) {
+        if (draftMode && streamBuf) {
           setAiDraft?.({
             text: streamBuf,
             skill: skillLabel,

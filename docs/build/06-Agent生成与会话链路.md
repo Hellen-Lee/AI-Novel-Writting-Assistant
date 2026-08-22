@@ -1,5 +1,7 @@
 # Agent 生成与会话链路
 
+> ⚠️ **部分废弃**：§5 的「Router 分流 + 全量上下文预塞」已由 [`09-Agent原生工具调用.md`](09-Agent原生工具调用.md) 取代（统一 agentic 路径、移除 `router_meta`）。本文的传输层 / 会话落盘 / 模块职责仍有效。
+>
 > 对应计划：`docs/AI小说创作Agent_MVP开发计划.md` §5.0（链路）→ §5.1（续写验收）  
 > 轻量 Agent 本期：[`07-轻量Agent闲聊与Router.md`](07-轻量Agent闲聊与Router.md)、[`docs/轻量通用Agent开发方向.md`](../轻量通用Agent开发方向.md)  
 > 设计稿：编辑页 Agent 栏（`d7ubn`）/ 历史壳（`OckRz`）  

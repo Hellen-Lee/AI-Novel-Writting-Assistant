@@ -337,6 +337,98 @@ def build_thin_context(
     )
 
 
+def build_rules_block(
+    project_id: str,
+    chapter_rules: str = "",
+    *,
+    global_rules_chars: int = THIN_GLOBAL_RULES_CHARS,
+) -> str:
+    """Rules-only system block: global_rules + style + chapter_rules.
+
+    Contains NO memory / outline / chapters — the model fetches those via tools.
+    """
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    settings = project_store.load_settings(project_id)
+    global_rules = _truncate(
+        str(settings.get("global_rules") or "").strip(),
+        global_rules_chars,
+    ) or "（无）"
+    style = str(settings.get("style_preference") or "").strip() or "（无）"
+    rules_line = (chapter_rules or "").strip() or "（无）"
+
+    return (
+        f"全局规则：{global_rules}\n"
+        f"文风偏好：{style}\n"
+        f"单章规则：{rules_line}"
+    )
+
+
+def build_thin_user(
+    project_id: str,
+    *,
+    chapter_id: Optional[str] = None,
+    current_content: str = "",
+    selected_text: str = "",
+    user_input: str = "",
+    chapter_rules: str = "",
+    chapter_tail_chars: int = THIN_CHAPTER_TAIL_CHARS,
+) -> str:
+    """Thin user context: book identity + current chapter tail + selection + input.
+
+    No memory dump, no previous chapters, no full outline — the model pulls what
+    it needs via tools. Uses the current-chapter tail window as a light anchor.
+    """
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    meta = project_store.load_meta(project_id)
+    name = str(meta.get("name") or "").strip() or "未命名项目"
+    genre = str(meta.get("genre") or "").strip() or "（未设题材）"
+
+    content = current_content or ""
+    if not content and chapter_id:
+        try:
+            chapter = project_store.get_chapter(project_id, chapter_id)
+            content = str(chapter.get("content") or "")
+        except FileNotFoundError:
+            content = ""
+    title = _chapter_title(project_id, chapter_id) or "（当前章）"
+    tail = content[-chapter_tail_chars:] if content else "（空）"
+    if content and len(content) > chapter_tail_chars:
+        tail = "…（章末窗口）\n" + tail
+
+    parts = [
+        f"书名：{name}",
+        f"题材：{genre}",
+        f"当前章：{title}",
+        f"当前章末尾：\n{tail}",
+    ]
+    if selected_text:
+        parts.append(f"选中文本：\n{selected_text}")
+    parts.append("【用户本轮输入】\n" + ((user_input or "").strip() or "（空）"))
+    return "\n\n".join(parts)
+
+
+def preset_intent(preset_name: str) -> str:
+    """Return a preset's intent text (its `system` frontmatter) for injection.
+
+    Presets (续写/润色/扩写/生成设定) no longer render their full `$var`
+    template; only their intent/rule text is appended to the agent system prompt.
+    Falls back to the user_template for kind=skill presets with an empty system.
+    """
+    if not preset_name:
+        return ""
+    skill = skill_loader.get_skill(preset_name)
+    if skill is None:
+        return ""
+    system = str(skill.get("system") or "").strip()
+    if system:
+        return system
+    return str(skill.get("user_template") or "").strip()
+
+
 def build_history_block(
     session: dict[str, Any],
     *,
