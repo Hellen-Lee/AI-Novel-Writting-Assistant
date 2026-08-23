@@ -129,6 +129,65 @@ def iter_generate(
         else:
             text = "（空输入）"
 
+    # --- Router: for free text, let the model pick a skill from the
+    # auto-invocable catalog, else fall through to the generic chat path. ---
+    preset_is_router = False
+    router_step: Optional[dict[str, Any]] = None
+    if preset is None:
+        candidates = skill_loader.list_skills(include_auto_invocable_only=True)
+        allowed = {str(c.get("name") or "").strip() for c in candidates if c.get("name")}
+        if allowed:  # nothing to route to -> skip the model call, go chat
+            t0 = time.perf_counter()
+            router_sys, router_user = prompt_builder.build_router_prompt(
+                project_id,
+                session=session,
+                user_input=text,
+                chapter_id=chapter_id,
+                current_content=current_content or "",
+                chapter_rules=chapter_rules or "",
+                candidate_skills=candidates,
+            )
+            try:
+                raw = client.generate(
+                    system=router_sys,
+                    messages=[{"role": "user", "content": router_user}],
+                    params={"max_tokens": 120, "temperature": 0.0},
+                )
+                decision = prompt_builder.parse_router_response(
+                    raw, allowed_names=allowed
+                )
+            except ModelClientError:
+                decision = {
+                    "decision": "chat",
+                    "skill_name": "",
+                    "reason": "router_error",
+                }
+            latency = int((time.perf_counter() - t0) * 1000)
+
+            if (
+                decision.get("decision") == "skill"
+                and decision.get("skill_name") in allowed
+            ):
+                preset = decision["skill_name"]
+                preset_is_router = True
+
+            router_step = run_store.make_step(
+                "router",
+                skill_name=preset if preset_is_router else "",
+                skill_kind=_skill_kind(preset) if preset_is_router else "",
+                skill_source="router",
+                candidate_skills=sorted(allowed),
+                system=router_sys,
+                user=router_user,
+                response=(decision.get("reason") or ""),
+                latency_ms=latency,
+                extra={
+                    "decision": decision.get("decision", "chat"),
+                    "reason": decision.get("reason", ""),
+                },
+            )
+            steps.append(router_step)  # first step, so the viewer shows it on top
+
     # Snapshot before append so history does not duplicate this turn.
     session_for_prompt = session
 
@@ -246,7 +305,7 @@ def iter_generate(
                         "agent_tool",
                         skill_name=preset or "",
                         skill_kind=_skill_kind(preset) if preset else "",
-                        skill_source="explicit" if preset else "",
+                        skill_source=_skill_source(explicit=not preset_is_router, skill_name=preset),
                         tools=tool_calls,
                         system=system,
                         user=messages[-1].get("content") or "",
@@ -396,7 +455,7 @@ def iter_generate(
                 "agent",
                 skill_name=preset or "",
                 skill_kind=_skill_kind(preset) if preset else "",
-                skill_source="explicit" if preset else "",
+                skill_source=_skill_source(explicit=not preset_is_router, skill_name=preset),
                 tools=[],
                 system=system,
                 user=user,
@@ -478,7 +537,7 @@ def iter_generate(
             "agent",
             skill_name=preset or "",
             skill_kind=_skill_kind(preset) if preset else "",
-            skill_source="explicit" if preset else "",
+            skill_source=_skill_source(explicit=not preset_is_router, skill_name=preset),
             tools=[],
             system=system,
             user=user,

@@ -178,16 +178,16 @@ AINovel/
 
 | kind | 用途 | system | 正文 | `disable-model-invocation` | 调用方式 |
 | --- | --- | --- | --- | --- | --- |
-| `quick_action` | 四个快捷按钮 | **必填**（frontmatter） | 必填 | 可选，默认 `true` | 按钮或 `/name` |
-| `skill` | 其他内置 / 用户自建 | **禁止**（调用时固定为空） | 必填 | 可选，默认 `true` | `/name` 或技能列表 |
+| `quick_action` | 四个快捷按钮 | **必填**（frontmatter） | 必填 | 可选，默认 `true` | 按钮、`/name`，或模型自动选用 |
+| `skill` | 其他内置 / 用户自建 | **禁止**（调用时固定为空） | 必填 | 可选，默认 `true` | `/name`、技能列表，或模型自动选用 |
 
 字段说明：
 
 - `name`：唯一标识（中文、小写字母/数字，可用下划线或连字符），亦为 `/` 调用名。
-- `description`：功能说明；供列表展示，并为后续「模型自动选用」预留。
+- `description`：功能说明；供列表展示，并作为模型自动选用时的候选目录描述。
 - `kind`：`quick_action` \| `skill`。
 - `system`：仅 `quick_action` 使用。
-- `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（MVP 不做自动选用，但字段落地并校验；两种 kind 均可手动调用）。
+- `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（两种 kind 均可手动调用）。**模型自动选用**：自由输入（未指定 `skill_name`）时，后端先做一次轻量路由，从 `disable-model-invocation=false` 的 skill 目录中选一个注入其意图，未命中则走统一 agentic 自由文本路径；详见 `docs/changes/` 对应记录。
 - 正文：用户消息模板；常见变量如 `$worldview`、`$characters`（含内嵌关系）、`$story_core`、`$synopsis`、`$volumes`、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules`、`$chapter_rules` 等。
 
 示例（quick_action）：
@@ -197,7 +197,7 @@ AINovel/
 name: 续写
 description: 基于上下文续写下一段正文。手动调用：/续写
 kind: quick_action
-disable-model-invocation: true
+disable-model-invocation: false
 system: |
   你是一位专业小说作者……
 ---
@@ -214,7 +214,7 @@ $current_content
 name: 场景节拍
 description: 根据情节点列出场景节拍。手动调用：/场景节拍
 kind: skill
-disable-model-invocation: true
+disable-model-invocation: false
 ---
 当前章节：
 $current_content
