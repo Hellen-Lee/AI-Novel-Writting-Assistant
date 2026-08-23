@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, CircleCheck, Circle, Sparkles } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
 import { putMemory } from '../api/memory'
+import { generateOnboardingSettings } from '../api/onboarding'
 import { createProject, updateProject } from '../api/projects'
 import { CharacterEditModal } from '../components/onboarding/CharacterEditModal'
 import {
@@ -23,8 +24,6 @@ import {
   volumeLabelFromIndex,
 } from '../utils/onboarding'
 import './OnboardingPage.css'
-
-const AI_PLACEHOLDER = 'AI 生成将在生成链路联调后接入；当前请手动填写。'
 
 function StatusItem({ done, label }) {
   return (
@@ -53,6 +52,7 @@ export default function OnboardingPage() {
   const [modal, setModal] = useState(null)
   const [draft, setDraft] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [aiGenerating, setAiGenerating] = useState('') // '' | 'all' | section key
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
@@ -66,8 +66,121 @@ export default function OnboardingPage() {
     [genre, title, core, characters, synopsis, volumes],
   )
 
-  const showAiNotice = () => {
-    setNotice(AI_PLACEHOLDER)
+  const currentContext = useMemo(
+    () => ({
+      topic: title,
+      genre,
+      worldview,
+      story_core: core,
+      characters,
+      synopsis,
+      volumes,
+    }),
+    [title, genre, worldview, core, characters, synopsis, volumes],
+  )
+
+  const runAiGenerate = async (section) => {
+    if (aiGenerating) return
+    // 全量或单区生成前，需要至少一句核心想法/题材作为灵感前提
+    const hasInspiration = Boolean((title || '').trim() || (genre || '').trim())
+    if (!hasInspiration) {
+      setError('')
+      setNotice('请先填写「作品暂定名」或一句核心想法/题材，作为 AI 生成的灵感来源。')
+      return
+    }
+    setAiGenerating(section || 'all')
+    setError('')
+    setNotice('')
+    try {
+      const result = await generateOnboardingSettings({
+        ...currentContext,
+        section: section || null,
+      })
+      applyAiResult(result, section || null)
+    } catch (err) {
+      setError(getErrorMessage(err, 'AI 生成失败'))
+    } finally {
+      setAiGenerating('')
+    }
+  }
+
+  const applyAiResult = (result, section) => {
+    if (!section) {
+      // 全量：回填四区块（保留用户已填的题材/类型，AI 仅补充设定）
+      if (result.genre && !genre) setGenre(result.genre)
+      if (result.worldview) setWorldview(result.worldview)
+      if (result.story_core && Object.values(result.story_core).some(Boolean)) {
+        setCore((c) => ({
+          theme: result.story_core.theme || c.theme,
+          conflict: result.story_core.conflict || c.conflict,
+          plotline: result.story_core.plotline || c.plotline,
+        }))
+      }
+      if (result.characters?.length) {
+        setCharacters(
+          result.characters.map((c, i) => ({
+            id: createLocalId('char'),
+            name: c.name,
+            role: c.role || '',
+            profile: c.profile || '',
+            relationship: c.relationship || [],
+          })),
+        )
+      }
+      if (result.synopsis) setSynopsis(result.synopsis)
+      if (result.volumes?.length) {
+        setVolumes(
+          result.volumes.map((v, i) => ({
+            id: createLocalId('vol'),
+            label: volumeLabelFromIndex(i),
+            name: v.name,
+            summary: v.summary || '',
+          })),
+        )
+      }
+      setNotice('已生成全部设定，请检查后再确认创建。')
+      return
+    }
+
+    // 单区重生成：仅覆盖目标区块
+    if (section === 'worldview' && result.worldview) {
+      setWorldview(result.worldview)
+    } else if (section === 'story_core' && result.story_core) {
+      setCore((c) => ({
+        theme: result.story_core.theme || c.theme,
+        conflict: result.story_core.conflict || c.conflict,
+        plotline: result.story_core.plotline || c.plotline,
+      }))
+    } else if (section === 'characters' && result.characters?.length) {
+      setCharacters(
+        result.characters.map((c, i) => ({
+          id: createLocalId('char'),
+          name: c.name,
+          role: c.role || '',
+          profile: c.profile || '',
+          relationship: c.relationship || [],
+        })),
+      )
+    } else if (section === 'outline') {
+      if (result.synopsis) setSynopsis(result.synopsis)
+      if (result.volumes?.length) {
+        setVolumes(
+          result.volumes.map((v, i) => ({
+            id: createLocalId('vol'),
+            label: volumeLabelFromIndex(i),
+            name: v.name,
+            summary: v.summary || '',
+          })),
+        )
+      }
+    }
+    const labels = {
+      worldview: '世界观',
+      story_core: '故事内核',
+      characters: '主要角色',
+      outline: '全本大纲',
+    }
+    setNotice(`已生成${labels[section] || '该区块'}设定，请检查后再确认创建。`)
   }
 
   const selectGenre = (value) => {
@@ -319,10 +432,11 @@ export default function OnboardingPage() {
             <button
               type="button"
               className="onboarding-page__btn-ai"
-              onClick={showAiNotice}
+              onClick={() => runAiGenerate()}
+              disabled={Boolean(aiGenerating)}
             >
               <Sparkles size={16} />
-              AI 一键生成全部
+              {aiGenerating === 'all' ? '生成中…' : 'AI 一键生成全部'}
             </button>
             <Button variant="primary" onClick={handleConfirm} disabled={submitting}>
               {submitting ? '创建中…' : '确认并创建'}
@@ -352,12 +466,14 @@ export default function OnboardingPage() {
               worldview={worldview}
               onWorldviewChange={setWorldview}
               onOpenWorldviewModal={openWorldviewModal}
-              onAiGenerate={showAiNotice}
+              onAiGenerate={() => runAiGenerate('worldview')}
+              aiGenerating={aiGenerating === 'worldview'}
             />
             <StoryCoreSection
               core={core}
               onCoreChange={(patch) => setCore((c) => ({ ...c, ...patch }))}
-              onAiGenerate={showAiNotice}
+              onAiGenerate={() => runAiGenerate('story_core')}
+              aiGenerating={aiGenerating === 'story_core'}
             />
           </div>
 
@@ -367,7 +483,8 @@ export default function OnboardingPage() {
               onEditCharacter={openCharacterModal}
               onRemoveCharacter={removeCharacter}
               onAddCharacter={() => openCharacterModal()}
-              onAiGenerate={showAiNotice}
+              onAiGenerate={() => runAiGenerate('characters')}
+              aiGenerating={aiGenerating === 'characters'}
             />
             <OutlineSection
               synopsis={synopsis}
@@ -377,7 +494,8 @@ export default function OnboardingPage() {
               onEditVolume={openVolumeModal}
               onRemoveVolume={removeVolume}
               onAddVolume={() => openVolumeModal()}
-              onAiGenerate={showAiNotice}
+              onAiGenerate={() => runAiGenerate('outline')}
+              aiGenerating={aiGenerating === 'outline'}
             />
           </div>
         </div>
@@ -405,7 +523,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             className="onboarding-page__btn-ai onboarding-page__btn-ai--modal"
-            onClick={showAiNotice}
+            onClick={() => runAiGenerate('worldview')}
           >
             <Sparkles size={14} />
             AI 生成

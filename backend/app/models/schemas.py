@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Optional
+import enum
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -300,6 +301,62 @@ class GenerateRequest(BaseModel):
     chapter_rules: str = ""
     model: Optional[str] = None
     # Future (not wired this phase): ask_reply: { ask_id, option_id | text }
+
+
+# --- 引导页 AI 一键生成设定（无状态，项目创建前） ---
+
+
+class OnboardingSection(str, enum.Enum):
+    """引导页四区块之一；也用于单区重生成。"""
+
+    worldview = "worldview"
+    story_core = "story_core"
+    characters = "characters"
+    outline = "outline"
+
+
+class OnboardingGenerateRequest(BaseModel):
+    """无状态引导生成请求。
+
+    项目尚未创建：仅携带前端当前已填内容作为上下文，不依赖 project_id/session_id。
+    """
+
+    # 用户核心想法/题材（必填前提）
+    topic: str = ""
+    genre: str = ""
+    # 当前已填内容，作为生成上下文（已填的保留、空白项生成）
+    worldview: str = ""
+    story_core: dict[str, str] = Field(default_factory=dict)
+    characters: list[dict[str, Any]] = Field(default_factory=list)
+    synopsis: str = ""
+    volumes: list[dict[str, Any]] = Field(default_factory=list)
+    # 空 → 一次全量生成四区块；指定 → 仅重生成该区块
+    section: Optional[OnboardingSection] = None
+    model: Optional[str] = None
+
+
+class OnboardingCharacter(BaseModel):
+    name: str = ""
+    role: str = ""
+    profile: str = ""
+    relationship: list[CharacterRelationship] = Field(default_factory=list)
+
+
+class OnboardingVolume(BaseModel):
+    name: str = ""
+    summary: str = ""
+
+
+class OnboardingGenerateResponse(BaseModel):
+    """对齐引导页四区块；前端零转换直接回填。"""
+
+    topic: str = ""
+    genre: str = ""
+    worldview: str = ""
+    story_core: dict[str, str] = Field(default_factory=dict)
+    characters: list[OnboardingCharacter] = Field(default_factory=list)
+    synopsis: str = ""
+    volumes: list[OnboardingVolume] = Field(default_factory=list)
 
 
 # --- Agent Viewer (developer observation) ---

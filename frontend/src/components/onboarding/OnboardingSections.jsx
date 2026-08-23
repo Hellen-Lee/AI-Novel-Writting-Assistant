@@ -25,6 +25,7 @@ export function GenreWorldviewSection({
   onWorldviewChange,
   onOpenWorldviewModal,
   onAiGenerate,
+  aiGenerating,
 }) {
   return (
     <section className="onboarding-section">
@@ -34,9 +35,10 @@ export function GenreWorldviewSection({
           type="button"
           className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
           onClick={onAiGenerate}
+          disabled={aiGenerating}
         >
           <Sparkles size={12} />
-          AI 生成
+          {aiGenerating ? '生成中…' : 'AI 生成'}
         </button>
       </div>
 
@@ -129,7 +131,7 @@ export function GenreWorldviewSection({
   )
 }
 
-export function StoryCoreSection({ core, onCoreChange, onAiGenerate }) {
+export function StoryCoreSection({ core, onCoreChange, onAiGenerate, aiGenerating }) {
   return (
     <section className="onboarding-section">
       <div className="onboarding-section__head">
@@ -138,9 +140,10 @@ export function StoryCoreSection({ core, onCoreChange, onAiGenerate }) {
           type="button"
           className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
           onClick={onAiGenerate}
+          disabled={aiGenerating}
         >
           <Sparkles size={12} />
-          AI 生成
+          {aiGenerating ? '生成中…' : 'AI 生成'}
         </button>
       </div>
       <div className="onboarding-field">
@@ -189,6 +192,7 @@ export function CharactersSection({
   onRemoveCharacter,
   onAddCharacter,
   onAiGenerate,
+  aiGenerating,
 }) {
   return (
     <section className="onboarding-section">
@@ -198,9 +202,10 @@ export function CharactersSection({
           type="button"
           className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
           onClick={onAiGenerate}
+          disabled={aiGenerating}
         >
           <Sparkles size={12} />
-          AI 生成
+          {aiGenerating ? '生成中…' : 'AI 生成'}
         </button>
       </div>
       <div className="onboarding-scroller">
@@ -260,6 +265,7 @@ export function OutlineSection({
   onRemoveVolume,
   onAddVolume,
   onAiGenerate,
+  aiGenerating,
 }) {
   return (
     <section className="onboarding-section">
@@ -269,9 +275,10 @@ export function OutlineSection({
           type="button"
           className="onboarding-page__btn-ai onboarding-page__btn-ai--sm"
           onClick={onAiGenerate}
+          disabled={aiGenerating}
         >
           <Sparkles size={12} />
-          AI 生成
+          {aiGenerating ? '生成中…' : 'AI 生成'}
         </button>
       </div>
       <div className="onboarding-outline">

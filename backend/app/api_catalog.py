@@ -16,6 +16,7 @@ from app.routers import (
     generation,
     health,
     memory,
+    onboarding,
     projects,
     sessions,
     skills,
@@ -59,6 +60,8 @@ API_INDEX: list[tuple[str, str, str]] = [
     ("DELETE", "/api/projects/{id}/agent/sessions/{sid}", "删除会话"),
     # generation (SSE)
     ("POST", "/api/projects/{id}/generate", "Agent 流式生成（SSE；可选 skill_name / Router）"),
+    # onboarding (无状态引导生成，项目创建前)
+    ("POST", "/api/onboarding/generate", "引导页 AI 一键生成设定（全量或单区，返回 JSON）"),
     # agent viewer (developer observation)
     ("GET", "/api/dev/projects/{id}/agent/runs", "Agent Viewer：run 列表（无 prompt 正文）"),
     ("GET", "/api/dev/projects/{id}/agent/runs/{run_id}", "Agent Viewer：run 详情（含 prompt/回复）"),
@@ -76,4 +79,5 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(skills.router, prefix="/api", tags=["skills"])
     app.include_router(sessions.router, prefix="/api", tags=["sessions"])
     app.include_router(generation.router, prefix="/api", tags=["generation"])
+    app.include_router(onboarding.router, prefix="/api", tags=["onboarding"])
     app.include_router(agent_viewer.router, prefix="/api", tags=["agent-viewer"])
