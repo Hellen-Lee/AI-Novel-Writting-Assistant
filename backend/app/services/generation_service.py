@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 from collections.abc import Iterator
+from string import Template
 from typing import Any, Optional
 
 from app.config import load_config
@@ -22,21 +23,10 @@ from app.services.model_client import (
     message_has_tool_calls,
 )
 from app.services.project_store import project_exists
+from app.services import prompt_loader
 
-SUMMARY_SYSTEM = (
-    "你是会话摘要助手。将旧对话压缩为简洁中文摘要，供后续轮次使用。"
-    "必须保留：已定调的情节/文风、已否决的方向、用户明确约束与关键设定结论。"
-    "不要续写正文；不要超过 400 字。"
-)
-
-AGENT_SYSTEM = (
-    "你是本地小说创作智能体。你拥有读取项目上下文的工具（章节、前文、大纲、记忆）。\n"
-    "规则：\n"
-    "1. 需要项目信息时先调用相应工具读取，不要凭空编造设定。\n"
-    "2. 用户明显想让你续写/润色/扩写正文时，先读取必要章节，再输出可直接使用的正文。\n"
-    "3. 用户只是在讨论/提问/闲聊时，不要输出大段正文，直接以简洁中文回复。\n"
-    "4. 读取结果应精简；若已足够，直接作答。"
-)
+SUMMARY_SYSTEM = prompt_loader.get("summary_system")
+AGENT_SYSTEM = prompt_loader.get("agent_system")
 
 # Tools loop safety / draft heuristics.
 MAX_TOOL_ROUNDS = 3
@@ -320,7 +310,7 @@ def iter_generate(
                     messages.append(
                         {
                             "role": "user",
-                            "content": "请基于已读取的信息直接作答，不要再调用工具。",
+                            "content": prompt_loader.get("tool_loop_fallback"),
                         }
                     )
                     break
@@ -670,9 +660,9 @@ def _maybe_refresh_summary(
 
     prev_summary = str(session.get("summary") or "").strip()
     folded = session_store.format_messages_for_summary(older)
-    user_prompt = (
-        (f"已有摘要：\n{prev_summary}\n\n" if prev_summary else "")
-        + f"待压缩的旧对话：\n{folded}\n\n请输出更新后的摘要："
+    prev_summary_header = f"已有摘要：\n{prev_summary}\n\n" if prev_summary else ""
+    user_prompt = Template(prompt_loader.get("summary_user")).safe_substitute(
+        prev_summary_header=prev_summary_header, folded=folded
     )
     t0 = time.perf_counter()
     fallback = False

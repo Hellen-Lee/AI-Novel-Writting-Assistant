@@ -17,6 +17,7 @@ yarn-error.log*
 # Editor
 .vscode/
 .idea/
+.workbuddy/
 *.swp
 *.swo
 

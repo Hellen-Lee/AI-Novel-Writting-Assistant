@@ -58,7 +58,7 @@ data/projects/{project_id}/agent/
 | 业务 | `session_store`、`generation_service` | 落盘、mode 编排、写会话 |
 | 上下文 | `prompt_builder`、`context_budget` | 分流组装与预算截断 |
 | 观测 | `run_store`、Agent Viewer | run JSON 落盘 + `/dev/agent-viewer` |
-| 复用 | `model_client`、`skill_loader` | 模型调用与 skill 列表 |
+| 复用 | `model_client`、`skill_loader`、`prompt_loader` | 模型调用、skill 列表、通用提示词（`prompts/*.md`） |
 
 ---
 

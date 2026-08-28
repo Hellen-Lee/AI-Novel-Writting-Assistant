@@ -7,6 +7,7 @@ from string import Template
 from typing import Any, Optional
 
 from app.services import memory_store, project_store, session_store, skill_loader
+from app.services import prompt_loader
 from app.services.skill_loader import KIND_QUICK_ACTION, KIND_SKILL
 
 # L0 / history defaults (see docs/build/07)
@@ -15,22 +16,8 @@ THIN_GLOBAL_RULES_CHARS = 800
 CONVERSATION_NOTE_MAX_CHARS = 500
 HISTORY_KEEP_ROUNDS = session_store.HISTORY_KEEP_ROUNDS
 
-CHAT_SYSTEM = (
-    "你是本地小说创作助手。用简洁中文与用户讨论设定、情节与写法。"
-    "不要擅自输出大段成章正文去替换章节，除非用户明确要求续写/润色类产出；"
-    "若用户意图不清，先简短澄清。可提示对方使用快捷按钮或 /技能名。"
-)
-
-ROUTER_SYSTEM = (
-    "你是路由助手。根据用户意图，在候选 skill 中选一个，或判定为闲聊/需澄清。"
-    "只输出一个 JSON 对象，不要其它文字。格式：\n"
-    '{"decision":"skill"|"chat"|"clarify","skill_name":"","reason":""}\n'
-    "规则：\n"
-    "- decision=skill 时 skill_name 必须是候选列表中的 name；\n"
-    "- 无法匹配或只需讨论时用 chat；\n"
-    "- 意图模糊时用 clarify；\n"
-    "- 不要选择列表外的 skill。"
-)
+CHAT_SYSTEM = prompt_loader.get("chat_system")
+ROUTER_SYSTEM = prompt_loader.get("router_system")
 
 
 def _format_tags(tags: Any) -> str:

@@ -12,18 +12,16 @@ from __future__ import annotations
 import json
 import logging
 import re
+from string import Template
 from typing import Any, Optional
 
 from app.models.schemas import OnboardingSection
 from app.services.model_client import ModelClientError, build_client
+from app.services import prompt_loader
 
 logger = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = (
-    "你是资深小说设定设计师，负责为新作品设计完整的世界观、故事内核、主要角色与全本大纲。"
-    "只输出一个合法的 JSON 对象，不要输出任何解释、markdown 代码块标记或其他文字。"
-    "JSON 必须严格使用中文字符串，不要使用英文键名。"
-)
+SYSTEM_PROMPT = prompt_loader.get("onboarding_system")
 
 # 四区块的 JSON 字段骨架；宽容解析时按此兜底。
 FULL_SKELETON: dict[str, Any] = {
@@ -128,26 +126,14 @@ def _build_user_prompt(
             "outline": "全本大纲",
         }
         parts.append(
-            f"\n【本次任务】只生成并返回「{labels[section]}」区块，其他字段保持空值或省略。"
-            "若该区块当前已有内容，请在其基础上重新生成更完善、与其余已填内容协调的版本。"
+            "\n" + Template(prompt_loader.get("onboarding_user_section")).safe_substitute(
+                section_label=labels[section]
+            )
         )
     else:
-        parts.append(
-            "\n【本次任务】一次性生成完整设定：世界观、故事内核（theme/conflict/plotline 三行）、"
-            "主要角色（建议 3-6 个，每个含 name/role/profile/relationship）、全书概要 synopsis、"
-            "分卷大纲 volumes（建议 3-6 卷，每卷含 name/summary）。各部分要与用户想法协调一致。"
-        )
+        parts.append("\n" + prompt_loader.get("onboarding_user_full"))
 
-    parts.append(
-        "\n【输出 JSON 字段约定】\n"
-        "- worldview: 字符串，世界背景/时代/力量体系/地理等。\n"
-        "- story_core: 对象，含 theme/conflict/plotline 三个字符串字段。\n"
-        "- characters: 数组，元素为 {name, role, profile, relationship}，"
-        "relationship 为 {type, target} 数组（type 可用中文，如 师徒/宿敌/恋人）。\n"
-        "- synopsis: 字符串，全书概要。\n"
-        "- volumes: 数组，元素为 {name, summary}。\n"
-        "仅输出以上 JSON 对象本身。"
-    )
+    parts.append("\n" + prompt_loader.get("onboarding_user_json_spec"))
 
     return "\n".join(parts)
 

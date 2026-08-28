@@ -9,6 +9,7 @@ from typing import Any, Optional
 import httpx
 
 from app.config import is_masked_api_key, load_config, mask_api_key
+from app.services import prompt_loader
 
 TOOL_CALL_DONE = {"type": "done", "finish_reason": ""}
 
@@ -252,7 +253,7 @@ class ModelClient:
 
     def _test_via_chat(self) -> dict[str, Any]:
         content = self.generate(
-            system="You are a connection test assistant. Reply with ok only.",
+            system=prompt_loader.get("connection_test"),
             messages=[{"role": "user", "content": "ping"}],
             params={"max_tokens": 8, "temperature": 0},
         )
