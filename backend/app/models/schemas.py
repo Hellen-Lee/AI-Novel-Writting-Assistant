@@ -5,9 +5,28 @@ from __future__ import annotations
 import enum
 from typing import Any, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 from app.config import AppConfig
+
+
+def non_blank(field_name: str):
+    """返回校验器：剔除首尾空白后必须非空。
+
+    统一「空字符串」的语义：长度校验（min_length）无法拦截纯空白输入，
+    会让 "   " 一路进入业务层再抛 400，与 Pydantic 的 422 不一致。
+    统一在 schema 层拦截，保证所有接口返回一致的错误码。
+    """
+
+    def _validate(cls: Any, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        stripped = value.strip()
+        if not stripped:
+            raise ValueError(f"{field_name} 不能为空或纯空白")
+        return stripped
+
+    return field_validator(field_name)(classmethod(_validate))
 
 
 class HealthResponse(BaseModel):
@@ -104,6 +123,12 @@ class ProjectCreateRequest(BaseModel):
     synopsis: str = ""
     first_chapter_title: str = "第一章"
 
+    _check_name = non_blank("name")
+
+
+class ProjectUpdateRequest(BaseModel):
+    name: Optional[str] = Field(default=None, min_length=1)
+
 
 class ProjectUpdateRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1)
@@ -139,10 +164,14 @@ class ChapterCreateRequest(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1)
     content: Optional[str] = None
 
+    _check_title = non_blank("title")
+
 
 class ChapterUpdateRequest(BaseModel):
     title: Optional[str] = Field(default=None, min_length=1)
     content: Optional[str] = None
+
+    _check_title = non_blank("title")
 
 
 class ChapterSummary(BaseModel):
@@ -172,6 +201,8 @@ class MemoryEntry(BaseModel):
     created_at: str = ""
     updated_at: str = ""
 
+    _check_name = non_blank("name")
+
 
 class CharacterRelationship(BaseModel):
     type: str = Field(min_length=1)
@@ -189,6 +220,8 @@ class CharacterEntry(BaseModel):
     created_at: str = ""
     updated_at: str = ""
 
+    _check_name = non_blank("name")
+
 
 class ProjectMemory(BaseModel):
     worldview: list[MemoryEntry] = Field(default_factory=list)
@@ -203,6 +236,8 @@ class MemoryEntryCreateRequest(BaseModel):
     relationship: list[CharacterRelationship] = Field(default_factory=list)
     tags: list[str] = Field(default_factory=list)
 
+    _check_name = non_blank("name")
+
 
 class MemoryEntryUpdateRequest(BaseModel):
     name: Optional[str] = Field(default=None, min_length=1)
@@ -210,6 +245,8 @@ class MemoryEntryUpdateRequest(BaseModel):
     profile: Optional[str] = None
     relationship: Optional[list[CharacterRelationship]] = None
     tags: Optional[list[str]] = None
+
+    _check_name = non_blank("name")
 
 
 class SkillSummary(BaseModel):
@@ -236,6 +273,10 @@ class SkillUpsertRequest(BaseModel):
     disable_model_invocation: bool = True
     system: str = ""
     user_template: str = Field(..., min_length=1)
+
+    _check_name = non_blank("name")
+    _check_description = non_blank("description")
+    _check_template = non_blank("user_template")
 
 
 class SkillDeleteResponse(BaseModel):

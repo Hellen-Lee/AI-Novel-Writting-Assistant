@@ -32,6 +32,8 @@ def create_project(payload: ProjectCreateRequest):
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except project_store.ProjectStoreError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.get("/projects/{project_id}", response_model=ProjectDetail)
@@ -53,6 +55,8 @@ def update_project(project_id: str, payload: ProjectUpdateRequest):
         raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except project_store.ProjectStoreError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 @router.delete("/projects/{project_id}")
@@ -61,4 +65,6 @@ def delete_project(project_id: str):
         project_store.delete_project(project_id)
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except project_store.ProjectStoreError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
     return {"ok": True, "id": project_id}

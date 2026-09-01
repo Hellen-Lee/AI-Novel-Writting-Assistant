@@ -352,6 +352,27 @@ def upsert_custom_skill(
         user_template=draft["user_template"],
     )
 
+    # 写盘前先对序列化结果做一次回环解析：无效内容绝不允许落盘，
+    # 否则会在 data/skills/ 留下永久损坏文件，每次启动都报「跳过无效 SKILL」。
+    try:
+        meta, body = _parse_frontmatter(text)
+        _validate_and_normalize(
+            meta,
+            body,
+            path=target_path,
+            source="custom",
+        )
+    except SkillValidationError as exc:
+        raise SkillValidationError(f"技能内容无效，未写入磁盘: {exc}") from exc
+
+    previous_text: Optional[str] = None
+    existed_before = target_path.exists()
+    if existed_before:
+        try:
+            previous_text = target_path.read_text(encoding="utf-8")
+        except OSError:
+            previous_text = None
+
     if path_name != name:
         existing = get_skill(path_name)
         if existing is None:
@@ -362,11 +383,26 @@ def upsert_custom_skill(
         if old_path.resolve() != target_path.resolve() and old_path.exists():
             old_path.unlink()
 
-    target_path.write_text(text, encoding="utf-8")
-    load_skills()
-    detail = get_skill_detail(name)
-    if detail is None:
-        raise SkillValidationError(f"保存后未能加载技能: {name}")
+    try:
+        target_path.write_text(text, encoding="utf-8")
+        load_skills()
+        detail = get_skill_detail(name)
+        if detail is None:
+            raise SkillValidationError(f"保存后未能加载技能: {name}")
+    except Exception:
+        # 回滚：新文件删除，被覆盖的文件还原，避免残留损坏/半成品技能
+        try:
+            if previous_text is not None:
+                target_path.write_text(previous_text, encoding="utf-8")
+            elif not existed_before and target_path.exists():
+                target_path.unlink()
+        except OSError:
+            pass
+        try:
+            load_skills()
+        except Exception:
+            pass
+        raise
     return detail
 
 

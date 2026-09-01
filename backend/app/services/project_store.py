@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 import shutil
 import uuid
@@ -14,6 +15,12 @@ from app.config import PROJECTS_DIR, ensure_data_dir
 from app.services.memory_store import empty_memory, save_memory
 
 CHAPTER_ID_RE = re.compile(r"^chapter_(\d+)$")
+
+logger = logging.getLogger(__name__)
+
+
+class ProjectStoreError(RuntimeError):
+    """项目数据读写失败（磁盘错误、文件被占用、权限不足等）。"""
 
 
 def _now_iso() -> str:
@@ -271,9 +278,41 @@ def update_project(project_id: str, updates: dict[str, Any]) -> dict[str, Any]:
 
 
 def delete_project(project_id: str) -> None:
+    """删除项目目录。
+
+    采用「先改名后删除」两段式：先把项目目录移出 projects/ 到 .trash/ 暂存区，
+    再清理暂存区。这样即使第二步因文件被占用（编辑器/杀毒软件）而失败，
+    项目也立刻从列表消失，不会残留一个删了一半、仍能打开的项目。
+    """
     if not project_exists(project_id):
         raise FileNotFoundError(f"项目不存在: {project_id}")
-    shutil.rmtree(get_project_dir(project_id))
+
+    source = get_project_dir(project_id)
+    ensure_projects_dir()
+    trash_root = PROJECTS_DIR / ".trash"
+    trash_root.mkdir(parents=True, exist_ok=True)
+    staged = trash_root / f"{project_id}-{uuid.uuid4().hex[:6]}"
+
+    try:
+        source.rename(staged)
+    except OSError as exc:
+        raise ProjectStoreError(
+            f"删除项目失败，文件可能正被其他程序占用：{project_id}"
+        ) from exc
+
+    try:
+        shutil.rmtree(staged)
+    except OSError as exc:
+        # 目录已移出 projects/，对用户而言项目已删除；残留留给下次清理。
+        logger.warning("项目暂存目录清理失败，已留待后续处理: %s (%s)", staged, exc)
+        return
+
+    # 暂存区已空则顺手移除，避免留下空目录
+    try:
+        if not any(trash_root.iterdir()):
+            trash_root.rmdir()
+    except OSError:
+        pass
 
 
 def list_chapters(project_id: str) -> list[dict[str, Any]]:

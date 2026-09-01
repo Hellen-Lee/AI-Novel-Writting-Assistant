@@ -30,9 +30,19 @@ AGENT_SYSTEM = prompt_loader.get("agent_system")
 
 # Tools loop safety / draft heuristics.
 MAX_TOOL_ROUNDS = 3
+# 工具决策轮的输出预算。注意：推理类模型（如 deepseek-v4-flash）会先消耗大量
+# reasoning token 再产出 tool_calls/content，预算过小会被整体截断，表现为
+# content 与 tool_calls 同时为空（模型"什么都没说"），工具链路随机失效。
+# 1024 足以覆盖常规推理开销，且本轮只做工具决策，正文由下一轮流式生成。
+TOOL_ROUND_MAX_TOKENS = 1024
+# 路由决策与会话摘要同样会被推理 token 挤占，预算需大于常规输出量级。
+ROUTER_MAX_TOKENS = 1024
+SUMMARY_MAX_TOKENS = 2048
 DRAFT_PROSE_MIN_CHARS = 400
 DRAFT_PRESETS = {"续写", "润色", "扩写"}
 BUBBLE_PRESETS = {"生成设定"}
+# 最终流式返回空内容时给用户的提示
+EMPTY_RESULT_MESSAGE = "模型未返回任何内容，请重试或调整输入"
 
 
 def _sse(payload: dict[str, Any]) -> str:
@@ -141,7 +151,7 @@ def iter_generate(
                 raw = client.generate(
                     system=router_sys,
                     messages=[{"role": "user", "content": router_user}],
-                    params={"max_tokens": 120, "temperature": 0.0},
+                    params={"max_tokens": ROUTER_MAX_TOKENS, "temperature": 0.0},
                 )
                 decision = prompt_builder.parse_router_response(
                     raw, allowed_names=allowed
@@ -273,6 +283,8 @@ def iter_generate(
     tool_rounds = 0
     reads_work = False
     tool_called = False
+    # 模型在工具轮直接给出正文（未调用工具）时保留，供最终流式为空时回退使用
+    tool_answer = ""
     t1 = time.perf_counter()
     errored = False
     parts: list[str] = []
@@ -287,7 +299,10 @@ def iter_generate(
                     messages=messages,
                     tools=agent_tools.TOOLS,
                     tool_choice="auto",
-                    params={"max_tokens": 256, "temperature": 0.4},
+                    params={
+                        "max_tokens": TOOL_ROUND_MAX_TOKENS,
+                        "temperature": 0.4,
+                    },
                 )
                 tool_calls = assistant.get("tool_calls") or []
                 tool_steps.append(
@@ -305,6 +320,9 @@ def iter_generate(
                     )
                 )
                 if not message_has_tool_calls(assistant):
+                    # 模型未调用工具、直接作答：记录内容，下一轮流式可能重复生成，
+                    # 若流式为空则回退到这里的结果，避免用户看到空白。
+                    tool_answer = (assistant.get("content") or "").strip()
                     break
                 if tool_rounds >= MAX_TOOL_ROUNDS:
                     messages.append(
@@ -482,6 +500,30 @@ def iter_generate(
         yield _sse({"type": "error", "error": err_text})
 
     full = "".join(parts)
+
+    # 流式为空时回退到工具轮已生成的正文（模型可能已在决策轮直接作答），
+    # 避免用户看到一条空白消息。
+    if not full.strip() and tool_answer:
+        full = tool_answer
+        yield _sse({"type": "content", "content": tool_answer})
+
+    # 仍然为空：明确报错，而不是静默写入一条空消息
+    if not full.strip() and not errored:
+        errored = True
+        err_text = EMPTY_RESULT_MESSAGE
+        try:
+            session_store.update_message(
+                project_id,
+                session_id,
+                assistant_msg["id"],
+                content="",
+                pending=False,
+                error=err_text,
+                status="idle",
+            )
+        except (FileNotFoundError, OSError):
+            pass
+        yield _sse({"type": "error", "error": err_text})
 
     # --- Draft vs bubble routing (no separate Router call) ---
     draft = _decide_draft(
@@ -670,7 +712,7 @@ def _maybe_refresh_summary(
         new_summary = client.generate(
             system=SUMMARY_SYSTEM,
             messages=[{"role": "user", "content": user_prompt}],
-            params={"max_tokens": 512, "temperature": 0.3},
+            params={"max_tokens": SUMMARY_MAX_TOKENS, "temperature": 0.3},
         )
         new_summary = (new_summary or "").strip()
         if not new_summary:

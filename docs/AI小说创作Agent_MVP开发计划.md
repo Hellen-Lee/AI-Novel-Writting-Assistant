@@ -243,36 +243,52 @@
 
 ### 6.1 联调测试
 
-- [ ] 完整走通：新建项目 → 引导 → 编辑页 → 续写 → 保存
-- [ ] 测试全局设置 · API（模型配置与连接）及 skill 库管理入口
-- [ ] 测试设定管理增删改查
-- [ ] 测试不同 skill 的生成效果
+- [x] 完整走通：新建项目 → 引导 → 编辑页 → 续写 → 保存
+- [x] 测试全局设置 · API（模型配置与连接）及 skill 库管理入口
+- [x] 测试设定管理增删改查
+- [x] 测试不同 skill 的生成效果
+
+> 实现：`backend/tests/smoke_test.py` 端到端冒烟脚本，覆盖 0–13 共 14 组用例（健康检查、API 配置与异常、技能库 CRUD、项目/章节/设定/会话 CRUD、续写流式、润色、自由输入 Router、引导生成、Agent Viewer、清理）。支持 `--skip-model` 离线、`--keep` 保留项目。
 
 
 
 ### 6.2 异常处理
 
-- [ ] 模型调用失败提示
-- [ ] 文件读写失败提示
-- [ ] 网络/配置错误提示
-- [ ] 空状态与 loading 状态
+- [x] 模型调用失败提示
+- [x] 文件读写失败提示
+- [x] 网络/配置错误提示
+- [x] 空状态与 loading 状态
+
+> 实现：后端路由统一 `HTTPException(status_code, detail=str)`，按 400/404/422/500/502/401 区分；模型层 `ModelClientError` 携带 `status_code` 与 `message`；`generation_service` 在 SSE 中发 `{"type":"error"}` 帧并落盘 pending=false。
+> 前端 `api/client.js` 的 `getErrorMessage` 统一解析三类来源（后端 detail 字符串/Pydantic 校验数组、HTTP 状态码、网络层超时/断连），给出可操作中文提示；各页有 loading 与空状态（「加载中…」「暂无章节」「暂无项目」等）。
 
 
 
 ### 6.3 代码整理
 
-- [ ] 统一错误返回格式
-- [ ] 前端提取 API 封装
-- [ ] 后端接口参数校验
-- [ ] 清理调试日志
+- [x] 统一错误返回格式
+- [x] 前端提取 API 封装
+- [x] 后端接口参数校验
+- [x] 清理调试日志
+
+> 实现：
+> - 错误格式：所有路由 `{"detail": ...}`；`schemas.non_blank` 在 schema 层统一拦截纯空白输入，保证空字符串语义一致返回 422。
+> - 前端封装：`frontend/src/api/` 下 `client.js`（axios 实例 + `getErrorMessage`）+ `projects/chapters/memory/skills/sessions/generate/config/onboarding/agentViewer.js` 按域拆分。
+> - 参数校验：Pydantic `Field(min_length=1, ge/le)` + `non_blank` 校验器 + 路由层空请求体 400 拦截。
+> - 日志清理：后端 `app/` 与前端 `src/` 无残留 `print(`/`console.log(`；`tests/_debug_*.py` 六个临时调试脚本已删除，仅保留 `smoke_test.py` 与 `verify_build.py`。
 
 
 
 ### 6.4 文档补充
 
-- [ ] 更新 `README.md`：安装、启动、使用说明
-- [ ] 补充 `AGENTS.md` 中的 API 定义与 JSON Schema
-- [ ] 记录已知问题与下一步计划
+- [x] 更新 `README.md`：安装、启动、使用说明
+- [x] 补充 `AGENTS.md` 中的 API 定义与 JSON Schema
+- [x] 记录已知问题与下一步计划
+
+> 实现：
+> - `README.md`：环境要求、安装、开发/生产/分目录启动、首次使用、数据存放、测试、常见问题、文档索引。
+> - `AGENTS.md` §6：路由表对齐 `api_catalog.py` 的 `API_INDEX`（含此前漏列的 PUT/DELETE projects、PUT/DELETE chapters、memory条目 CRUD、config/models、onboarding、health 等）；§6.2 补全配置/项目/章节/记忆/技能/会话/生成/引导/Agent Viewer 九类核心 JSON Schema 摘要。
+> - `AGENTS.md` §9：已知问题（上下文裁剪未摘要、引导生成模型质量敏感、通用栏占位、工具调用兼容性、摘要降级、测试为冒烟脚本）与下一步方向（桌面打包、记忆进化、会话持久化、通用栏落地、冲突检测、语义摘要、pytest+CI）。
 
 ---
 
@@ -280,14 +296,16 @@
 
 ## 七、MVP 验收标准
 
-- [ ] 本地启动前后端后，浏览器可正常访问
-- [ ] 能成功创建项目并通过单页引导初始化（含 AI 一键生成或手动填写）
-- [ ] 能在编辑页右侧 Agent 对话栏调用 AI 续写，并将结果采纳到正文
-- [ ] 临时规则遮罩可编辑并随生成请求生效
-- [ ] 章节内容保存后，重新进入项目可读取
-- [ ] 设定管理中人物关系内嵌于角色并可持久化，影响后续生成
-- [ ] 全局设置中 API 配置能本地保存并通过连接测试；skill 栏可管理技能库
-- [ ] 项目数据全部保存在 `data/` 目录下，无云端依赖
+- [x] 本地启动前后端后，浏览器可正常访问
+- [x] 能成功创建项目并通过单页引导初始化（含 AI 一键生成或手动填写）
+- [x] 能在编辑页右侧 Agent 对话栏调用 AI 续写，并将结果采纳到正文
+- [x] 临时规则遮罩可编辑并随生成请求生效
+- [x] 章节内容保存后，重新进入项目可读取
+- [x] 设定管理中人物关系内嵌于角色并可持久化，影响后续生成
+- [x] 全局设置中 API 配置能本地保存并通过连接测试；skill 栏可管理技能库
+- [x] 项目数据全部保存在 `data/` 目录下，无云端依赖
+
+> 验收依据：`backend/tests/smoke_test.py` 端到端覆盖主流程与异常路径；`npm run build` 通过后端导入校验；README 与 AGENTS 文档完备。各验收项对应代码路径见 §一至 §六勾选项。
 
 ---
 

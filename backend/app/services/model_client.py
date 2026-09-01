@@ -275,17 +275,42 @@ class ModelClient:
         """
         Non-streaming chat completion. Prefer generate_stream for UI generation.
         """
+        return self.generate_detailed(system, messages, params)["content"]
+
+    def generate_detailed(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, str]]] = None,
+        params: Optional[dict[str, Any]] = None,
+        timeout: float = 120.0,
+    ) -> dict[str, Any]:
+        """Non-streaming completion，额外返回 finish_reason / usage。
+
+        推理类模型（DeepSeek-R1 系、o1 系等）的思考 token 也计入 max_tokens，
+        预算不足时会出现 finish_reason="length" 且 content 为空。调用方需要
+        finish_reason 才能区分「生成失败」与「预算被推理耗尽」，故单独暴露。
+
+        Returns: {"content": str, "finish_reason": str, "usage": dict}
+        """
         payload = self._build_chat_payload(system, messages, params, stream=False)
         data = self._request(
             "POST",
             "/chat/completions",
             json=payload,
-            timeout=120.0,
+            timeout=timeout,
         )
         try:
-            return data["choices"][0]["message"]["content"]
+            choice = data["choices"][0]
+            message = choice["message"]
         except (KeyError, IndexError, TypeError) as exc:
             raise ModelClientError("模型响应格式无效，未找到生成内容") from exc
+        if not isinstance(message, dict):
+            raise ModelClientError("模型响应格式无效，未找到生成内容")
+        return {
+            "content": message.get("content") or "",
+            "finish_reason": choice.get("finish_reason") or "",
+            "usage": data.get("usage") or {},
+        }
 
     def chat(
         self,

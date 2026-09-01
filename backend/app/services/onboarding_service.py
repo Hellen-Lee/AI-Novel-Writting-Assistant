@@ -289,29 +289,63 @@ def generate_onboarding_settings(
         section=section_name,
     )
 
-    # 全量生成涉及四区块，需较大输出预算以免被截断导致 JSON 不完整
-    max_tokens = 3000 if section_name else 8000
-    params = {"max_tokens": max_tokens, "temperature": 0.8}
+    # 输出预算：推理类模型（DeepSeek-R1 系 / o1 系）的思考 token 同样计入
+    # max_tokens，预算不足时会返回 finish_reason="length" 且 content 为空。
+    # 因此首轮给足预算，并在检测到「被截断/空内容」时逐轮扩容重试。
+    base_tokens = 6000 if section_name else 16000
+    max_attempts = 3
 
-    # 部分 provider 偶发返回空内容或截断 JSON；重试整个 生成→解析 周期以提升成功率
     last_error: Optional[Exception] = None
-    for _attempt in range(2):
-        raw = client.generate(
-            system=SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": prompt}],
-            params=params,
-        )
-        if not raw or not raw.strip():
+    for attempt in range(max_attempts):
+        max_tokens = base_tokens * (attempt + 1)
+        params = {"max_tokens": max_tokens, "temperature": 0.8}
+        try:
+            result = client.generate_detailed(
+                system=SYSTEM_PROMPT,
+                messages=[{"role": "user", "content": prompt}],
+                params=params,
+                timeout=180.0,
+            )
+        except ModelClientError as exc:
+            logger.warning("引导生成调用失败（第 %d 次）: %s", attempt + 1, exc)
+            last_error = exc
+            continue
+
+        raw = result["content"]
+        truncated = result["finish_reason"] == "length"
+        if not raw.strip():
+            # 推理耗尽预算 → 下一轮更大预算重试
+            logger.warning(
+                "引导生成返回空内容（第 %d 次，finish_reason=%s, max_tokens=%d），扩容重试",
+                attempt + 1,
+                result["finish_reason"] or "unknown",
+                max_tokens,
+            )
             last_error = ModelClientError("模型未返回任何内容")
             continue
+
         try:
             obj = _parse_response(raw)
-            return _extract_section(section_name, obj)
         except ValueError as exc:
-            logger.warning("引导生成 JSON 解析失败，重试: %s", exc)
+            # 截断造成的 JSON 不完整同样靠扩容重试解决
+            logger.warning(
+                "引导生成 JSON 解析失败（第 %d 次，truncated=%s）: %s",
+                attempt + 1,
+                truncated,
+                exc,
+            )
             last_error = ValueError("AI 生成结果无法解析，请重试")
             continue
 
+        try:
+            return _extract_section(section_name, obj)
+        except KeyError as exc:
+            logger.warning("引导生成区块缺失: %s", exc)
+            last_error = ValueError("AI 生成结果缺少所需字段，请重试")
+            continue
+
     if isinstance(last_error, ValueError):
+        raise last_error
+    if isinstance(last_error, ModelClientError):
         raise last_error
     raise ModelClientError("模型未返回任何内容，请重试")
