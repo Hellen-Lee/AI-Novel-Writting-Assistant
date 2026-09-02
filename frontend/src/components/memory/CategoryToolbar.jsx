@@ -23,7 +23,7 @@ export function CategoryToolbar({
           className="memory-page__add-btn"
           onClick={onCreate}
         >
-          <Plus size={12} strokeWidth={2.5} />
+          <Plus size={14} strokeWidth={2.5} />
           {createButtonLabel(category)}
         </button>
       </div>

@@ -136,7 +136,7 @@ export function toolbarCountLabel(category, memory, outline) {
 }
 
 export function createButtonLabel(category) {
-  if (category === 'characters') return '新建人物'
+  if (category === 'characters') return '新增人物'
   if (category === 'story_core') return '新建内核'
   if (category === 'outline') return '添加分卷'
   if (category === 'worldview') return '新建设定'

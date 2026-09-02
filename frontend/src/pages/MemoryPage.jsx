@@ -85,6 +85,7 @@ export default function MemoryPage() {
             onDeleteEntry={handleDelete}
             onDeleteVolume={handleDelete}
             onAddVolume={handleCreate}
+            onCreate={handleCreate}
           />
         </div>
       </div>

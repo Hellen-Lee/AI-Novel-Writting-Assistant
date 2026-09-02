@@ -16,6 +16,7 @@ export function CardWorkspace({
   onDeleteEntry,
   onDeleteVolume,
   onAddVolume,
+  onCreate,
 }) {
   if (category === 'worldview') {
     return (
@@ -48,6 +49,7 @@ export function CardWorkspace({
         selectedId={selectedId}
         onOpenEntry={onOpenEntry}
         onDeleteEntry={onDeleteEntry}
+        onCreate={onCreate}
       />
     )
   }
