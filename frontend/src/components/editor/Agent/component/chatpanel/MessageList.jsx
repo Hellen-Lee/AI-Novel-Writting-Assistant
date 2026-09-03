@@ -22,10 +22,6 @@ function EmptyGuide({ onQuickAction, generating }) {
 export function MessageList({
   messages,
   messagesEndRef,
-  draft,
-  onApplyDraft,
-  onDiscardDraft,
-  onRetry,
   onQuickAction,
   generating,
 }) {
@@ -34,16 +30,7 @@ export function MessageList({
       {messages.length === 0 ? (
         <EmptyGuide onQuickAction={onQuickAction} generating={generating} />
       ) : (
-        messages.map((msg) => (
-          <MessageItem
-            key={msg.id}
-            message={msg}
-            draft={draft}
-            onApplyDraft={onApplyDraft}
-            onDiscardDraft={onDiscardDraft}
-            onRetry={onRetry}
-          />
-        ))
+        messages.map((msg) => <MessageItem key={msg.id} message={msg} />)
       )}
       <div ref={messagesEndRef} />
     </div>

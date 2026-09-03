@@ -17,8 +17,7 @@ export function EditorRightRail({
   selectedText,
   setAiDraft,
   draft,
-  onApplyDraft,
-  onDiscardDraft,
+  onRegisterRetry,
   onCollapse,
   rulesId,
   globalRules,
@@ -59,8 +58,7 @@ export function EditorRightRail({
           selectedText={selectedText}
           setAiDraft={setAiDraft}
           draft={draft}
-          onApplyDraft={onApplyDraft}
-          onDiscardDraft={onDiscardDraft}
+          onRegisterRetry={onRegisterRetry}
           onCollapse={onCollapse}
         />
       </div>

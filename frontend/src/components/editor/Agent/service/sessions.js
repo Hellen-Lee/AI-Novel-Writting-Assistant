@@ -4,6 +4,8 @@ import {
   getSession as apiGetSession,
   listSessions as apiListSessions,
 } from '../../../../api/sessions'
+import { countWords } from '../../../../utils/format'
+import { AGENT_PHASE } from '../utils/constants'
 
 /** Map API session summary → UI list item */
 export function mapSessionSummary(item) {
@@ -22,14 +24,21 @@ export function mapSessionDetail(detail) {
   return {
     id: detail.id,
     title: detail.title || '新对话',
-    messages: (detail.messages || []).map((m) => ({
-      id: m.id,
-      role: m.role,
-      content: m.content || '',
-      skill: m.skill || '',
-      pending: Boolean(m.pending),
-      error: m.error || '',
-    })),
+    messages: (detail.messages || []).map((m) => {
+      const content = m.content || ''
+      return {
+        id: m.id,
+        role: m.role,
+        content,
+        skill: m.skill || '',
+        pending: Boolean(m.pending),
+        error: m.error || '',
+        // 历史消息：后端落盘 pending = draft，据此还原写作轮折叠态与字数
+        phase: AGENT_PHASE.DONE,
+        draftRound: Boolean(m.pending),
+        charCount: countWords(content),
+      }
+    }),
     updatedAt: detail.updated_at || Date.now(),
     status: detail.status || 'idle',
   }

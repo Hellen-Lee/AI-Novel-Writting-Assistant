@@ -2,6 +2,36 @@ import { BookOpen, Maximize2, Sparkles, WandSparkles } from 'lucide-react'
 
 export const AI_PLACEHOLDER = '正在生成…'
 
+/**
+ * 生成过程阶段枚举（仅前端暂态，不落盘）。
+ * thinking → (tool_call)* → streaming → done
+ * 例外终态：stopped(输出终止) / error(出错)
+ */
+export const AGENT_PHASE = {
+  THINKING: 'thinking',
+  TOOL_CALL: 'tool_call',
+  STREAMING: 'streaming',
+  STOPPED: 'stopped',
+  ERROR: 'error',
+  DONE: 'done',
+}
+
+/** 后端 agent_tools 工具名 → 中文文案（供 tool_call 状态行展示） */
+export const TOOL_LABELS = {
+  read_chapter: '读取章节',
+  read_recent_work: '读取前文',
+  get_outline: '读取大纲',
+  search_memory: '检索设定',
+}
+
+/** 阶段中文短文案（气泡状态行 / 草稿卡 head 复用） */
+export const PHASE_TEXT = {
+  [AGENT_PHASE.THINKING]: '正在思考',
+  [AGENT_PHASE.STREAMING]: '正在书写',
+  [AGENT_PHASE.STOPPED]: '已终止',
+  [AGENT_PHASE.TOOL_CALL]: '调用工具',
+}
+
 export const QUICK_ACTIONS = [
   {
     id: '续写',

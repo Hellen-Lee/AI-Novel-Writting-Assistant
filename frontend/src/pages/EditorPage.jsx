@@ -19,7 +19,9 @@ import {
 import { EditorRightRail } from '../components/editor/EditorRightRail'
 import { EditorToolbar } from '../components/editor/EditorToolbar'
 import { useAgentRules } from '../components/editor/Agent/hook/useAgentRules'
+import { AGENT_PHASE } from '../components/editor/Agent/utils/constants'
 import { Button } from '../components/ui/Button'
+import { Markdown } from '../components/ui/Markdown'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
 import './EditorPage.css'
@@ -212,11 +214,29 @@ function ChapterMain({
                       <Sparkles size={14} />
                       <span>
                         AI {aiDraft.skill || '续写'}
-                        {aiDraft.status === 'streaming' ? ' · 生成中' : ' · 待插入'}
+                        {aiDraft.phase === AGENT_PHASE.TOOL_CALL
+                          ? ' · 读取上下文中'
+                          : aiDraft.stopped
+                            ? ' · 已终止（部分内容）'
+                            : aiDraft.status === 'streaming'
+                              ? ' · 生成中'
+                              : ' · 待插入'}
                       </span>
                     </div>
-                    <p className="editor-page__ai-draft-text">{aiDraft.text}</p>
-                    {aiDraft.status === 'streaming' ? (
+                    {aiDraft.status === 'streaming' &&
+                    aiDraft.phase !== AGENT_PHASE.TOOL_CALL ? (
+                      <p className="editor-page__ai-draft-text editor-page__ai-draft-text--raw">
+                        {aiDraft.text}
+                      </p>
+                    ) : (
+                      <Markdown
+                        text={aiDraft.text}
+                        className="editor-page__md"
+                        conservative
+                      />
+                    )}
+                    {aiDraft.status === 'streaming' &&
+                    aiDraft.phase !== AGENT_PHASE.TOOL_CALL ? (
                       <div className="editor-page__stream-tail">
                         <i className="editor-page__cursor" />
                         <span>流式输出中</span>
@@ -268,6 +288,7 @@ export default function EditorPage() {
   const navigate = useNavigate()
   const { setSaveStatus } = useEditorChrome()
   const rulesId = useId()
+  const agentRetryRef = useRef(null)
 
   const [chapters, setChapters] = useState([])
   const [activeChapterId, setActiveChapterId] = useState(null)
@@ -597,9 +618,10 @@ export default function EditorPage() {
         onSave={handleSave}
         onCreateChapter={handleCreateChapter}
         onApplyDraft={handleApplyDraft}
-        onRewriteDraft={() =>
-          setAiDraft((d) => (d ? { ...d, status: 'ready' } : d))
-        }
+        onRewriteDraft={() => {
+          setAiDraft(null)
+          agentRetryRef.current?.()
+        }}
         onDiscardDraft={handleDiscardDraft}
         toolbar={
           <EditorToolbar
@@ -622,8 +644,9 @@ export default function EditorPage() {
         selectedText=""
         setAiDraft={setAiDraft}
         draft={aiDraft}
-        onApplyDraft={handleApplyDraft}
-        onDiscardDraft={handleDiscardDraft}
+        onRegisterRetry={(fn) => {
+          agentRetryRef.current = fn
+        }}
         onCollapse={handleCollapseRail}
         rulesId={rulesId}
         globalRules={globalRules}

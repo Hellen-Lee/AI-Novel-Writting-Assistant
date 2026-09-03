@@ -1,10 +1,9 @@
-export function MessageItem({
-  message,
-  draft,
-  onApplyDraft,
-  onDiscardDraft,
-  onRetry,
-}) {
+import { Markdown } from '../../../../ui/Markdown'
+import { AGENT_PHASE } from '../../utils/constants'
+import { AssistantPhase } from './AssistantPhase'
+import { DraftNotice } from './DraftNotice'
+
+export function MessageItem({ message }) {
   if (message.role === 'user') {
     return (
       <div className="agent-panel__msg agent-panel__msg--user">
@@ -15,6 +14,22 @@ export function MessageItem({
     )
   }
 
+  const streaming = message.phase === AGENT_PHASE.STREAMING
+  const collapsed = Boolean(message.draftRound)
+  const hasBody = Boolean(message.content)
+  const body = collapsed ? (
+    <DraftNotice
+      phase={message.phase}
+      charCount={message.charCount}
+      pending={message.pending}
+      text={message.content}
+    />
+  ) : hasBody ? (
+    <Markdown text={message.content} className="agent-panel__md" />
+  ) : message.error ? (
+    <p className="agent-panel__error-text">{message.error}</p>
+  ) : null
+
   return (
     <div className="agent-panel__msg agent-panel__msg--ai">
       <div className="agent-panel__ai-meta">
@@ -24,37 +39,10 @@ export function MessageItem({
         ) : null}
       </div>
       <div className="agent-panel__bubble agent-panel__bubble--ai">
-        <p>
-          {message.content ||
-            (message.pending ? '正在生成…' : message.error || '')}
-        </p>
-        {message.pending && !message.error && draft ? (
-          <div className="agent-panel__msg-actions">
-            <button
-              type="button"
-              className="agent-panel__mini-btn agent-panel__mini-btn--primary"
-              disabled={!draft?.text || draft.status === 'streaming'}
-              onClick={() => onApplyDraft?.()}
-            >
-              插入文末
-            </button>
-            <button
-              type="button"
-              className="agent-panel__mini-btn"
-              disabled={draft?.status === 'streaming'}
-              onClick={onRetry}
-            >
-              重写
-            </button>
-            <button
-              type="button"
-              className="agent-panel__mini-btn agent-panel__mini-btn--ghost"
-              disabled={draft?.status === 'streaming'}
-              onClick={() => onDiscardDraft?.()}
-            >
-              弃用
-            </button>
-          </div>
+        <AssistantPhase phase={message.phase} tools={message.tools} />
+        {body}
+        {streaming && !collapsed && hasBody ? (
+          <i className="agent-panel__cursor" aria-hidden />
         ) : null}
       </div>
     </div>

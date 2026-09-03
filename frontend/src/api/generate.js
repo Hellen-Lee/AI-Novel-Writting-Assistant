@@ -89,6 +89,13 @@ export async function streamGenerate({
       onEvent?.(ev)
       return
     }
+    if (type === 'tool_progress') {
+      onEvent?.({
+        type: 'tool_progress',
+        tools: Array.isArray(ev.tools) ? ev.tools : [],
+      })
+      return
+    }
     if (type === 'content' || (ev.content != null && !ev.error)) {
       const chunk = String(ev.content ?? '')
       content += chunk

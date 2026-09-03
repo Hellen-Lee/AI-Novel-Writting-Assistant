@@ -5,10 +5,6 @@ import { MessageList } from './MessageList'
 export function ChatPanel({
   messages,
   messagesEndRef,
-  draft,
-  onApplyDraft,
-  onDiscardDraft,
-  onRetry,
   onQuickAction,
   generating,
 }) {
@@ -16,10 +12,6 @@ export function ChatPanel({
     <MessageList
       messages={messages}
       messagesEndRef={messagesEndRef}
-      draft={draft}
-      onApplyDraft={onApplyDraft}
-      onDiscardDraft={onDiscardDraft}
-      onRetry={onRetry}
       onQuickAction={onQuickAction}
       generating={generating}
     />

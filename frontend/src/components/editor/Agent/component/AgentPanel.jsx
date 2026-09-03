@@ -4,6 +4,7 @@ import {
   MessageSquarePlus,
   PanelRightClose,
 } from 'lucide-react'
+import { useEffect } from 'react'
 import { useAgentPanel } from '../hook/useAgentPanel'
 import '../styles/AgentPanel.css'
 import { ChatPanel } from './chatpanel/ChatPanel'
@@ -21,8 +22,7 @@ export function AgentPanel({
   currentContent = '',
   selectedText = '',
   setAiDraft,
-  onApplyDraft,
-  onDiscardDraft,
+  onRegisterRetry,
   onCollapse,
   draft = null,
 }) {
@@ -49,8 +49,6 @@ export function AgentPanel({
     handleStop,
     handleRetry,
     handleQuickAction,
-    handleApplyDraft,
-    handleDiscardDraft,
     setModelOpen,
     setModelId,
   } = useAgentPanel({
@@ -63,15 +61,10 @@ export function AgentPanel({
     setAiDraft,
   })
 
-  const apply = () => {
-    handleApplyDraft()
-    onApplyDraft?.()
-  }
-
-  const discard = () => {
-    handleDiscardDraft()
-    onDiscardDraft?.()
-  }
+  // 重试能力上提给编辑区草稿卡（气泡按钮已移除）
+  useEffect(() => {
+    onRegisterRetry?.(handleRetry)
+  }, [handleRetry, onRegisterRetry])
 
   return (
     <aside className="agent-panel">
@@ -128,10 +121,6 @@ export function AgentPanel({
           <ChatPanel
             messages={activeSession?.messages || []}
             messagesEndRef={messagesEndRef}
-            draft={draft}
-            onApplyDraft={apply}
-            onDiscardDraft={discard}
-            onRetry={handleRetry}
             onQuickAction={handleQuickAction}
             generating={generating || sessionsLoading}
           />
