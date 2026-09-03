@@ -1,6 +1,6 @@
 import {
-  Bot,
   History,
+  MessageCircleMore,
   MessageSquarePlus,
   PanelRightClose,
 } from 'lucide-react'
@@ -70,7 +70,7 @@ export function AgentPanel({
     <aside className="agent-panel">
       <header className="agent-panel__head">
         <div className="agent-panel__head-left">
-          <Bot size={16} strokeWidth={2} aria-hidden />
+          <MessageCircleMore size={16} strokeWidth={2} aria-hidden />
           <h2>AI 对话</h2>
         </div>
         <div className="agent-panel__head-actions">

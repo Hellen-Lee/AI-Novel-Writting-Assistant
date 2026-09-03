@@ -29,6 +29,7 @@
 
 .editor-layout__nav-right {
   justify-content: flex-end;
+  gap: 2px; /* 四图标紧排，对齐设计 NavRight */
 }
 
 .editor-layout__save-badge {
@@ -38,12 +39,6 @@
 .editor-layout__save-badge--dirty {
   background: var(--color-accent-soft);
   color: var(--color-accent);
-}
-
-.editor-layout__settings {
-  height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
 }
 
 .editor-layout__back {

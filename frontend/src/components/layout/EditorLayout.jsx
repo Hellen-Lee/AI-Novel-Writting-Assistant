@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useParams } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation, useParams } from 'react-router-dom'
 import { ChevronLeft, Settings } from 'lucide-react'
 import { getErrorMessage } from '../../api/client'
 import { getProject } from '../../api/projects'
 import { Badge } from '../ui/Badge'
-import { Button } from '../ui/Button'
+import { EditorToolbar } from '../editor/EditorToolbar'
 import { EditorChromeProvider } from '../../stores/editorChrome'
 import { useEditorChrome } from '../../stores/useEditorChrome'
 import './EditorLayout.css'
@@ -23,7 +23,7 @@ function EditorLayoutInner() {
   const { projectId } = useParams()
   const location = useLocation()
   const base = `/projects/${projectId}`
-  const { saveStatus } = useEditorChrome()
+  const { saveStatus, toolbar } = useEditorChrome()
   const [projectName, setProjectName] = useState('加载中…')
   const isEditRoute = location.pathname.includes('/edit')
   const showSaveBadge =
@@ -84,14 +84,24 @@ function EditorLayoutInner() {
         </nav>
 
         <div className="editor-layout__nav-right">
-          <Button
+          {toolbar ? (
+            <EditorToolbar
+              activeMode={toolbar.activeMode}
+              panelOpen={toolbar.panelOpen}
+              hasTempRules={toolbar.hasTempRules}
+              onSelectAgent={toolbar.onSelectAgent}
+              onSelectRules={toolbar.onSelectRules}
+              onExport={toolbar.onExport}
+            />
+          ) : null}
+          <Link
             to="/settings?tab=api"
-            variant="secondary"
-            className="editor-layout__settings"
+            className="editor-layout__nav-icon"
+            aria-label="项目设置"
+            title="项目设置"
           >
-            <Settings size={14} strokeWidth={2} />
-            设置
-          </Button>
+            <Settings size={15} strokeWidth={2} aria-hidden />
+          </Link>
         </div>
       </header>
 

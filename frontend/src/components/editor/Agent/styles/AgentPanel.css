@@ -30,8 +30,6 @@
 .agent-panel__head-left svg {
   display: block;
   flex-shrink: 0;
-  /* Lucide Bot 顶部天线使几何中心偏上，视觉上图标偏下 */
-  transform: translateY(-1px);
 }
 
 .agent-panel__head-left h2 {

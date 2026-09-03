@@ -25642,7 +25642,6 @@
               "type": "frame",
               "id": "bBGRM",
               "name": "NavRight",
-              "fill": "$color/bg/sidebar",
               "cornerRadius": "$radius/md",
               "gap": 2,
               "padding": 4,
@@ -25662,13 +25661,13 @@
                   "children": [
                     {
                       "type": "icon",
-                      "id": "kOeN9",
-                      "name": "I",
+                      "id": "bIxAa",
+                      "name": "Icon",
                       "width": 15,
                       "height": 15,
-                      "icon": "pen-line",
+                      "icon": "message-circle-more",
                       "library": "lucide",
-                      "fill": "#2D5A4A"
+                      "fill": "#2d5a4a"
                     }
                   ]
                 },
@@ -27261,7 +27260,6 @@
               "type": "frame",
               "id": "CBZxg",
               "name": "NavRight",
-              "fill": "$color/bg/sidebar",
               "cornerRadius": "$radius/md",
               "gap": 2,
               "padding": 4,
@@ -27281,13 +27279,13 @@
                   "children": [
                     {
                       "type": "icon",
-                      "id": "O0EQHW",
-                      "name": "I",
+                      "id": "vYu24",
+                      "name": "Icon",
                       "width": 15,
                       "height": 15,
-                      "icon": "pen-line",
+                      "icon": "message-circle-more",
                       "library": "lucide",
-                      "fill": "#5A6E66"
+                      "fill": "#5a6e66"
                     }
                   ]
                 },
@@ -32502,7 +32500,7 @@
       "y": 326,
       "name": "Review/Comp/AgentIconOptions",
       "clip": true,
-      "width": 520,
+      "width": 602,
       "fill": "#FFFFFF",
       "cornerRadius": 12,
       "stroke": "#D5DED9",
@@ -32712,6 +32710,422 @@
                   "name": "Label",
                   "fill": "#5A6E66",
                   "content": "D/墨水环",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gZkFk",
+          "name": "IconRow2",
+          "width": "fill_container",
+          "gap": 16,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "l99wz",
+              "name": "Opt/星火笔",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WoMIB",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E4EFE9",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "F7sxnd",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "wand-sparkles",
+                      "library": "lucide",
+                      "fill": "#2D5A4A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "kkljH",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "E/星火笔",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NoLHQ",
+              "name": "Opt/羽毛笔",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "WtWWk",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E8F3EF",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "qzqX6",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "feather",
+                      "library": "lucide",
+                      "fill": "#1B6B5A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "crFx6",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "F/羽毛笔",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PVNLi",
+              "name": "Opt/卷轴文",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "p0nFsZ",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#F0F6F3",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "HQ8fg",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "scroll-text",
+                      "library": "lucide",
+                      "fill": "#234A3C"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "qK3Lg",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "G/卷轴文",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "JscJR",
+              "name": "Opt/灵感灯",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "krbzR",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E4EFE9",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "Xlu2F",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "lamp-desk",
+                      "library": "lucide",
+                      "fill": "#2D5A4A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "e8vnZ",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "H/灵感灯",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "h93Xu",
+          "name": "IconRow3",
+          "width": "fill_container",
+          "gap": 16,
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "JFw9S",
+              "name": "Opt/创作脑",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "aTqjp",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E8F3EF",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "nJFn0",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "brain-circuit",
+                      "library": "lucide",
+                      "fill": "#1B6B5A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "PYo64",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "I/创作脑",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fDlfT",
+              "name": "Opt/书签页",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "iwiGl",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#F0F6F3",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "wGIVE",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "book-marked",
+                      "library": "lucide",
+                      "fill": "#234A3C"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "KJDYK",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "J/书签页",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "pHk6O",
+              "name": "Opt/星芒",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "W7wK0U",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E4EFE9",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "iyEPi",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "sparkles",
+                      "library": "lucide",
+                      "fill": "#2D5A4A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "JmCpv",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "K/星芒",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DOI0o",
+              "name": "Opt/叙事弧",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "M4ZXZG",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E8F3EF",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "j9Spk1",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "git-branch",
+                      "library": "lucide",
+                      "fill": "#1B6B5A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Y6OSCE",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "L/叙事弧",
+                  "fontFamily": "Geist",
+                  "fontSize": 11,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "j6HKMh",
+              "name": "Opt/气泡点",
+              "width": 100,
+              "layout": "vertical",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "RA7pg",
+                  "name": "IconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#E8F3EF",
+                  "cornerRadius": 8,
+                  "justifyContent": "center",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "GFzD0",
+                      "name": "Icon",
+                      "width": 18,
+                      "height": 18,
+                      "icon": "message-circle-more",
+                      "library": "lucide",
+                      "fill": "#1B6B5A"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "flXL0",
+                  "name": "Label",
+                  "fill": "#5A6E66",
+                  "content": "M/气泡点",
                   "fontFamily": "Geist",
                   "fontSize": 11,
                   "fontWeight": "500"

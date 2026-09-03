@@ -17,7 +17,6 @@ import {
   updateChapter,
 } from '../api/chapters'
 import { EditorRightRail } from '../components/editor/EditorRightRail'
-import { EditorToolbar } from '../components/editor/EditorToolbar'
 import { useAgentRules } from '../components/editor/Agent/hook/useAgentRules'
 import { AGENT_PHASE } from '../components/editor/Agent/utils/constants'
 import { Button } from '../components/ui/Button'
@@ -109,7 +108,6 @@ function ChapterMain({
   onApplyDraft,
   onRewriteDraft,
   onDiscardDraft,
-  toolbar,
 }) {
   const textareaRef = useRef(null)
 
@@ -123,7 +121,6 @@ function ChapterMain({
 
   return (
     <section className="editor-page__main">
-      {toolbar}
       {error ? (
         <div className="editor-page__error" role="alert">
           {error}
@@ -286,7 +283,7 @@ function ChapterMain({
 export default function EditorPage() {
   const { projectId, chapterId: routeChapterId } = useParams()
   const navigate = useNavigate()
-  const { setSaveStatus } = useEditorChrome()
+  const { setSaveStatus, registerToolbar, clearToolbar } = useEditorChrome()
   const rulesId = useId()
   const agentRetryRef = useRef(null)
 
@@ -578,13 +575,29 @@ export default function EditorPage() {
   }
 
   const handleRulesClose = () => {
-    setRightPanel({ open: true, mode: 'agent' })
+    setRightPanel((prev) => ({ ...prev, open: false }))
   }
 
   const handleRulesSaveAndClose = () => {
     handleRulesSave()
     setRightPanel({ open: true, mode: 'agent' })
   }
+
+  // 将编辑工具栏（Agent/规则/导出）注册到顶栏右侧，与「项目设置」同排；
+  // 卸载时清除，使设定库页顶栏仅保留设置图标。
+  // 回调在 store 内以 ref 持久化，故此处 deps 只含驱动显示变化的标志，避免重渲染循环。
+  useEffect(() => {
+    registerToolbar({
+      activeMode: rightPanel.mode,
+      panelOpen: rightPanel.open,
+      hasTempRules: Boolean(tempRules.trim()),
+      onSelectAgent: handleSelectAgent,
+      onSelectRules: handleSelectRules,
+      onExport: handleExport,
+    })
+    return () => clearToolbar()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rightPanel.mode, rightPanel.open, tempRules, registerToolbar, clearToolbar])
 
   return (
     <div className="editor-page">
@@ -623,16 +636,6 @@ export default function EditorPage() {
           agentRetryRef.current?.()
         }}
         onDiscardDraft={handleDiscardDraft}
-        toolbar={
-          <EditorToolbar
-            activeMode={rightPanel.mode}
-            panelOpen={rightPanel.open}
-            hasTempRules={Boolean(tempRules.trim())}
-            onSelectAgent={handleSelectAgent}
-            onSelectRules={handleSelectRules}
-            onExport={handleExport}
-          />
-        }
       />
       <EditorRightRail
         open={rightPanel.open}

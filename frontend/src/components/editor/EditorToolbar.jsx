@@ -1,9 +1,9 @@
-import { Bot, Download, SlidersHorizontal } from 'lucide-react'
+import { Download, MessageCircleMore, SlidersHorizontal } from 'lucide-react'
 import './EditorToolbar.css'
 
 /**
- * 编辑区右上角工具栏：Agent 对话 / 规则 / 导出（占位）
- * 设计对照：d7ubn Toolbar/Editor (gnTAb)
+ * 编辑页工具组：Agent 对话 / 规则 / 导出（渲染在项目顶栏右侧，与「项目设置」同排）
+ * 设计对照：d7ubn NavRight (bBGRM) —— 顶栏右侧四图标
  */
 export function EditorToolbar({
   activeMode,
@@ -26,7 +26,7 @@ export function EditorToolbar({
         aria-pressed={agentActive}
         onClick={onSelectAgent}
       >
-        <Bot size={15} strokeWidth={2} aria-hidden />
+        <MessageCircleMore size={15} strokeWidth={2} aria-hidden />
       </button>
       <button
         type="button"
