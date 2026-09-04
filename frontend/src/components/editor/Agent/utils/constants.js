@@ -58,12 +58,3 @@ export const QUICK_ACTIONS = [
     icon: BookOpen,
   },
 ]
-
-/** 界面占位模型列表（配置页接入前本地展示） */
-export const MODEL_OPTIONS = [
-  { id: 'deepseek', name: 'DeepSeek', desc: '默认' },
-  { id: 'doubao', name: '豆包', desc: 'Pro' },
-  { id: 'gpt-4o', name: 'GPT-4o', desc: 'OpenAI' },
-  { id: 'claude', name: 'Claude', desc: 'Sonnet' },
-  { id: 'qwen', name: '通义千问', desc: 'Plus' },
-]

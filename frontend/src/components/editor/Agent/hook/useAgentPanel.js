@@ -1,8 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
-import { MODEL_OPTIONS } from '../utils/constants'
+import { getConfig, getSavedModels } from '../../../../api/config'
 import { parseCommand } from '../utils/parseCommand'
 import { useAgentGenerate } from './useAgentGenerate'
 import { useAgentSessions } from './useAgentSessions'
+
+/**
+ * 将后端 ModelInfo({id, owned_by}) 列表映射为下拉选项。
+ * name 以 id 展示（真实模型名），desc 取 owned_by（若提供）。
+ */
+function toModelOptions(modelInfos) {
+  return (modelInfos || [])
+    .filter((m) => m && m.id)
+    .map((m) => ({
+      id: m.id,
+      name: m.id,
+      desc: (m.owned_by || '').trim() || 'API 模型',
+    }))
+}
+
+const EMPTY_MODEL = { id: '', name: '选择模型', desc: '' }
 
 export function useAgentPanel({
   projectId,
@@ -16,7 +32,8 @@ export function useAgentPanel({
   const [panelMode, setPanelMode] = useState('chat') // chat | history
   const [selectedSkill, setSelectedSkill] = useState('续写')
   const [input, setInput] = useState('')
-  const [modelId, setModelId] = useState(MODEL_OPTIONS[0].id)
+  const [modelOptions, setModelOptions] = useState([])
+  const [modelId, setModelId] = useState('')
   const [modelOpen, setModelOpen] = useState(false)
   const messagesEndRef = useRef(null)
   const abortRef = useRef(null)
@@ -43,6 +60,53 @@ export function useAgentPanel({
     sessionIdRef.current = activeSessionId
   }, [activeSessionId])
 
+  // 记录当前选中的模型 id，供生成链路随时读取（避免闭包过期）
+  const modelIdRef = useRef(modelId)
+  useEffect(() => {
+    modelIdRef.current = modelId
+  }, [modelId])
+
+  // 挂载时拉取已保存配置 + API 可用模型，组装下拉选项并确定默认模型
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      let apiOpts = []
+      try {
+        const listed = await getSavedModels()
+        apiOpts = toModelOptions(listed?.models)
+      } catch {
+        apiOpts = []
+      }
+
+      // 已保存的默认模型，保证无 API 模型列表（未配置/接口失败）时也有可选项
+      let savedId = ''
+      try {
+        const cfg = await getConfig()
+        savedId = (cfg?.model || '').trim()
+      } catch {
+        savedId = ''
+      }
+
+      if (cancelled) return
+      const merged = apiOpts.some((o) => o.id === savedId)
+        ? apiOpts
+        : savedId
+          ? [{ id: savedId, name: savedId, desc: '已保存的默认模型' }, ...apiOpts]
+          : apiOpts
+      setModelOptions(merged)
+      // 默认选中：优先已保存默认模型，否则取第一个可用模型
+      setModelId((prev) =>
+        prev && merged.some((o) => o.id === prev)
+          ? prev
+          : savedId || merged[0]?.id || '',
+      )
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
   const generateApi = useAgentGenerate({
     projectId,
     tempRules,
@@ -50,6 +114,7 @@ export function useAgentPanel({
     currentContent,
     selectedText,
     getSessionId: () => sessionIdRef.current,
+    getModelId: () => modelIdRef.current || undefined,
     updateSessionById,
     setAiDraft,
     onInputClear: () => setInput(''),
@@ -70,7 +135,9 @@ export function useAgentPanel({
   }, [abortGenerate])
 
   const selectedModel =
-    MODEL_OPTIONS.find((m) => m.id === modelId) || MODEL_OPTIONS[0]
+    modelOptions.find((m) => m.id === modelId) ||
+    modelOptions[0] ||
+    EMPTY_MODEL
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -179,6 +246,7 @@ export function useAgentPanel({
     generating,
     modelId,
     modelOpen,
+    modelOptions,
     selectedModel,
     handleNewChat,
     handleSelectSession,

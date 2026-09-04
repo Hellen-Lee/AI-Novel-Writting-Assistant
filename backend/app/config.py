@@ -19,9 +19,9 @@ CONTEXT_WINDOW_CHOICES = (32_768, 65_536, 131_072)
 
 
 class AppConfig(BaseModel):
-    api_base: str = "https://api.openai.com/v1"
+    api_base: str = ""
     api_key: str = ""
-    model: str = "gpt-4o-mini"
+    model: str = ""
     context_window: int = Field(default=131_072)
     # 以下为模型调用内部默认，设置页不暴露（MVP）
     temperature: float = Field(default=0.7, ge=0, le=2)
@@ -32,8 +32,9 @@ class AppConfig(BaseModel):
     @classmethod
     def validate_api_base(cls, value: str) -> str:
         value = value.strip()
+        # 空值 = 未配置（前端据此仅展示占位符）；仅在填了非空地址时校验格式
         if not value:
-            raise ValueError("api_base 不能为空")
+            return ""
         if not (value.startswith("http://") or value.startswith("https://")):
             raise ValueError("api_base 必须以 http:// 或 https:// 开头")
         return value.rstrip("/")
@@ -42,8 +43,7 @@ class AppConfig(BaseModel):
     @classmethod
     def validate_model(cls, value: str) -> str:
         value = value.strip()
-        if not value:
-            raise ValueError("model 不能为空")
+        # 空值 = 未选择模型（前端据此仅展示占位符）
         return value
 
     @field_validator("context_window")

@@ -42,6 +42,7 @@ export function AgentPanel({
     generating,
     modelId,
     modelOpen,
+    modelOptions,
     selectedModel,
     handleNewChat,
     handleSelectSession,
@@ -133,6 +134,7 @@ export function AgentPanel({
             onSend={handleSend}
             onStop={handleStop}
             onShowAttachNotice={() => showNotice('附加能力待后续版本接入。')}
+            modelOptions={modelOptions}
             selectedModel={selectedModel}
             modelOpen={modelOpen}
             modelId={modelId}

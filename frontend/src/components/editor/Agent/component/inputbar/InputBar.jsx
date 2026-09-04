@@ -12,6 +12,7 @@ export function InputBar({
   onSend,
   onStop,
   onShowAttachNotice,
+  modelOptions = [],
   selectedModel,
   modelOpen,
   modelId,
@@ -65,6 +66,7 @@ export function InputBar({
           </button>
 
           <ModelPicker
+            options={modelOptions}
             selectedModel={selectedModel}
             modelOpen={modelOpen}
             modelId={modelId}

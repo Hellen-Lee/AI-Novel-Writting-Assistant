@@ -29,3 +29,12 @@ export async function listModels(overrides) {
   const { data } = await api.post('/config/models', overrides || {})
   return data
 }
+
+/**
+ * GET /api/config/models
+ * 用已保存配置拉取可用模型列表（无需覆盖表单，供 Agent 栏直接读取）
+ */
+export async function getSavedModels() {
+  const { data } = await api.get('/config/models')
+  return data
+}

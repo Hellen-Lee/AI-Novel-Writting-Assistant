@@ -18,6 +18,7 @@ export function useAgentGenerate({
   currentContent = '',
   selectedText = '',
   getSessionId,
+  getModelId,
   updateSessionById,
   setAiDraft,
   onInputClear,
@@ -141,6 +142,7 @@ export function useAgentGenerate({
         chapterId,
         currentContent,
         selectedText,
+        model: getModelId?.() || undefined,
         signal: controller.signal,
         onEvent: (ev) => {
           if (ev?.type === 'meta') {
