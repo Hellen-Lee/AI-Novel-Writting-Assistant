@@ -291,8 +291,7 @@ def generate_onboarding_settings(
 
     # 输出预算：推理类模型（DeepSeek-R1 系 / o1 系）的思考 token 同样计入
     # max_tokens，预算不足时会返回 finish_reason="length" 且 content 为空。
-    # 因此首轮给足预算，并在检测到「被截断/空内容」时逐轮扩容重试。
-    base_tokens = 6000 if section_name else 16000
+    base_tokens = 16000 if section_name else 64000
     max_attempts = 3
 
     last_error: Optional[Exception] = None
