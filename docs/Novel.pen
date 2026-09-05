@@ -33142,9 +33142,7 @@
       "x": 13680,
       "y": 326,
       "name": "Review/Screen/Editor-Agent-States",
-      "clip": true,
       "width": 1880,
-      "height": 960,
       "fill": "#F3F5F3",
       "layout": "vertical",
       "children": [
@@ -33426,14 +33424,12 @@
           "id": "f9gXAX",
           "name": "Body",
           "width": "fill_container",
-          "height": "fill_container",
           "children": [
             {
               "type": "frame",
               "id": "QTtg8",
               "name": "Sidebar/Agent",
               "width": 1860,
-              "height": "fill_container",
               "fill": "#F3F5F3",
               "stroke": "#D5DED9",
               "strokeWidth": {
@@ -33447,332 +33443,64 @@
                   "id": "EKpzL",
                   "name": "StatesSplit",
                   "width": "fill_container",
-                  "height": "fill_container",
+                  "gap": 6,
                   "children": [
                     {
                       "type": "frame",
-                      "id": "C2acF",
-                      "name": "Panel/思考中",
+                      "id": "GL8XW",
+                      "name": "Col/思考中",
                       "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#D5DED9",
-                      "strokeWidth": {
-                        "right": 1
-                      },
                       "layout": "vertical",
+                      "gap": 6,
                       "children": [
                         {
                           "type": "frame",
-                          "id": "yBE1X",
-                          "name": "StateTag",
+                          "id": "C2acF",
+                          "name": "Panel/思考中",
                           "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "ABRRR",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 A · 思考中",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "rvuDX",
-                          "name": "ChatArea",
-                          "width": "fill_container",
-                          "height": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": {
+                            "right": 1
+                          },
                           "layout": "vertical",
-                          "gap": 10,
-                          "padding": 14,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "H2I8KB",
-                              "name": "UserBubbleWrap",
+                              "id": "yBE1X",
+                              "name": "StateTag",
                               "width": "fill_container",
-                              "layout": "vertical",
-                              "alignItems": "end",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                6,
+                                12
+                              ],
+                              "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "frame",
-                                  "id": "n8oLY",
-                                  "name": "UserBubble",
-                                  "fill": "#2D5A4A",
-                                  "cornerRadius": 10,
-                                  "padding": [
-                                    8,
-                                    10
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "zbvir",
-                                      "name": "Txt",
-                                      "fill": "#FFFFFF",
-                                      "content": "按悬疑气氛续写一段",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
+                                  "type": "text",
+                                  "id": "ABRRR",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 A · 思考中",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "vxpCg",
-                              "name": "AIResponse",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 6,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "utbLu",
-                                  "name": "Meta",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "pqPqQ",
-                                      "name": "Name",
-                                      "fill": "#1B6B5A",
-                                      "content": "Agent",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "600"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "g8prBV",
-                                      "name": "Skill",
-                                      "fill": "#8A9A93",
-                                      "content": "· 续写",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "B7Nkw2",
-                                  "name": "ThinkStatus",
-                                  "width": "fill_container",
-                                  "cornerRadius": 6,
-                                  "gap": 6,
-                                  "padding": [
-                                    6,
-                                    0
-                                  ],
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "j8E49w",
-                                      "name": "Spin",
-                                      "width": 12,
-                                      "height": 12,
-                                      "icon": "loader-circle",
-                                      "library": "lucide",
-                                      "fill": "#5a6e66"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "e4mmu",
-                                      "name": "Label",
-                                      "fill": "#5a6e66",
-                                      "content": "思考中",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "600"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "ROClu",
-                                  "name": "ThoughtLine",
-                                  "fill": "#5A6E66",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "已读取第 62 章上下文（约 3,800 字）",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "MPnJI",
-                                  "name": "ThoughtLine",
-                                  "fill": "#5A6E66",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "匹配人物：林晚、守夜人",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "BufnB",
-                                  "name": "ThoughtLine",
-                                  "fill": "#5A6E66",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "核对规则：悬疑推进，避免直白解释",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "CSSFQ",
-                                  "name": "WritingBubble",
-                                  "width": "fill_container",
-                                  "fill": "#FFFFFF",
-                                  "cornerRadius": 10,
-                                  "stroke": "#D5DED9",
-                                  "strokeWidth": 1,
-                                  "layout": "vertical",
-                                  "gap": 6,
-                                  "padding": [
-                                    10,
-                                    12
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "h8NJUF",
-                                      "name": "BubbleLabel",
-                                      "fill": "#8A9A93",
-                                      "content": "预备开篇",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 10,
-                                      "fontWeight": "600"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "V0e9u",
-                                      "name": "DraftPreview",
-                                      "fill": "#1A2E28",
-                                      "textGrowth": "fixed-width",
-                                      "width": "fill_container",
-                                      "content": "门缝下的光忽明忽灭——",
-                                      "lineHeight": 1.55,
-                                      "fontFamily": "Geist",
-                                      "fontSize": 12,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "DrrT1",
-                                      "name": "Sk",
-                                      "width": "fill_container",
-                                      "layout": "vertical",
-                                      "gap": 4,
-                                      "children": [
-                                        {
-                                          "type": "frame",
-                                          "id": "gqijo",
-                                          "name": "l1",
-                                          "width": "fill_container",
-                                          "height": 6,
-                                          "fill": "#ECF0ED",
-                                          "cornerRadius": 3
-                                        },
-                                        {
-                                          "type": "frame",
-                                          "id": "ck2Ib",
-                                          "name": "l2",
-                                          "width": 100,
-                                          "height": 6,
-                                          "fill": "#ECF0ED",
-                                          "cornerRadius": 3
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "eSNer",
-                      "name": "Panel/生成中",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#D5DED9",
-                      "strokeWidth": {
-                        "right": 1
-                      },
-                      "layout": "vertical",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "pTr8A",
-                          "name": "StateTag",
-                          "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "hLgmQ",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 B · 生成中",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "MKk4A",
-                          "name": "ChatArea",
-                          "width": "fill_container",
-                          "height": "fill_container",
-                          "layout": "vertical",
-                          "gap": 10,
-                          "padding": 14,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "D63Qq",
-                              "name": "MiniChat",
+                              "id": "rvuDX",
+                              "name": "ChatArea",
                               "width": "fill_container",
                               "layout": "vertical",
                               "gap": 10,
+                              "padding": 14,
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "Gle5G",
+                                  "id": "H2I8KB",
                                   "name": "UserBubbleWrap",
                                   "width": "fill_container",
                                   "layout": "vertical",
@@ -33780,7 +33508,7 @@
                                   "children": [
                                     {
                                       "type": "frame",
-                                      "id": "vYJDr",
+                                      "id": "n8oLY",
                                       "name": "UserBubble",
                                       "fill": "#2D5A4A",
                                       "cornerRadius": 10,
@@ -33791,7 +33519,7 @@
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "E93PQ",
+                                          "id": "zbvir",
                                           "name": "Txt",
                                           "fill": "#FFFFFF",
                                           "content": "按悬疑气氛续写一段",
@@ -33805,22 +33533,22 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "yLV2D",
-                                  "name": "AIStream",
+                                  "id": "vxpCg",
+                                  "name": "AIResponse",
                                   "width": "fill_container",
                                   "layout": "vertical",
                                   "gap": 6,
                                   "children": [
                                     {
                                       "type": "frame",
-                                      "id": "M0VqY",
+                                      "id": "utbLu",
                                       "name": "Meta",
                                       "gap": 6,
                                       "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "fJD3V",
+                                          "id": "pqPqQ",
                                           "name": "Name",
                                           "fill": "#1B6B5A",
                                           "content": "Agent",
@@ -33830,7 +33558,7 @@
                                         },
                                         {
                                           "type": "text",
-                                          "id": "c5WWl",
+                                          "id": "g8prBV",
                                           "name": "Skill",
                                           "fill": "#8A9A93",
                                           "content": "· 续写",
@@ -33841,22 +33569,9 @@
                                       ]
                                     },
                                     {
-                                      "type": "text",
-                                      "id": "waQJn",
-                                      "name": "ThoughtLine",
-                                      "fill": "#5A6E66",
-                                      "textGrowth": "fixed-width",
-                                      "width": "fill_container",
-                                      "content": "下面按悬疑气氛与当前章节语境续写。",
-                                      "lineHeight": 1.5,
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    },
-                                    {
                                       "type": "frame",
-                                      "id": "ZrGfI",
-                                      "name": "GenStatus",
+                                      "id": "B7Nkw2",
+                                      "name": "ThinkStatus",
                                       "width": "fill_container",
                                       "cornerRadius": 6,
                                       "gap": 6,
@@ -33868,7 +33583,7 @@
                                       "children": [
                                         {
                                           "type": "icon",
-                                          "id": "kCOTr",
+                                          "id": "j8E49w",
                                           "name": "Spin",
                                           "width": 12,
                                           "height": 12,
@@ -33878,10 +33593,10 @@
                                         },
                                         {
                                           "type": "text",
-                                          "id": "u2nzG",
+                                          "id": "e4mmu",
                                           "name": "Label",
                                           "fill": "#5a6e66",
-                                          "content": "生成中",
+                                          "content": "思考中",
                                           "fontFamily": "Geist",
                                           "fontSize": 11,
                                           "fontWeight": "600"
@@ -33889,16 +33604,55 @@
                                       ]
                                     },
                                     {
+                                      "type": "text",
+                                      "id": "ROClu",
+                                      "name": "ThoughtLine",
+                                      "fill": "#5A6E66",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "已读取第 62 章上下文（约 3,800 字）",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "MPnJI",
+                                      "name": "ThoughtLine",
+                                      "fill": "#5A6E66",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "匹配人物：林晚、守夜人",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "BufnB",
+                                      "name": "ThoughtLine",
+                                      "fill": "#5A6E66",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "核对规则：悬疑推进，避免直白解释",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
                                       "type": "frame",
-                                      "id": "IHIXq",
-                                      "name": "StreamBubble",
+                                      "id": "CSSFQ",
+                                      "name": "WritingBubble",
                                       "width": "fill_container",
                                       "fill": "#FFFFFF",
                                       "cornerRadius": 10,
                                       "stroke": "#D5DED9",
                                       "strokeWidth": 1,
                                       "layout": "vertical",
-                                      "gap": 8,
+                                      "gap": 6,
                                       "padding": [
                                         10,
                                         12
@@ -33906,12 +33660,22 @@
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "SAQOR",
-                                          "name": "Partial",
+                                          "id": "h8NJUF",
+                                          "name": "BubbleLabel",
+                                          "fill": "#8A9A93",
+                                          "content": "预备开篇",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "V0e9u",
+                                          "name": "DraftPreview",
                                           "fill": "#1A2E28",
                                           "textGrowth": "fixed-width",
                                           "width": "fill_container",
-                                          "content": "门缝下的光忽明忽灭，像有人在门外屏住呼吸。林晚没有立刻开门，只是把",
+                                          "content": "门缝下的光忽明忽灭——",
                                           "lineHeight": 1.55,
                                           "fontFamily": "Geist",
                                           "fontSize": 12,
@@ -33919,119 +33683,62 @@
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "oe5LL",
-                                          "name": "Skeleton",
+                                          "id": "DrrT1",
+                                          "name": "Sk",
                                           "width": "fill_container",
                                           "layout": "vertical",
-                                          "gap": 6,
+                                          "gap": 4,
                                           "children": [
                                             {
                                               "type": "frame",
-                                              "id": "fJguV",
-                                              "name": "L1",
+                                              "id": "gqijo",
+                                              "name": "l1",
                                               "width": "fill_container",
-                                              "height": 8,
+                                              "height": 6,
                                               "fill": "#ECF0ED",
-                                              "cornerRadius": 4
+                                              "cornerRadius": 3
                                             },
                                             {
                                               "type": "frame",
-                                              "id": "fwEdJ",
-                                              "name": "L2",
-                                              "width": 180,
-                                              "height": 8,
+                                              "id": "ck2Ib",
+                                              "name": "l2",
+                                              "width": 100,
+                                              "height": 6,
                                               "fill": "#ECF0ED",
-                                              "cornerRadius": 4
-                                            },
-                                            {
-                                              "type": "frame",
-                                              "id": "vyJUT",
-                                              "name": "L3",
-                                              "width": 140,
-                                              "height": 8,
-                                              "fill": "#ECF0ED",
-                                              "cornerRadius": 4
+                                              "cornerRadius": 3
                                             }
                                           ]
-                                        },
-                                        {
-                                          "type": "text",
-                                          "id": "I5bk5k",
-                                          "name": "Cursor",
-                                          "fill": "#1B6B5A",
-                                          "content": "▍",
-                                          "fontFamily": "Geist",
-                                          "fontSize": 12,
-                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
                                   ]
                                 }
                               ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "CqqBM",
-                      "name": "Panel/调用工具",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#D5DED9",
-                      "layout": "vertical",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "knIwK",
-                          "name": "StateTag",
-                          "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "d9xa4",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 C · 调用工具",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "XuxQf",
-                          "name": "ChatArea",
-                          "width": "fill_container",
-                          "height": "fill_container",
-                          "layout": "vertical",
-                          "gap": 10,
-                          "padding": 14,
-                          "children": [
+                            },
                             {
                               "type": "frame",
-                              "id": "Qv1AK",
-                              "name": "UserBubbleWrap",
+                              "id": "frlYe",
+                              "name": "Variants/思考中",
                               "width": "fill_container",
                               "layout": "vertical",
-                              "alignItems": "end",
+                              "gap": 6,
+                              "padding": [
+                                0,
+                                8,
+                                8,
+                                8
+                              ],
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "X1Ju10",
-                                  "name": "UserBubble",
-                                  "fill": "#2D5A4A",
-                                  "cornerRadius": 10,
+                                  "id": "IrD5Y",
+                                  "name": "VarCard",
+                                  "width": "fill_container",
+                                  "fill": "#FFFFFF",
+                                  "cornerRadius": 8,
+                                  "stroke": "#D5DED9",
+                                  "layout": "vertical",
+                                  "gap": 6,
                                   "padding": [
                                     8,
                                     10
@@ -34039,389 +33746,118 @@
                                   "children": [
                                     {
                                       "type": "text",
-                                      "id": "S9FFW",
-                                      "name": "Txt",
-                                      "fill": "#FFFFFF",
-                                      "content": "林晚和守夜人是什么关系？",
+                                      "id": "B3YhN",
+                                      "name": "Lbl",
+                                      "fill": "#8A9A93",
+                                      "content": "变体 D · 左色条卡片",
                                       "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "fVd0a",
-                              "name": "AIResponse",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 8,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "xprjI",
-                                  "name": "Meta",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "aCx4y",
-                                      "name": "Name",
-                                      "fill": "#1B6B5A",
-                                      "content": "Agent",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
+                                      "fontSize": 9,
                                       "fontWeight": "600"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "ujEhn",
+                                      "name": "BarRow",
+                                      "width": "fill_container",
+                                      "gap": 8,
+                                      "children": [
+                                        {
+                                          "type": "rectangle",
+                                          "cornerRadius": 2,
+                                          "id": "sdw86",
+                                          "name": "Bar",
+                                          "fill": "#1B6B5A",
+                                          "width": 3,
+                                          "height": 36
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "KQumF",
+                                          "name": "Col",
+                                          "width": "fill_container",
+                                          "layout": "vertical",
+                                          "gap": 4,
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "pXOvD",
+                                              "name": "T1",
+                                              "fill": "#1B6B5A",
+                                              "content": "思考中 · 续写",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 10,
+                                              "fontWeight": "600"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "wp1bx",
+                                              "name": "T2",
+                                              "fill": "#5A6E66",
+                                              "textGrowth": "fixed-width",
+                                              "width": "fill_container",
+                                              "content": "已加载上下文，正在组织开篇节奏…",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 10,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
                                   ]
                                 },
                                 {
-                                  "type": "text",
-                                  "id": "nsiFs",
-                                  "name": "ThoughtLine",
-                                  "fill": "#5A6E66",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "需要从记忆库检索人物关系。",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                },
-                                {
                                   "type": "frame",
-                                  "id": "m9XeE",
-                                  "name": "ToolProgress",
+                                  "id": "nIbjq",
+                                  "name": "VarCard",
                                   "width": "fill_container",
+                                  "fill": "#FFFFFF",
+                                  "cornerRadius": 8,
                                   "stroke": "#D5DED9",
-                                  "strokeWidth": {
-                                    "left": 2
-                                  },
                                   "layout": "vertical",
-                                  "gap": 2,
+                                  "gap": 6,
                                   "padding": [
-                                    0,
-                                    0,
-                                    0,
+                                    8,
                                     10
                                   ],
                                   "children": [
                                     {
-                                      "type": "frame",
-                                      "id": "mzhAj",
-                                      "name": "ToolCaptionWrap",
-                                      "width": "fill_container",
-                                      "padding": [
-                                        0,
-                                        0,
-                                        8,
-                                        8
-                                      ],
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "JQw69",
-                                          "name": "ToolCaption",
-                                          "fill": "#8A9A93",
-                                          "content": "正在调用工具",
-                                          "fontFamily": "Geist",
-                                          "fontSize": 10,
-                                          "fontWeight": "500"
-                                        }
-                                      ]
+                                      "type": "text",
+                                      "id": "jQ6UW",
+                                      "name": "Lbl",
+                                      "fill": "#8A9A93",
+                                      "content": "变体 E · Cursor 风 · 思考折叠",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 9,
+                                      "fontWeight": "600"
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "i7XtRP",
-                                      "name": "ToolStep/search_memory",
+                                      "id": "t4kkmA",
+                                      "name": "ThoughtHead",
                                       "width": "fill_container",
-                                      "fill": "#FFFFFF00",
-                                      "layout": "vertical",
-                                      "gap": 2,
+                                      "gap": 6,
                                       "padding": [
                                         4,
-                                        8
+                                        0
                                       ],
                                       "children": [
                                         {
-                                          "type": "frame",
-                                          "id": "E7XUrK",
-                                          "name": "RowHead",
-                                          "width": "fill_container",
-                                          "gap": 6,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "z6hpos",
-                                              "name": "Mark",
-                                              "width": 11,
-                                              "height": 11,
-                                              "icon": "check",
-                                              "library": "lucide",
-                                              "fill": "#2D7A4F"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "cRh5z",
-                                              "name": "ToolName",
-                                              "fill": "#5A6E66",
-                                              "content": "search_memory",
-                                              "fontFamily": "Geist Mono",
-                                              "fontSize": 10,
-                                              "fontWeight": "600"
-                                            }
-                                          ]
+                                          "type": "text",
+                                          "id": "TfYb4",
+                                          "name": "Chev",
+                                          "fill": "#8A9A93",
+                                          "content": "▸",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
                                         },
                                         {
                                           "type": "text",
-                                          "id": "QJJRd",
-                                          "name": "ToolArgs",
-                                          "fill": "#8A9A93",
-                                          "textGrowth": "fixed-width",
-                                          "width": "fill_container",
-                                          "content": "category: characters · query: 林晚 守夜人",
-                                          "lineHeight": 1.4,
-                                          "fontFamily": "Geist",
-                                          "fontSize": 10,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "W3TBBa",
-                                      "name": "ToolStep/get_chapter_summary",
-                                      "width": "fill_container",
-                                      "fill": "#E4EFE9",
-                                      "cornerRadius": 4,
-                                      "layout": "vertical",
-                                      "gap": 2,
-                                      "padding": [
-                                        6,
-                                        8
-                                      ],
-                                      "children": [
-                                        {
-                                          "type": "frame",
-                                          "id": "LPd1a",
-                                          "name": "RowHead",
-                                          "width": "fill_container",
-                                          "gap": 6,
-                                          "alignItems": "center",
-                                          "children": [
-                                            {
-                                              "type": "icon",
-                                              "id": "v9Ke23",
-                                              "name": "Mark",
-                                              "width": 11,
-                                              "height": 11,
-                                              "icon": "loader-circle",
-                                              "library": "lucide",
-                                              "fill": "#2D5A4A"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "s70In1",
-                                              "name": "ToolName",
-                                              "fill": "#2D5A4A",
-                                              "content": "get_chapter_summary",
-                                              "fontFamily": "Geist Mono",
-                                              "fontSize": 10,
-                                              "fontWeight": "600"
-                                            },
-                                            {
-                                              "type": "text",
-                                              "id": "LhBXW",
-                                              "name": "Badge",
-                                              "fill": "#2D5A4A",
-                                              "content": "进行中",
-                                              "fontFamily": "Geist",
-                                              "fontSize": 9,
-                                              "fontWeight": "500"
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "type": "text",
-                                          "id": "Z3xKS",
-                                          "name": "ToolArgs",
-                                          "fill": "#8A9A93",
-                                          "textGrowth": "fixed-width",
-                                          "width": "fill_container",
-                                          "content": "chapter_id: ch_61 · limit: 1",
-                                          "lineHeight": 1.4,
-                                          "fontFamily": "Geist",
-                                          "fontSize": 10,
-                                          "fontWeight": "normal"
-                                        }
-                                      ]
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "MdjvG",
-                                  "name": "ThoughtLine",
-                                  "fill": "#8A9A93",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "等待工具返回…",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "sUKfe",
-                      "name": "Panel/草稿待确认",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#D5DED9",
-                      "strokeWidth": {
-                        "right": 1
-                      },
-                      "layout": "vertical",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "bVHIR",
-                          "name": "StateTag",
-                          "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "J23w8",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 D · 草稿待确认",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "D6AqZ",
-                          "name": "Body",
-                          "width": "fill_container",
-                          "height": "fill_container",
-                          "layout": "vertical",
-                          "gap": 8,
-                          "padding": 10,
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "Pn65u",
-                              "name": "EditorHint",
-                              "fill": "#8A9A93",
-                              "content": "编辑区预览",
-                              "fontFamily": "Geist",
-                              "fontSize": 9,
-                              "fontWeight": "600"
-                            },
-                            {
-                              "type": "frame",
-                              "id": "QHyp8",
-                              "name": "EditorDraftCard",
-                              "width": "fill_container",
-                              "fill": "#E8F5F0",
-                              "cornerRadius": 8,
-                              "stroke": "#1B6B5A",
-                              "strokeWidth": 1,
-                              "layout": "vertical",
-                              "gap": 8,
-                              "padding": [
-                                10,
-                                12
-                              ],
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "qsHpC",
-                                  "name": "DraftHead",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "kaVUs",
-                                      "name": "I",
-                                      "width": 12,
-                                      "height": 12,
-                                      "icon": "sparkles",
-                                      "library": "lucide",
-                                      "fill": "#1B6B5A"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "o7iTT2",
-                                      "name": "L",
-                                      "fill": "#1B6B5A",
-                                      "content": "AI 续写 · 待插入",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 10,
-                                      "fontWeight": "600"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "k85Whu",
-                                  "name": "DraftText",
-                                  "fill": "#1B6B5A",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "门缝下的光忽明忽灭，像有人在门外屏住呼吸。林晚没有立刻开门，只是把呼吸压得更轻。",
-                                  "lineHeight": 1.6,
-                                  "fontFamily": "Newsreader",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "y6oy1n",
-                                  "name": "DraftActions",
-                                  "width": "fill_container",
-                                  "gap": 6,
-                                  "children": [
-                                    {
-                                      "type": "frame",
-                                      "id": "znyBw",
-                                      "name": "Btn/插入正文",
-                                      "fill": "#2D5A4A",
-                                      "cornerRadius": 4,
-                                      "stroke": "#FFFFFF00",
-                                      "padding": [
-                                        5,
-                                        10
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "C6R0We",
-                                          "name": "L",
-                                          "fill": "#FFFFFF",
-                                          "content": "插入正文",
+                                          "id": "urLxk",
+                                          "name": "Title",
+                                          "fill": "#5A6E66",
+                                          "content": "Thought for 2s",
                                           "fontFamily": "Geist",
                                           "fontSize": 10,
                                           "fontWeight": "600"
@@ -34430,77 +33866,387 @@
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "TAEub",
-                                      "name": "Btn/改写",
-                                      "fill": "#FFFFFF",
-                                      "cornerRadius": 4,
-                                      "stroke": "#D5DED9",
-                                      "strokeWidth": 1,
+                                      "id": "H4yxv",
+                                      "name": "ThoughtBody",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "gap": 3,
                                       "padding": [
-                                        5,
-                                        10
+                                        0,
+                                        0,
+                                        0,
+                                        14
                                       ],
-                                      "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "uHMdz",
-                                          "name": "L",
-                                          "fill": "#2D5A4A",
-                                          "content": "改写",
-                                          "fontFamily": "Geist",
-                                          "fontSize": 10,
-                                          "fontWeight": "500"
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "type": "frame",
-                                      "id": "FqsmE",
-                                      "name": "Btn/弃用",
-                                      "fill": "#FFFFFF00",
-                                      "cornerRadius": 4,
-                                      "stroke": "#D5DED9",
-                                      "strokeWidth": 1,
-                                      "padding": [
-                                        5,
-                                        10
-                                      ],
-                                      "alignItems": "center",
-                                      "children": [
-                                        {
-                                          "type": "text",
-                                          "id": "SN21d",
-                                          "name": "L",
+                                          "id": "XjH1D",
+                                          "name": "L1",
                                           "fill": "#8A9A93",
-                                          "content": "弃用",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "Reading chapter context and character notes…",
                                           "fontFamily": "Geist",
-                                          "fontSize": 10,
-                                          "fontWeight": "500"
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "RzTaU",
+                                          "name": "L2",
+                                          "fill": "#8A9A93",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "Planning suspenseful opening beat.",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
                                         }
                                       ]
                                     }
                                   ]
                                 }
                               ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MW9n9",
+                      "name": "Col/生成中",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "eSNer",
+                          "name": "Panel/生成中",
+                          "width": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": {
+                            "right": 1
+                          },
+                          "layout": "vertical",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "pTr8A",
+                              "name": "StateTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                6,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "hLgmQ",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 B · 生成中",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
                             },
                             {
                               "type": "frame",
-                              "id": "J2Nche",
+                              "id": "MKk4A",
                               "name": "ChatArea",
                               "width": "fill_container",
                               "layout": "vertical",
-                              "gap": 8,
-                              "padding": [
-                                4,
-                                0,
-                                0,
-                                0
-                              ],
+                              "gap": 10,
+                              "padding": 14,
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "fzzev",
+                                  "id": "D63Qq",
+                                  "name": "MiniChat",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "gap": 10,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "Gle5G",
+                                      "name": "UserBubbleWrap",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "alignItems": "end",
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "vYJDr",
+                                          "name": "UserBubble",
+                                          "fill": "#2D5A4A",
+                                          "cornerRadius": 10,
+                                          "padding": [
+                                            8,
+                                            10
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "E93PQ",
+                                              "name": "Txt",
+                                              "fill": "#FFFFFF",
+                                              "content": "按悬疑气氛续写一段",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "yLV2D",
+                                      "name": "AIStream",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "gap": 6,
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "M0VqY",
+                                          "name": "Meta",
+                                          "gap": 6,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "fJD3V",
+                                              "name": "Name",
+                                              "fill": "#1B6B5A",
+                                              "content": "Agent",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "600"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "c5WWl",
+                                              "name": "Skill",
+                                              "fill": "#8A9A93",
+                                              "content": "· 续写",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "waQJn",
+                                          "name": "ThoughtLine",
+                                          "fill": "#5A6E66",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "下面按悬疑气氛与当前章节语境续写。",
+                                          "lineHeight": 1.5,
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "ZrGfI",
+                                          "name": "GenStatus",
+                                          "width": "fill_container",
+                                          "cornerRadius": 6,
+                                          "gap": 6,
+                                          "padding": [
+                                            6,
+                                            0
+                                          ],
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "icon",
+                                              "id": "kCOTr",
+                                              "name": "Spin",
+                                              "width": 12,
+                                              "height": 12,
+                                              "icon": "loader-circle",
+                                              "library": "lucide",
+                                              "fill": "#5a6e66"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "u2nzG",
+                                              "name": "Label",
+                                              "fill": "#5a6e66",
+                                              "content": "生成中",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "600"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "IHIXq",
+                                          "name": "StreamBubble",
+                                          "width": "fill_container",
+                                          "fill": "#FFFFFF",
+                                          "cornerRadius": 10,
+                                          "stroke": "#D5DED9",
+                                          "strokeWidth": 1,
+                                          "layout": "vertical",
+                                          "gap": 8,
+                                          "padding": [
+                                            10,
+                                            12
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "SAQOR",
+                                              "name": "Partial",
+                                              "fill": "#1A2E28",
+                                              "textGrowth": "fixed-width",
+                                              "width": "fill_container",
+                                              "content": "门缝下的光忽明忽灭，像有人在门外屏住呼吸。林晚没有立刻开门，只是把",
+                                              "lineHeight": 1.55,
+                                              "fontFamily": "Geist",
+                                              "fontSize": 12,
+                                              "fontWeight": "normal"
+                                            },
+                                            {
+                                              "type": "frame",
+                                              "id": "oe5LL",
+                                              "name": "Skeleton",
+                                              "width": "fill_container",
+                                              "layout": "vertical",
+                                              "gap": 6,
+                                              "children": [
+                                                {
+                                                  "type": "frame",
+                                                  "id": "fJguV",
+                                                  "name": "L1",
+                                                  "width": "fill_container",
+                                                  "height": 8,
+                                                  "fill": "#ECF0ED",
+                                                  "cornerRadius": 4
+                                                },
+                                                {
+                                                  "type": "frame",
+                                                  "id": "fwEdJ",
+                                                  "name": "L2",
+                                                  "width": 180,
+                                                  "height": 8,
+                                                  "fill": "#ECF0ED",
+                                                  "cornerRadius": 4
+                                                },
+                                                {
+                                                  "type": "frame",
+                                                  "id": "vyJUT",
+                                                  "name": "L3",
+                                                  "width": 140,
+                                                  "height": 8,
+                                                  "fill": "#ECF0ED",
+                                                  "cornerRadius": 4
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "I5bk5k",
+                                              "name": "Cursor",
+                                              "fill": "#1B6B5A",
+                                              "content": "▍",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 12,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vyr0D",
+                          "name": "Variants/生成中",
+                          "width": "fill_container",
+                          "height": "fit_content(112)",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            8,
+                            8,
+                            8
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "j4m5P",
+                      "name": "Col/调用工具",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "CqqBM",
+                          "name": "Panel/调用工具",
+                          "width": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#D5DED9",
+                          "layout": "vertical",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "knIwK",
+                              "name": "StateTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                6,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "d9xa4",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 C · 调用工具",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "XuxQf",
+                              "name": "ChatArea",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 10,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "Qv1AK",
                                   "name": "UserBubbleWrap",
                                   "width": "fill_container",
                                   "layout": "vertical",
@@ -34508,7 +34254,7 @@
                                   "children": [
                                     {
                                       "type": "frame",
-                                      "id": "Ifvj9",
+                                      "id": "X1Ju10",
                                       "name": "UserBubble",
                                       "fill": "#2D5A4A",
                                       "cornerRadius": 10,
@@ -34519,10 +34265,10 @@
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "G9TPKi",
+                                          "id": "S9FFW",
                                           "name": "Txt",
                                           "fill": "#FFFFFF",
-                                          "content": "按悬疑气氛续写一段",
+                                          "content": "林晚和守夜人是什么关系？",
                                           "fontFamily": "Geist",
                                           "fontSize": 11,
                                           "fontWeight": "normal"
@@ -34533,49 +34279,39 @@
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "Ff6tu",
+                                  "id": "fVd0a",
                                   "name": "AIResponse",
                                   "width": "fill_container",
                                   "layout": "vertical",
-                                  "gap": 6,
+                                  "gap": 8,
                                   "children": [
                                     {
                                       "type": "frame",
-                                      "id": "Qp28e",
+                                      "id": "xprjI",
                                       "name": "Meta",
                                       "gap": 6,
                                       "alignItems": "center",
                                       "children": [
                                         {
                                           "type": "text",
-                                          "id": "V6Xvxt",
+                                          "id": "aCx4y",
                                           "name": "Name",
                                           "fill": "#1B6B5A",
                                           "content": "Agent",
                                           "fontFamily": "Geist",
                                           "fontSize": 11,
                                           "fontWeight": "600"
-                                        },
-                                        {
-                                          "type": "text",
-                                          "id": "NYlxe",
-                                          "name": "Skill",
-                                          "fill": "#8A9A93",
-                                          "content": "· 续写",
-                                          "fontFamily": "Geist",
-                                          "fontSize": 11,
-                                          "fontWeight": "normal"
                                         }
                                       ]
                                     },
                                     {
                                       "type": "text",
-                                      "id": "qFdjZ",
+                                      "id": "nsiFs",
                                       "name": "ThoughtLine",
                                       "fill": "#5A6E66",
                                       "textGrowth": "fixed-width",
                                       "width": "fill_container",
-                                      "content": "已生成约 180 字续写，正文已高亮于编辑区。",
+                                      "content": "需要从记忆库检索人物关系。",
                                       "lineHeight": 1.5,
                                       "fontFamily": "Geist",
                                       "fontSize": 11,
@@ -34583,15 +34319,721 @@
                                     },
                                     {
                                       "type": "frame",
-                                      "id": "btjpG",
-                                      "name": "MsgActions",
+                                      "id": "m9XeE",
+                                      "name": "ToolProgress",
+                                      "width": "fill_container",
+                                      "stroke": "#D5DED9",
+                                      "strokeWidth": {
+                                        "left": 2
+                                      },
+                                      "layout": "vertical",
+                                      "gap": 2,
+                                      "padding": [
+                                        0,
+                                        0,
+                                        0,
+                                        10
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "mzhAj",
+                                          "name": "ToolCaptionWrap",
+                                          "width": "fill_container",
+                                          "padding": [
+                                            0,
+                                            0,
+                                            8,
+                                            8
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "JQw69",
+                                              "name": "ToolCaption",
+                                              "fill": "#8A9A93",
+                                              "content": "正在调用工具",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 10,
+                                              "fontWeight": "500"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "i7XtRP",
+                                          "name": "ToolStep/search_memory",
+                                          "width": "fill_container",
+                                          "fill": "#FFFFFF00",
+                                          "layout": "vertical",
+                                          "gap": 2,
+                                          "padding": [
+                                            4,
+                                            8
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "frame",
+                                              "id": "E7XUrK",
+                                              "name": "RowHead",
+                                              "width": "fill_container",
+                                              "gap": 6,
+                                              "alignItems": "center",
+                                              "children": [
+                                                {
+                                                  "type": "icon",
+                                                  "id": "z6hpos",
+                                                  "name": "Mark",
+                                                  "width": 11,
+                                                  "height": 11,
+                                                  "icon": "check",
+                                                  "library": "lucide",
+                                                  "fill": "#2D7A4F"
+                                                },
+                                                {
+                                                  "type": "text",
+                                                  "id": "cRh5z",
+                                                  "name": "ToolName",
+                                                  "fill": "#5A6E66",
+                                                  "content": "search_memory",
+                                                  "fontFamily": "Geist Mono",
+                                                  "fontSize": 10,
+                                                  "fontWeight": "600"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "QJJRd",
+                                              "name": "ToolArgs",
+                                              "fill": "#8A9A93",
+                                              "textGrowth": "fixed-width",
+                                              "width": "fill_container",
+                                              "content": "category: characters · query: 林晚 守夜人",
+                                              "lineHeight": 1.4,
+                                              "fontFamily": "Geist",
+                                              "fontSize": 10,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "W3TBBa",
+                                          "name": "ToolStep/get_chapter_summary",
+                                          "width": "fill_container",
+                                          "fill": "#E4EFE9",
+                                          "cornerRadius": 4,
+                                          "layout": "vertical",
+                                          "gap": 2,
+                                          "padding": [
+                                            6,
+                                            8
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "frame",
+                                              "id": "LPd1a",
+                                              "name": "RowHead",
+                                              "width": "fill_container",
+                                              "gap": 6,
+                                              "alignItems": "center",
+                                              "children": [
+                                                {
+                                                  "type": "icon",
+                                                  "id": "v9Ke23",
+                                                  "name": "Mark",
+                                                  "width": 11,
+                                                  "height": 11,
+                                                  "icon": "loader-circle",
+                                                  "library": "lucide",
+                                                  "fill": "#2D5A4A"
+                                                },
+                                                {
+                                                  "type": "text",
+                                                  "id": "s70In1",
+                                                  "name": "ToolName",
+                                                  "fill": "#2D5A4A",
+                                                  "content": "get_chapter_summary",
+                                                  "fontFamily": "Geist Mono",
+                                                  "fontSize": 10,
+                                                  "fontWeight": "600"
+                                                },
+                                                {
+                                                  "type": "text",
+                                                  "id": "LhBXW",
+                                                  "name": "Badge",
+                                                  "fill": "#2D5A4A",
+                                                  "content": "进行中",
+                                                  "fontFamily": "Geist",
+                                                  "fontSize": 9,
+                                                  "fontWeight": "500"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "Z3xKS",
+                                              "name": "ToolArgs",
+                                              "fill": "#8A9A93",
+                                              "textGrowth": "fixed-width",
+                                              "width": "fill_container",
+                                              "content": "chapter_id: ch_61 · limit: 1",
+                                              "lineHeight": 1.4,
+                                              "fontFamily": "Geist",
+                                              "fontSize": 10,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "MdjvG",
+                                      "name": "ThoughtLine",
+                                      "fill": "#8A9A93",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "等待工具返回…",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "PA4Yg",
+                          "name": "Variants/调用工具",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            8,
+                            8,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "glYTT",
+                              "name": "VarTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "MdK5I",
+                                  "name": "T",
+                                  "fill": "#5A6E66",
+                                  "content": "样式变体",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "cQmiU",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "bYiAX",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 B · 胶囊标签",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "kJMbL",
+                                  "name": "Pills",
+                                  "width": "fill_container",
+                                  "gap": 6,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "ypgIo",
+                                      "name": "Pill",
+                                      "fill": "#ECF0ED",
+                                      "cornerRadius": 10,
+                                      "stroke": "#D5DED9",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "Qqejk",
+                                          "name": "N",
+                                          "fill": "#5A6E66",
+                                          "content": "search_memory",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "OvZlC",
+                                      "name": "Pill",
+                                      "fill": "#E4EFE9",
+                                      "cornerRadius": 10,
+                                      "stroke": "#D5DED9",
+                                      "padding": [
+                                        4,
+                                        8
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "XbxlR",
+                                          "name": "N",
+                                          "fill": "#2D5A4A",
+                                          "content": "get_chapter_summary",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "BRjaU",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "HuYkV",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 C · 终端风",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "tNedW",
+                                  "name": "Terminal",
+                                  "width": "fill_container",
+                                  "fill": "#1A2E28",
+                                  "cornerRadius": 6,
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    10
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "x0GD7",
+                                      "name": "L1",
+                                      "fill": "#7DD3A8",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "> search_memory({query:\"林晚\"})",
+                                      "fontFamily": "JetBrains Mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "vTWJz",
+                                      "name": "L2",
+                                      "fill": "#A8C4B8",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "> get_chapter_summary(ch:62) …",
+                                      "fontFamily": "JetBrains Mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "WNTWW",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "WHF9n",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 D · 折叠摘要",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "G1NYu",
+                                  "name": "Summary",
+                                  "width": "fill_container",
+                                  "gap": 6,
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "EDABk",
+                                      "name": "Icon",
+                                      "fill": "#8A9A93",
+                                      "content": "▾",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "e9UfjK",
+                                      "name": "Txt",
+                                      "fill": "#5A6E66",
+                                      "content": "已调用 2 个工具 · 等待返回",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ubjKP",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "meCuE",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 E · Cursor 风 · 工具调用条",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "ErhZu",
+                                  "name": "ToolRow",
+                                  "width": "fill_container",
+                                  "fill": "#ECF0ED",
+                                  "cornerRadius": 6,
+                                  "gap": 8,
+                                  "padding": [
+                                    6,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "p2sGS",
+                                      "name": "Icon",
+                                      "fill": "#8A9A93",
+                                      "content": "◧",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "z8YtP7",
+                                      "name": "Col",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "gap": 2,
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "dO0rP",
+                                          "name": "Name",
+                                          "fill": "#1A2E28",
+                                          "content": "Read",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "u1oxL",
+                                          "name": "Sub",
+                                          "fill": "#8A9A93",
+                                          "content": "memory.json · 林晚",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "T7cIN",
+                                  "name": "ToolRow",
+                                  "width": "fill_container",
+                                  "fill": "#2A2A2A",
+                                  "cornerRadius": 6,
+                                  "gap": 8,
+                                  "padding": [
+                                    6,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "ceSNi",
+                                      "name": "Icon",
+                                      "fill": "#A8C4B8",
+                                      "content": "◧",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "RUiXY",
+                                      "name": "Col",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "gap": 2,
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "Pnqog",
+                                          "name": "Name",
+                                          "fill": "#FFFFFF",
+                                          "content": "Read",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "NPE6z",
+                                          "name": "Sub",
+                                          "fill": "#9CA3AF",
+                                          "content": "chapter_62.md",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 9,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "S4p8L",
+                                  "name": "Wait",
+                                  "fill": "#8A9A93",
+                                  "content": "Running tools…",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "wWXFL",
+                      "name": "Col/草稿待确认",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "sUKfe",
+                          "name": "Panel/草稿待确认",
+                          "width": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": {
+                            "right": 1
+                          },
+                          "layout": "vertical",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "bVHIR",
+                              "name": "StateTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                6,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "J23w8",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 D · 草稿待确认",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "D6AqZ",
+                              "name": "Body",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 8,
+                              "padding": 10,
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Pn65u",
+                                  "name": "EditorHint",
+                                  "fill": "#8A9A93",
+                                  "content": "编辑区预览",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "QHyp8",
+                                  "name": "EditorDraftCard",
+                                  "width": "fill_container",
+                                  "fill": "#E8F5F0",
+                                  "cornerRadius": 8,
+                                  "stroke": "#1B6B5A",
+                                  "strokeWidth": 1,
+                                  "layout": "vertical",
+                                  "gap": 8,
+                                  "padding": [
+                                    10,
+                                    12
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "qsHpC",
+                                      "name": "DraftHead",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "kaVUs",
+                                          "name": "I",
+                                          "width": 12,
+                                          "height": 12,
+                                          "icon": "sparkles",
+                                          "library": "lucide",
+                                          "fill": "#1B6B5A"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "o7iTT2",
+                                          "name": "L",
+                                          "fill": "#1B6B5A",
+                                          "content": "AI 续写 · 待插入",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "600"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "k85Whu",
+                                      "name": "DraftText",
+                                      "fill": "#1B6B5A",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "门缝下的光忽明忽灭，像有人在门外屏住呼吸。林晚没有立刻开门，只是把呼吸压得更轻。",
+                                      "lineHeight": 1.6,
+                                      "fontFamily": "Newsreader",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "y6oy1n",
+                                      "name": "DraftActions",
                                       "width": "fill_container",
                                       "gap": 6,
                                       "children": [
                                         {
                                           "type": "frame",
-                                          "id": "bkMod",
-                                          "name": "Btn/插入文末",
+                                          "id": "znyBw",
+                                          "name": "Btn/插入正文",
                                           "fill": "#2D5A4A",
                                           "cornerRadius": 4,
                                           "stroke": "#FFFFFF00",
@@ -34603,10 +35045,10 @@
                                           "children": [
                                             {
                                               "type": "text",
-                                              "id": "u0MLOn",
+                                              "id": "C6R0We",
                                               "name": "L",
                                               "fill": "#FFFFFF",
-                                              "content": "插入文末",
+                                              "content": "插入正文",
                                               "fontFamily": "Geist",
                                               "fontSize": 10,
                                               "fontWeight": "600"
@@ -34615,8 +35057,8 @@
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "lxxP2",
-                                          "name": "Btn/重写",
+                                          "id": "TAEub",
+                                          "name": "Btn/改写",
                                           "fill": "#FFFFFF",
                                           "cornerRadius": 4,
                                           "stroke": "#D5DED9",
@@ -34629,10 +35071,10 @@
                                           "children": [
                                             {
                                               "type": "text",
-                                              "id": "qhQ2a",
+                                              "id": "uHMdz",
                                               "name": "L",
                                               "fill": "#2D5A4A",
-                                              "content": "重写",
+                                              "content": "改写",
                                               "fontFamily": "Geist",
                                               "fontSize": 10,
                                               "fontWeight": "500"
@@ -34641,7 +35083,7 @@
                                         },
                                         {
                                           "type": "frame",
-                                          "id": "UARBE",
+                                          "id": "FqsmE",
                                           "name": "Btn/弃用",
                                           "fill": "#FFFFFF00",
                                           "cornerRadius": 4,
@@ -34655,7 +35097,7 @@
                                           "children": [
                                             {
                                               "type": "text",
-                                              "id": "QHc5Y",
+                                              "id": "SN21d",
                                               "name": "L",
                                               "fill": "#8A9A93",
                                               "content": "弃用",
@@ -34668,467 +35110,1001 @@
                                       ]
                                     }
                                   ]
-                                }
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "KYw0y",
-                      "name": "Panel/气泡回复",
-                      "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#D5DED9",
-                      "strokeWidth": {
-                        "right": 1
-                      },
-                      "layout": "vertical",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "PMLgx",
-                          "name": "StateTag",
-                          "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "IQEeQ",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 E · 气泡回复（设定/闲聊）",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Y9ywn",
-                          "name": "ChatArea",
-                          "width": "fill_container",
-                          "height": "fill_container",
-                          "layout": "vertical",
-                          "gap": 10,
-                          "padding": 14,
-                          "children": [
-                            {
-                              "type": "frame",
-                              "id": "zfMWC",
-                              "name": "UserBubbleWrap",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "alignItems": "end",
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "o8dKN",
-                                  "name": "UserBubble",
-                                  "fill": "#2D5A4A",
-                                  "cornerRadius": 10,
-                                  "padding": [
-                                    8,
-                                    10
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "iutnm",
-                                      "name": "Txt",
-                                      "fill": "#FFFFFF",
-                                      "content": "补一段林晚的人物小传",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "b0o53",
-                              "name": "AIResponse",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 6,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "xwTwA",
-                                  "name": "Meta",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "C3zMc",
-                                      "name": "Name",
-                                      "fill": "#1B6B5A",
-                                      "content": "Agent",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "600"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "nCIlo",
-                                      "name": "Skill",
-                                      "fill": "#8A9A93",
-                                      "content": "· 生成设定",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "text",
-                                  "id": "Oyy9n",
-                                  "name": "ThoughtLine",
-                                  "fill": "#5A6E66",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "以下为设定补充，可直接复制到设定库。",
-                                  "lineHeight": 1.5,
-                                  "fontFamily": "Geist",
-                                  "fontSize": 11,
-                                  "fontWeight": "normal"
                                 },
                                 {
                                   "type": "frame",
-                                  "id": "K0gDA",
-                                  "name": "ReplyBubble",
+                                  "id": "J2Nche",
+                                  "name": "ChatArea",
                                   "width": "fill_container",
-                                  "fill": "#FFFFFF",
-                                  "cornerRadius": 10,
-                                  "stroke": "#D5DED9",
-                                  "strokeWidth": 1,
                                   "layout": "vertical",
-                                  "gap": 6,
+                                  "gap": 8,
                                   "padding": [
-                                    10,
-                                    12
+                                    4,
+                                    0,
+                                    0,
+                                    0
                                   ],
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "Xi8ih",
-                                      "name": "Title",
-                                      "fill": "#1A2E28",
-                                      "content": "林晚",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 12,
-                                      "fontWeight": "600"
+                                      "type": "frame",
+                                      "id": "fzzev",
+                                      "name": "UserBubbleWrap",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "alignItems": "end",
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "Ifvj9",
+                                          "name": "UserBubble",
+                                          "fill": "#2D5A4A",
+                                          "cornerRadius": 10,
+                                          "padding": [
+                                            8,
+                                            10
+                                          ],
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "G9TPKi",
+                                              "name": "Txt",
+                                              "fill": "#FFFFFF",
+                                              "content": "按悬疑气氛续写一段",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     },
                                     {
-                                      "type": "text",
-                                      "id": "JR9JB",
-                                      "name": "Body",
-                                      "fill": "#1A2E28",
-                                      "textGrowth": "fixed-width",
+                                      "type": "frame",
+                                      "id": "Ff6tu",
+                                      "name": "AIResponse",
                                       "width": "fill_container",
-                                      "content": "守夜人一脉的末裔，习惯在夜里记录不可说之事。对外冷淡，对可信之人会露出罕见的耐心。与守夜人为「师徒/守望」关系，非血缘。",
-                                      "lineHeight": 1.55,
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
+                                      "layout": "vertical",
+                                      "gap": 6,
+                                      "children": [
+                                        {
+                                          "type": "frame",
+                                          "id": "Qp28e",
+                                          "name": "Meta",
+                                          "gap": 6,
+                                          "alignItems": "center",
+                                          "children": [
+                                            {
+                                              "type": "text",
+                                              "id": "V6Xvxt",
+                                              "name": "Name",
+                                              "fill": "#1B6B5A",
+                                              "content": "Agent",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "600"
+                                            },
+                                            {
+                                              "type": "text",
+                                              "id": "NYlxe",
+                                              "name": "Skill",
+                                              "fill": "#8A9A93",
+                                              "content": "· 续写",
+                                              "fontFamily": "Geist",
+                                              "fontSize": 11,
+                                              "fontWeight": "normal"
+                                            }
+                                          ]
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "qFdjZ",
+                                          "name": "ThoughtLine",
+                                          "fill": "#5A6E66",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "已生成约 180 字续写，正文已高亮于编辑区。",
+                                          "lineHeight": 1.5,
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        },
+                                        {
+                                          "type": "frame",
+                                          "id": "btjpG",
+                                          "name": "MsgActions",
+                                          "width": "fill_container",
+                                          "gap": 6,
+                                          "children": [
+                                            {
+                                              "type": "frame",
+                                              "id": "bkMod",
+                                              "name": "Btn/插入文末",
+                                              "fill": "#2D5A4A",
+                                              "cornerRadius": 4,
+                                              "stroke": "#FFFFFF00",
+                                              "padding": [
+                                                5,
+                                                10
+                                              ],
+                                              "alignItems": "center",
+                                              "children": [
+                                                {
+                                                  "type": "text",
+                                                  "id": "u0MLOn",
+                                                  "name": "L",
+                                                  "fill": "#FFFFFF",
+                                                  "content": "插入文末",
+                                                  "fontFamily": "Geist",
+                                                  "fontSize": 10,
+                                                  "fontWeight": "600"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "frame",
+                                              "id": "lxxP2",
+                                              "name": "Btn/重写",
+                                              "fill": "#FFFFFF",
+                                              "cornerRadius": 4,
+                                              "stroke": "#D5DED9",
+                                              "strokeWidth": 1,
+                                              "padding": [
+                                                5,
+                                                10
+                                              ],
+                                              "alignItems": "center",
+                                              "children": [
+                                                {
+                                                  "type": "text",
+                                                  "id": "qhQ2a",
+                                                  "name": "L",
+                                                  "fill": "#2D5A4A",
+                                                  "content": "重写",
+                                                  "fontFamily": "Geist",
+                                                  "fontSize": 10,
+                                                  "fontWeight": "500"
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "type": "frame",
+                                              "id": "UARBE",
+                                              "name": "Btn/弃用",
+                                              "fill": "#FFFFFF00",
+                                              "cornerRadius": 4,
+                                              "stroke": "#D5DED9",
+                                              "strokeWidth": 1,
+                                              "padding": [
+                                                5,
+                                                10
+                                              ],
+                                              "alignItems": "center",
+                                              "children": [
+                                                {
+                                                  "type": "text",
+                                                  "id": "QHc5Y",
+                                                  "name": "L",
+                                                  "fill": "#8A9A93",
+                                                  "content": "弃用",
+                                                  "fontFamily": "Geist",
+                                                  "fontSize": 10,
+                                                  "fontWeight": "500"
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
                                   ]
                                 }
                               ]
                             }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "QZKGe",
+                          "name": "Variants/草稿待确认",
+                          "width": "fill_container",
+                          "height": "fit_content(29)",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            8,
+                            8,
+                            8
                           ]
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "s8FaG",
-                      "name": "Panel/错误中断",
+                      "id": "pkktw",
+                      "name": "Col/气泡回复",
                       "width": "fill_container",
-                      "height": "fill_container",
-                      "fill": "#F3F5F3",
-                      "stroke": "#FFFFFF00",
                       "layout": "vertical",
+                      "gap": 6,
                       "children": [
                         {
                           "type": "frame",
-                          "id": "DKVD1",
-                          "name": "StateTag",
+                          "id": "KYw0y",
+                          "name": "Panel/气泡回复",
                           "width": "fill_container",
-                          "fill": "#ECF0ED",
-                          "padding": [
-                            6,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "EktWu",
-                              "name": "Tag",
-                              "fill": "#5A6E66",
-                              "content": "状态 F · 错误 / 中断",
-                              "fontFamily": "Geist",
-                              "fontSize": 10,
-                              "fontWeight": "600"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Z7DGo",
-                          "name": "ChatArea",
-                          "width": "fill_container",
-                          "height": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#D5DED9",
+                          "strokeWidth": {
+                            "right": 1
+                          },
                           "layout": "vertical",
-                          "gap": 10,
-                          "padding": 14,
                           "children": [
                             {
                               "type": "frame",
-                              "id": "x5jOh9",
-                              "name": "UserBubbleWrap",
+                              "id": "PMLgx",
+                              "name": "StateTag",
                               "width": "fill_container",
-                              "layout": "vertical",
-                              "alignItems": "end",
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "QpbUd",
-                                  "name": "UserBubble",
-                                  "fill": "#2D5A4A",
-                                  "cornerRadius": 10,
-                                  "padding": [
-                                    8,
-                                    10
-                                  ],
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "J75QBs",
-                                      "name": "Txt",
-                                      "fill": "#FFFFFF",
-                                      "content": "按悬疑气氛续写一段",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "f5OrV",
-                              "name": "AIResponse/Error",
-                              "width": "fill_container",
-                              "layout": "vertical",
-                              "gap": 8,
-                              "children": [
-                                {
-                                  "type": "frame",
-                                  "id": "wsd1Q",
-                                  "name": "Meta",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "u3W7q",
-                                      "name": "Name",
-                                      "fill": "#1B6B5A",
-                                      "content": "Agent",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "600"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "ppyFO",
-                                      "name": "Skill",
-                                      "fill": "#8A9A93",
-                                      "content": "· 续写",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "D85M6",
-                                  "name": "ErrorRow",
-                                  "width": "fill_container",
-                                  "gap": 6,
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "icon",
-                                      "id": "GZTJe",
-                                      "name": "I",
-                                      "width": 12,
-                                      "height": 12,
-                                      "icon": "circle-alert",
-                                      "library": "lucide",
-                                      "fill": "#B42318"
-                                    },
-                                    {
-                                      "type": "text",
-                                      "id": "STrVv",
-                                      "name": "ErrText",
-                                      "fill": "#B42318",
-                                      "textGrowth": "fixed-width",
-                                      "width": "fill_container",
-                                      "content": "模型未返回任何内容，请重试或调整输入",
-                                      "lineHeight": 1.45,
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "normal"
-                                    }
-                                  ]
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "dtPP3",
-                                  "name": "BtnRetry",
-                                  "fill": "#FFFFFF",
-                                  "cornerRadius": 4,
-                                  "stroke": "#D5DED9",
-                                  "strokeWidth": 1,
-                                  "padding": [
-                                    5,
-                                    10
-                                  ],
-                                  "alignItems": "center",
-                                  "children": [
-                                    {
-                                      "type": "text",
-                                      "id": "zMZsp",
-                                      "name": "L",
-                                      "fill": "#2D5A4A",
-                                      "content": "重试",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 10,
-                                      "fontWeight": "500"
-                                    }
-                                  ]
-                                }
-                              ]
-                            },
-                            {
-                              "type": "frame",
-                              "id": "LYSPW",
-                              "name": "Divider",
-                              "width": "fill_container",
-                              "gap": 8,
+                              "fill": "#ECF0ED",
                               "padding": [
-                                8,
-                                0
+                                6,
+                                12
                               ],
                               "alignItems": "center",
                               "children": [
                                 {
-                                  "type": "frame",
-                                  "id": "a2zym",
-                                  "name": "Line",
-                                  "width": "fill_container",
-                                  "height": 1,
-                                  "fill": "#D5DED9"
-                                },
-                                {
                                   "type": "text",
-                                  "id": "mu3Jk",
-                                  "name": "Cap",
-                                  "fill": "#8A9A93",
-                                  "content": "用户停止",
+                                  "id": "IQEeQ",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 E · 气泡回复（设定/闲聊）",
                                   "fontFamily": "Geist",
-                                  "fontSize": 9,
-                                  "fontWeight": "normal"
-                                },
-                                {
-                                  "type": "frame",
-                                  "id": "R5ALE",
-                                  "name": "Line2",
-                                  "width": "fill_container",
-                                  "height": 1,
-                                  "fill": "#D5DED9"
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
                                 }
                               ]
                             },
                             {
                               "type": "frame",
-                              "id": "Q5VKy",
-                              "name": "AIResponse/Abort",
+                              "id": "Y9ywn",
+                              "name": "ChatArea",
                               "width": "fill_container",
                               "layout": "vertical",
-                              "gap": 6,
+                              "gap": 10,
+                              "padding": 14,
                               "children": [
                                 {
                                   "type": "frame",
-                                  "id": "S7mJ72",
-                                  "name": "Meta",
-                                  "gap": 6,
-                                  "alignItems": "center",
+                                  "id": "zfMWC",
+                                  "name": "UserBubbleWrap",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "alignItems": "end",
                                   "children": [
                                     {
-                                      "type": "text",
-                                      "id": "R4lDIZ",
-                                      "name": "Name",
-                                      "fill": "#1B6B5A",
-                                      "content": "Agent",
-                                      "fontFamily": "Geist",
-                                      "fontSize": 11,
-                                      "fontWeight": "600"
+                                      "type": "frame",
+                                      "id": "o8dKN",
+                                      "name": "UserBubble",
+                                      "fill": "#2D5A4A",
+                                      "cornerRadius": 10,
+                                      "padding": [
+                                        8,
+                                        10
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "iutnm",
+                                          "name": "Txt",
+                                          "fill": "#FFFFFF",
+                                          "content": "补一段林晚的人物小传",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "b0o53",
+                                  "name": "AIResponse",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "gap": 6,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "xwTwA",
+                                      "name": "Meta",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "C3zMc",
+                                          "name": "Name",
+                                          "fill": "#1B6B5A",
+                                          "content": "Agent",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "nCIlo",
+                                          "name": "Skill",
+                                          "fill": "#8A9A93",
+                                          "content": "· 生成设定",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
                                     },
                                     {
                                       "type": "text",
-                                      "id": "IVILa",
-                                      "name": "Skill",
-                                      "fill": "#8A9A93",
-                                      "content": "· 续写",
+                                      "id": "Oyy9n",
+                                      "name": "ThoughtLine",
+                                      "fill": "#5A6E66",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "以下为设定补充，可直接复制到设定库。",
+                                      "lineHeight": 1.5,
                                       "fontFamily": "Geist",
                                       "fontSize": 11,
                                       "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "K0gDA",
+                                      "name": "ReplyBubble",
+                                      "width": "fill_container",
+                                      "fill": "#FFFFFF",
+                                      "cornerRadius": 10,
+                                      "stroke": "#D5DED9",
+                                      "strokeWidth": 1,
+                                      "layout": "vertical",
+                                      "gap": 6,
+                                      "padding": [
+                                        10,
+                                        12
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "Xi8ih",
+                                          "name": "Title",
+                                          "fill": "#1A2E28",
+                                          "content": "林晚",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 12,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "JR9JB",
+                                          "name": "Body",
+                                          "fill": "#1A2E28",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "守夜人一脉的末裔，习惯在夜里记录不可说之事。对外冷淡，对可信之人会露出罕见的耐心。与守夜人为「师徒/守望」关系，非血缘。",
+                                          "lineHeight": 1.55,
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "pwWeV",
+                          "name": "Variants/气泡回复",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            8,
+                            8,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "SWUdw",
+                              "name": "VarTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                4,
+                                8
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "F5XNhp",
+                                  "name": "T",
+                                  "fill": "#5A6E66",
+                                  "content": "样式变体",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "AnmcF",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "fDwVP",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 B · 引用左边框",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "g9gtU",
+                                  "name": "Quote",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "children": [
+                                    {
+                                      "type": "rectangle",
+                                      "cornerRadius": 2,
+                                      "id": "lPYkB",
+                                      "name": "Bar",
+                                      "fill": "#1B6B5A",
+                                      "width": 3,
+                                      "height": 48
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "Jk4bq",
+                                      "name": "Col",
+                                      "width": "fill_container",
+                                      "layout": "vertical",
+                                      "gap": 4,
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "mHvDR",
+                                          "name": "Title",
+                                          "fill": "#1A2E28",
+                                          "content": "林晚",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "OLKtD",
+                                          "name": "Body",
+                                          "fill": "#5A6E66",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "守夜人一脉的末裔，习惯在夜里记录不可说之事。",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "q25ukp",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "d2E0SX",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 C · 分类标签头",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "wmSCU",
+                                  "name": "CatTag",
+                                  "fill": "#E4EFE9",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    3,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "d96VkT",
+                                      "name": "CatLbl",
+                                      "fill": "#2D5A4A",
+                                      "content": "人物设定",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 9,
+                                      "fontWeight": "600"
                                     }
                                   ]
                                 },
                                 {
                                   "type": "text",
-                                  "id": "aFHFA",
-                                  "name": "ThoughtLine",
-                                  "fill": "#8A9A93",
-                                  "textGrowth": "fixed-width",
-                                  "width": "fill_container",
-                                  "content": "已中断",
-                                  "lineHeight": 1.5,
+                                  "id": "ZMODw",
+                                  "name": "Title2",
+                                  "fill": "#1A2E28",
+                                  "content": "林晚",
                                   "fontFamily": "Geist",
                                   "fontSize": 11,
-                                  "fontWeight": "normal"
+                                  "fontWeight": "600"
                                 },
                                 {
                                   "type": "text",
-                                  "id": "vMfG6",
-                                  "name": "ThoughtLine",
-                                  "fill": "#8A9A93",
+                                  "id": "RmLra",
+                                  "name": "Body2",
+                                  "fill": "#5A6E66",
                                   "textGrowth": "fixed-width",
                                   "width": "fill_container",
-                                  "content": "已保留部分生成内容（52 字），可重写或弃用。",
-                                  "lineHeight": 1.5,
+                                  "content": "对外冷淡，对可信之人会露出少见的耐心。",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "fzCGv",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "aqlqt",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 D · 无框浅底",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "swva7",
+                                  "name": "Plain",
+                                  "width": "fill_container",
+                                  "fill": "#ECF0ED",
+                                  "cornerRadius": 8,
+                                  "layout": "vertical",
+                                  "gap": 4,
+                                  "padding": [
+                                    8,
+                                    10
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "jSmVw",
+                                      "name": "Body3",
+                                      "fill": "#1A2E28",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "林晚：守夜人末裔，夜巡记录者。习惯独来独往，言语不多。",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 10,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "ZgHhr",
+                              "name": "VarCard",
+                              "width": "fill_container",
+                              "fill": "#FFFFFF",
+                              "cornerRadius": 8,
+                              "stroke": "#D5DED9",
+                              "layout": "vertical",
+                              "gap": 6,
+                              "padding": [
+                                8,
+                                10
+                              ],
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "dQfnM",
+                                  "name": "Lbl",
+                                  "fill": "#8A9A93",
+                                  "content": "变体 E · Cursor 风 · Markdown 回复",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 9,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "B5Iy0",
+                                  "name": "H",
+                                  "fill": "#1A2E28",
+                                  "content": "林晚",
                                   "fontFamily": "Geist",
                                   "fontSize": 11,
+                                  "fontWeight": "700"
+                                },
+                                {
+                                  "type": "text",
+                                  "id": "UCf4P",
+                                  "name": "P",
+                                  "fill": "#5A6E66",
+                                  "textGrowth": "fixed-width",
+                                  "width": "fill_container",
+                                  "content": "守夜人一脉的末裔，习惯在夜里记录不可说之事。对外冷淡，对可信之人会露出少见的耐心。",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
                                   "fontWeight": "normal"
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "c7qN1d",
+                                  "name": "CodeInline",
+                                  "width": "fill_container",
+                                  "fill": "#ECF0ED",
+                                  "cornerRadius": 4,
+                                  "padding": [
+                                    4,
+                                    8
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "text",
+                                      "id": "V4DvYC",
+                                      "name": "Tag",
+                                      "fill": "#1B6B5A",
+                                      "content": "tags: 守夜人 · 悬疑 · 女主",
+                                      "fontFamily": "JetBrains Mono",
+                                      "fontSize": 9,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "mCnZW",
+                      "name": "Col/错误中断",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 6,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "s8FaG",
+                          "name": "Panel/错误中断",
+                          "width": "fill_container",
+                          "fill": "#F3F5F3",
+                          "stroke": "#FFFFFF00",
+                          "layout": "vertical",
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "DKVD1",
+                              "name": "StateTag",
+                              "width": "fill_container",
+                              "fill": "#ECF0ED",
+                              "padding": [
+                                6,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "EktWu",
+                                  "name": "Tag",
+                                  "fill": "#5A6E66",
+                                  "content": "状态 F · 错误 / 中断",
+                                  "fontFamily": "Geist",
+                                  "fontSize": 10,
+                                  "fontWeight": "600"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Z7DGo",
+                              "name": "ChatArea",
+                              "width": "fill_container",
+                              "layout": "vertical",
+                              "gap": 10,
+                              "padding": 14,
+                              "children": [
+                                {
+                                  "type": "frame",
+                                  "id": "x5jOh9",
+                                  "name": "UserBubbleWrap",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "alignItems": "end",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "QpbUd",
+                                      "name": "UserBubble",
+                                      "fill": "#2D5A4A",
+                                      "cornerRadius": 10,
+                                      "padding": [
+                                        8,
+                                        10
+                                      ],
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "J75QBs",
+                                          "name": "Txt",
+                                          "fill": "#FFFFFF",
+                                          "content": "按悬疑气氛续写一段",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "f5OrV",
+                                  "name": "AIResponse/Error",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "gap": 8,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "wsd1Q",
+                                      "name": "Meta",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "u3W7q",
+                                          "name": "Name",
+                                          "fill": "#1B6B5A",
+                                          "content": "Agent",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "ppyFO",
+                                          "name": "Skill",
+                                          "fill": "#8A9A93",
+                                          "content": "· 续写",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "D85M6",
+                                      "name": "ErrorRow",
+                                      "width": "fill_container",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "icon",
+                                          "id": "GZTJe",
+                                          "name": "I",
+                                          "width": 12,
+                                          "height": 12,
+                                          "icon": "circle-alert",
+                                          "library": "lucide",
+                                          "fill": "#B42318"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "STrVv",
+                                          "name": "ErrText",
+                                          "fill": "#B42318",
+                                          "textGrowth": "fixed-width",
+                                          "width": "fill_container",
+                                          "content": "模型未返回任何内容，请重试或调整输入",
+                                          "lineHeight": 1.45,
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "dtPP3",
+                                      "name": "BtnRetry",
+                                      "fill": "#FFFFFF",
+                                      "cornerRadius": 4,
+                                      "stroke": "#D5DED9",
+                                      "strokeWidth": 1,
+                                      "padding": [
+                                        5,
+                                        10
+                                      ],
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "zMZsp",
+                                          "name": "L",
+                                          "fill": "#2D5A4A",
+                                          "content": "重试",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 10,
+                                          "fontWeight": "500"
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "LYSPW",
+                                  "name": "Divider",
+                                  "width": "fill_container",
+                                  "gap": 8,
+                                  "padding": [
+                                    8,
+                                    0
+                                  ],
+                                  "alignItems": "center",
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "a2zym",
+                                      "name": "Line",
+                                      "width": "fill_container",
+                                      "height": 1,
+                                      "fill": "#D5DED9"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "mu3Jk",
+                                      "name": "Cap",
+                                      "fill": "#8A9A93",
+                                      "content": "用户停止",
+                                      "fontFamily": "Geist",
+                                      "fontSize": 9,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "frame",
+                                      "id": "R5ALE",
+                                      "name": "Line2",
+                                      "width": "fill_container",
+                                      "height": 1,
+                                      "fill": "#D5DED9"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "type": "frame",
+                                  "id": "Q5VKy",
+                                  "name": "AIResponse/Abort",
+                                  "width": "fill_container",
+                                  "layout": "vertical",
+                                  "gap": 6,
+                                  "children": [
+                                    {
+                                      "type": "frame",
+                                      "id": "S7mJ72",
+                                      "name": "Meta",
+                                      "gap": 6,
+                                      "alignItems": "center",
+                                      "children": [
+                                        {
+                                          "type": "text",
+                                          "id": "R4lDIZ",
+                                          "name": "Name",
+                                          "fill": "#1B6B5A",
+                                          "content": "Agent",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "600"
+                                        },
+                                        {
+                                          "type": "text",
+                                          "id": "IVILa",
+                                          "name": "Skill",
+                                          "fill": "#8A9A93",
+                                          "content": "· 续写",
+                                          "fontFamily": "Geist",
+                                          "fontSize": 11,
+                                          "fontWeight": "normal"
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "aFHFA",
+                                      "name": "ThoughtLine",
+                                      "fill": "#8A9A93",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "已中断",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    },
+                                    {
+                                      "type": "text",
+                                      "id": "vMfG6",
+                                      "name": "ThoughtLine",
+                                      "fill": "#8A9A93",
+                                      "textGrowth": "fixed-width",
+                                      "width": "fill_container",
+                                      "content": "已保留部分生成内容（52 字），可重写或弃用。",
+                                      "lineHeight": 1.5,
+                                      "fontFamily": "Geist",
+                                      "fontSize": 11,
+                                      "fontWeight": "normal"
+                                    }
+                                  ]
                                 }
                               ]
                             }
