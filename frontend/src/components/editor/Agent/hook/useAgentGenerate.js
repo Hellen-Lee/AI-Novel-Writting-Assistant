@@ -74,6 +74,8 @@ export function useAgentGenerate({
     let skillLabel = explicitSkill ? resolveSkillLabel(explicitSkill) : ''
     let charCount = 0
     let phaseRef = AGENT_PHASE.THINKING
+    // 本次生成累积的工具调用记录（[{name, arguments(dict)}]），跨工具轮追加去重
+    let toolAcc = []
 
     const patchAssist = (patch) => {
       updateSessionById(sessionId, (s) => ({
@@ -82,6 +84,19 @@ export function useAgentGenerate({
           m.id === assistId || m.id === localAssistId ? { ...m, ...patch } : m,
         ),
       }))
+    }
+
+    // 追加工具调用，同工具同参只保留一行
+    const mergeTool = (calls) => {
+      for (const c of calls) {
+        const key = `${c.name}::${JSON.stringify(c.arguments ?? {})}`
+        const dup = toolAcc.some(
+          (x) => `${x.name}::${JSON.stringify(x.arguments ?? {})}` === key,
+        )
+        if (!dup) {
+          toolAcc.push(c)
+        }
+      }
     }
 
     const setPhase = (phase) => {
@@ -182,11 +197,28 @@ export function useAgentGenerate({
               }))
             }
           } else if (ev?.type === 'tool_progress') {
-            const names = Array.isArray(ev.tools)
-              ? ev.tools.map((t) => (typeof t === 'string' ? t : t?.name)).filter(Boolean)
+            const incoming = Array.isArray(ev.tools)
+              ? ev.tools
+                  .map((t) => {
+                    const name = typeof t === 'string' ? t : t?.name
+                    const rawArgs = typeof t === 'string' ? {} : t?.arguments
+                    const args =
+                      typeof rawArgs === 'string'
+                        ? (() => {
+                            try {
+                              return JSON.parse(rawArgs) || {}
+                            } catch {
+                              return {}
+                            }
+                          })()
+                        : rawArgs ?? {}
+                    return { name, arguments: args }
+                  })
+                  .filter((t) => t.name)
               : []
+            mergeTool(incoming)
             setPhase(AGENT_PHASE.TOOL_CALL)
-            patchAssist({ tools: names })
+            patchAssist({ tools: [...toolAcc] })
             syncDraft(streamBuf, 'streaming')
           } else if (ev?.type === 'error') {
             setPhase(AGENT_PHASE.ERROR)
@@ -197,7 +229,7 @@ export function useAgentGenerate({
           streamBuf += chunk
           if (phaseRef === AGENT_PHASE.THINKING || phaseRef === AGENT_PHASE.TOOL_CALL) {
             setPhase(AGENT_PHASE.STREAMING)
-            patchAssist({ tools: [] })
+            // 保留已累积的工具行，不在此清空 tools
           }
           charCount += countWords(chunk)
           patchAssist({
@@ -232,6 +264,7 @@ export function useAgentGenerate({
         phase: finalPhase,
         draftRound: draftMode,
         charCount: countWords(finalText),
+        tools: [...toolAcc],
       })
       if (draftMode) {
         setAiDraft?.({
@@ -255,6 +288,7 @@ export function useAgentGenerate({
           phase: AGENT_PHASE.STOPPED,
           draftRound: draftMode,
           charCount,
+          tools: [...toolAcc],
         })
         if (draftMode && streamBuf) {
           setAiDraft?.({
@@ -279,6 +313,7 @@ export function useAgentGenerate({
           phase: AGENT_PHASE.ERROR,
           draftRound: draftMode,
           charCount,
+          tools: [...toolAcc],
         })
         setAiDraft?.(null)
       }

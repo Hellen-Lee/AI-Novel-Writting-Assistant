@@ -1,7 +1,9 @@
 import { Markdown } from '../../../../ui/Markdown'
 import { AGENT_PHASE } from '../../utils/constants'
+import { isToolCalling } from '../../utils/phase'
 import { AssistantPhase } from './AssistantPhase'
 import { DraftNotice } from './DraftNotice'
+import { ToolCallList } from './toolcall'
 
 export function MessageItem({ message }) {
   if (message.role === 'user') {
@@ -39,7 +41,8 @@ export function MessageItem({ message }) {
         ) : null}
       </div>
       <div className="agent-panel__bubble agent-panel__bubble--ai">
-        <AssistantPhase phase={message.phase} tools={message.tools} />
+        <AssistantPhase phase={message.phase} />
+        <ToolCallList tools={message.tools} running={isToolCalling(message.phase)} />
         {body}
         {streaming && !collapsed && hasBody ? (
           <i className="agent-panel__cursor" aria-hidden />

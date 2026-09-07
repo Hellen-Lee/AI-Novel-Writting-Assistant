@@ -289,6 +289,8 @@ def iter_generate(
     errored = False
     parts: list[str] = []
     tool_steps: list[dict[str, Any]] = []
+    # 跨所有工具轮累积的工具调用（[{name, arguments(dict)}]），随消息落盘保留
+    tools_called: list[dict[str, Any]] = []
 
     try:
         if tools_enabled:
@@ -377,6 +379,8 @@ def iter_generate(
                             ),
                         }
                     )
+                    # 落盘保留解析后的 dict（与 SSE 的字符串形态解耦）
+                    tools_called.append({"name": name, "arguments": args})
                 tool_rounds += 1
                 yield _sse({"type": "tool_progress", "tools": progress})
     except ModelClientError as exc:
@@ -396,6 +400,7 @@ def iter_generate(
                     pending=False,
                     error=err_text,
                     status="idle",
+                    tools=tools_called,
                 )
             except (FileNotFoundError, OSError):
                 pass
@@ -439,6 +444,7 @@ def iter_generate(
                 pending=False,
                 error=err_text,
                 status="idle",
+                tools=tools_called,
             )
         except (FileNotFoundError, OSError):
             pass
@@ -454,6 +460,7 @@ def iter_generate(
                 pending=False,
                 error="已中断" if not partial else "",
                 status="idle",
+                tools=tools_called,
             )
         except (FileNotFoundError, OSError):
             pass
@@ -494,6 +501,7 @@ def iter_generate(
                 pending=False,
                 error=err_text,
                 status="idle",
+                tools=tools_called,
             )
         except (FileNotFoundError, OSError):
             pass
@@ -520,6 +528,7 @@ def iter_generate(
                 pending=False,
                 error=err_text,
                 status="idle",
+                tools=tools_called,
             )
         except (FileNotFoundError, OSError):
             pass
@@ -559,6 +568,7 @@ def iter_generate(
                 error="",
                 skill=skill_label,
                 status="idle",
+                tools=tools_called,
             )
         except (FileNotFoundError, OSError):
             pass

@@ -1,17 +1,11 @@
-import { LoaderCircle, Wrench } from 'lucide-react'
+import { LoaderCircle } from 'lucide-react'
 import { AGENT_PHASE } from '../../utils/constants'
-import { toolLabels } from '../../utils/phase'
 
-/** 生成阶段状态行（只渲染状态，不渲染正文） */
-export function AssistantPhase({ phase, tools }) {
-  if (phase === AGENT_PHASE.TOOL_CALL) {
-    return (
-      <div className="agent-panel__phase agent-panel__phase--tool">
-        <Wrench size={12} aria-hidden />
-        <span>正在{toolLabels(tools)}…</span>
-      </div>
-    )
-  }
+/**
+ * 生成阶段状态行（只渲染状态，不渲染正文）。
+ * 工具调用不再在此展示：改为逐行 ToolCallList，见 ./toolcall。
+ */
+export function AssistantPhase({ phase }) {
   if (phase === AGENT_PHASE.THINKING) {
     return (
       <div className="agent-panel__phase">

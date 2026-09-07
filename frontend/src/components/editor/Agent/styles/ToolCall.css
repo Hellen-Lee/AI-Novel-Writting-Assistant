@@ -1,0 +1,81 @@
+/* 工具调用逐行展示（流式实时 + 完成态落盘共用） */
+.agent-panel__toolcall-list {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.agent-panel__toolcall-item {
+  min-width: 0;
+}
+.agent-panel__toolcall-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  text-align: left;
+}
+.agent-panel__toolcall-row:hover {
+  opacity: 0.8;
+}
+.agent-panel__toolcall-icon {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.agent-panel__toolcall-name {
+  font-weight: 500;
+  color: var(--color-primary);
+}
+.agent-panel__toolcall-toggle {
+  /* margin-left: auto; */
+  color: var(--color-text-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.agent-panel__toolcall-args {
+  list-style: none;
+  margin: 2px 0 2px 18px;
+  padding: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+.agent-panel__toolcall-arg-item {
+  word-break: break-word;
+}
+.agent-panel__toolcall-arg-item + .agent-panel__toolcall-arg-item {
+  margin-top: 2px;
+}
+
+/* 工具调用进行中（ing）：图标与文案颜色深浅交替，整体呈波浪起伏
+   每行由 --wave-delay 错开相位，形成自上而下推进的波浪；
+   调用结束（running 移除）后动画停止，自动恢复默认样式。 */
+@keyframes agent-toolcall-wave {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.32;
+  }
+}
+.agent-panel__toolcall-row--running .agent-panel__toolcall-icon,
+.agent-panel__toolcall-name--running {
+  animation: agent-toolcall-wave 1.5s ease-in-out infinite;
+  animation-delay: var(--wave-delay, 0s);
+}
+@media (prefers-reduced-motion: reduce) {
+  .agent-panel__toolcall-row--running .agent-panel__toolcall-icon,
+  .agent-panel__toolcall-name--running {
+    animation: none;
+  }
+}

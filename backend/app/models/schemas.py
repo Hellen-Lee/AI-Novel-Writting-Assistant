@@ -302,6 +302,8 @@ class AgentMessage(BaseModel):
     pending: bool = False
     error: str = ""
     created_at: str = ""
+    # 本消息 AI 生成过程中调用过的工具（[{name, arguments(dict)}]，可空）
+    tools: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class SessionSummary(BaseModel):

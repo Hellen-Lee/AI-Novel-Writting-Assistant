@@ -37,6 +37,8 @@ export function mapSessionDetail(detail) {
         phase: AGENT_PHASE.DONE,
         draftRound: Boolean(m.pending),
         charCount: countWords(content),
+        // 工具调用记录（[{name, arguments}]），完成态消息据此渲染工具行
+        tools: Array.isArray(m.tools) ? m.tools : [],
       }
     }),
     updatedAt: detail.updated_at || Date.now(),

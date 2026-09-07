@@ -319,6 +319,7 @@ def update_message(
     error: Optional[str] = None,
     skill: Optional[str] = None,
     status: Optional[str] = None,
+    tools: Optional[list[dict[str, Any]]] = None,
 ) -> dict[str, Any]:
     session = get_session(project_id, session_id)
     messages = session.get("messages") or []
@@ -337,6 +338,8 @@ def update_message(
             msg["error"] = error
         if skill is not None:
             msg["skill"] = skill
+        if tools is not None:
+            msg["tools"] = tools
         break
     if not found:
         raise FileNotFoundError(f"消息不存在: {message_id}")
@@ -354,6 +357,7 @@ def make_message(
     pending: bool = False,
     error: str = "",
     message_id: Optional[str] = None,
+    tools: Optional[list[dict[str, Any]]] = None,
 ) -> dict[str, Any]:
     msg: dict[str, Any] = {
         "id": message_id or _new_message_id(),
@@ -367,6 +371,8 @@ def make_message(
         msg["pending"] = True
     if error:
         msg["error"] = error
+    if tools is not None:
+        msg["tools"] = tools
     return msg
 
 
