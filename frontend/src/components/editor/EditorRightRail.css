@@ -1,4 +1,5 @@
 .editor-right-rail {
+  position: relative; /* 作为左缘拖拽把手 absolute 定位的参照 */
   display: flex;
   flex-shrink: 0;
   height: 100%;

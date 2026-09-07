@@ -1,5 +1,7 @@
 import { AgentPanel } from './Agent'
 import { RulesPanel } from './Agent/component/shell/RulesPanel'
+import { useResizablePanel } from './useResizablePanel'
+import { RailResizeHandle } from './RailResizeHandle'
 import './EditorRightRail.css'
 
 /**
@@ -28,11 +30,23 @@ export function EditorRightRail({
   onRulesSave,
   onRulesClose,
 }) {
+  const { width, isDragging, onHandlePointerDown } = useResizablePanel({
+    storageKey: 'editor.agentRailWidth',
+    defaultWidth: 320,
+    min: 300,
+    max: 600,
+  })
+
   return (
     <div
       className={`editor-right-rail${!open ? ' is-collapsed' : ''}`}
       aria-hidden={!open}
+      style={{ width: `${width}px`, '--agent-width': `${width}px` }}
     >
+      <RailResizeHandle
+        isDragging={isDragging}
+        onPointerDown={onHandlePointerDown}
+      />
       {mode === 'rules' ? (
         <RulesPanel
           rulesId={rulesId}

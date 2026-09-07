@@ -1,0 +1,28 @@
+/* 右栏左缘拖拽把手：命中区在栏内，不遮挡正文 */
+.rail-resize-handle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 2;
+  background: transparent; /* 命中区透明，竖线由 ::before 绘制 */
+}
+
+/* 竖线视觉：落在右栏左缘，与子面板 border-left 重合 */
+.rail-resize-handle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.rail-resize-handle:hover::before,
+.rail-resize-handle.is-dragging::before {
+  background: var(--color-border-strong);
+}
