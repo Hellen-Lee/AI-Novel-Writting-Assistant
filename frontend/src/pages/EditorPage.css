@@ -140,9 +140,11 @@
   flex: 1;
   min-width: 0;
   background: var(--color-bg-surface);
-  padding: 20px 36px 12px;
+  padding: 20px 36px 28px;
   gap: 4px;
   min-height: 0;
+  /* 整栏作为滚动容器：标题/图例/正文随内容一起上下滚动 */
+  overflow-y: auto;
 }
 
 .editor-page__error,
@@ -283,9 +285,6 @@
 }
 
 .editor-page__canvas {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 18px;

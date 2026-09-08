@@ -111,7 +111,7 @@ function ChapterMain({
 }) {
   const textareaRef = useRef(null)
 
-  // 正文增高由 canvas 滚动；textarea 自身不出现滚动条
+  // 正文随内容自动增高，滚动由 .editor-page__main 统一处理；textarea 自身不出现滚动条
   useLayoutEffect(() => {
     const el = textareaRef.current
     if (!el) return
