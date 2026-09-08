@@ -1,0 +1,67 @@
+.ctx-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  cursor: default;
+}
+
+.ctx-ring__svg {
+  display: block;
+}
+
+.ctx-ring__track {
+  stroke: var(--color-border-default);
+}
+
+.ctx-ring__progress {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+/* 颜色档位：随占比在 低 → 中 → 高 间切换 */
+.ctx-ring--ok .ctx-ring__progress {
+  stroke: var(--color-ai, #1b6b5a);
+}
+
+.ctx-ring--warn .ctx-ring__progress {
+  stroke: var(--color-warning, #b8860b);
+}
+
+.ctx-ring--danger .ctx-ring__progress {
+  stroke: var(--color-error, #b42318);
+}
+
+/* 生成中轻微提示 */
+.ctx-ring.is-loading .ctx-ring__svg {
+  opacity: 0.55;
+}
+
+/* Hover tooltip：向上弹出，右对齐避免溢出面板 */
+.ctx-ring__tip {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 8px);
+  z-index: 6;
+  white-space: nowrap;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-surface);
+  box-shadow: 0 8px 20px rgba(26, 46, 40, 0.12);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  font-size: var(--text-body-sm);
+  line-height: 1.4;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.ctx-ring:hover .ctx-ring__tip {
+  opacity: 1;
+  visibility: visible;
+}

@@ -43,6 +43,8 @@ export function mapSessionDetail(detail) {
     }),
     updatedAt: detail.updated_at || Date.now(),
     status: detail.status || 'idle',
+    // 最近一次生成的上下文用量（已持久化），供底栏圆环在刷新/切回会话后仍显示
+    contextUsage: detail.context_usage || null,
   }
 }
 

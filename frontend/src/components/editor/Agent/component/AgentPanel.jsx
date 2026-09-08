@@ -134,6 +134,7 @@ export function AgentPanel({
             onSend={handleSend}
             onStop={handleStop}
             onShowAttachNotice={() => showNotice('附加能力待后续版本接入。')}
+            contextUsage={activeSession?.contextUsage}
             modelOptions={modelOptions}
             selectedModel={selectedModel}
             modelOpen={modelOpen}

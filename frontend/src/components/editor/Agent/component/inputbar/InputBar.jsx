@@ -1,5 +1,6 @@
 import { ArrowUp, Plus, Square, X } from 'lucide-react'
 import '../../styles/InputBar.css'
+import { ContextUsageRing } from './ContextUsageRing'
 import { ModelPicker } from './ModelPicker'
 
 /** 底栏：notice + 输入区（快捷指令仅出现在无消息空态） */
@@ -12,6 +13,7 @@ export function InputBar({
   onSend,
   onStop,
   onShowAttachNotice,
+  contextUsage = null,
   modelOptions = [],
   selectedModel,
   modelOpen,
@@ -75,6 +77,12 @@ export function InputBar({
           />
 
           <div className="agent-panel__toolrow-spacer" />
+
+          <ContextUsageRing
+            used={contextUsage?.used}
+            window={contextUsage?.window}
+            loading={generating}
+          />
 
           {generating ? (
             <button

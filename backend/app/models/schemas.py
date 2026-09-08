@@ -322,6 +322,8 @@ class SessionDetail(BaseModel):
     summary: str = ""
     created_at: str = ""
     updated_at: int = 0
+    # 最近一次生成的上下文用量（估算入模 token vs 完整上下文窗口），持久化以便刷新后仍可展示
+    context_usage: Optional[dict[str, Any]] = None
 
 
 class SessionCreateRequest(BaseModel):

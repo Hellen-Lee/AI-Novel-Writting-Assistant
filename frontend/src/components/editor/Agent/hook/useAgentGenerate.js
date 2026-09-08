@@ -174,6 +174,14 @@ export function useAgentGenerate({
               skillLabel = skillLabel || '闲聊'
             }
             patchAssist({ skill: skillLabel, pending: draftMode, draftRound: draftMode })
+            // 缓存后端精确上下文用量（估算入模 token vs 完整上下文窗口），供底栏圆环展示
+            const cu = ev.context_usage
+            if (cu && typeof cu.used_est === 'number' && cu.window) {
+              updateSessionById(sessionId, (s) => ({
+                ...s,
+                contextUsage: { used: cu.used_est, window: cu.window },
+              }))
+            }
             if (draftMode) {
               syncDraft(streamBuf, 'streaming')
             } else {

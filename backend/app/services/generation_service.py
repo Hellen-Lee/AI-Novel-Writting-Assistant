@@ -262,6 +262,19 @@ def iter_generate(
         yield _sse_done()
         return
 
+    # 持久化最近一次上下文用量（估算入模 token vs 完整窗口），刷新/切回会话后仍可展示
+    try:
+        session_store.update_session_fields(
+            project_id,
+            session_id,
+            context_usage={
+                "used": int(budget_report.get("used_est", 0)),
+                "window": int(context_window),
+            },
+        )
+    except (FileNotFoundError, OSError, ValueError):
+        pass  # 持久化为 best-effort，失败不阻塞生成
+
     # Emit the meta frame so the frontend can map message ids. Draft is decided
     # from preset upfront; it is re-emitted with the final value after routing.
     yield _sse(
@@ -274,6 +287,10 @@ def iter_generate(
             "skill_name": preset or "",
             "preset": preset or "",
             "draft": _preset_draft(preset),
+            "context_usage": {
+                "used_est": int(budget_report.get("used_est", 0)),
+                "window": int(context_window),
+            },
         }
     )
 
@@ -553,6 +570,10 @@ def iter_generate(
             "skill_name": preset or "",
             "preset": preset or "",
             "draft": draft,
+            "context_usage": {
+                "used_est": int(budget_report.get("used_est", 0)),
+                "window": int(context_window),
+            },
         }
     )
 

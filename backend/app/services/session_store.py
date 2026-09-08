@@ -125,6 +125,7 @@ def get_session(project_id: str, session_id: str) -> dict[str, Any]:
     data.setdefault("status", "idle")
     data.setdefault("summary", "")
     data.setdefault("summary_at_round_count", 0)
+    data.setdefault("context_usage", None)
     data.setdefault("updated_at", _now_ms())
     return data
 
@@ -138,6 +139,7 @@ def create_session(project_id: str, title: str = "新对话") -> dict[str, Any]:
         "messages": [],
         "summary": "",
         "summary_at_round_count": 0,
+        "context_usage": None,
         "status": "idle",
         "created_at": _now_iso(),
         "updated_at": _now_ms(),
@@ -203,8 +205,9 @@ def update_session_fields(
     summary: Optional[str] = None,
     summary_at_round_count: Optional[int] = None,
     status: Optional[str] = None,
+    context_usage: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
-    """Patch session-level fields (summary / status). Future: pending_run, waiting_user."""
+    """Patch session-level fields (summary / status / context_usage)."""
     session = get_session(project_id, session_id)
     if summary is not None:
         session["summary"] = summary
@@ -212,6 +215,8 @@ def update_session_fields(
         session["summary_at_round_count"] = int(summary_at_round_count)
     if status is not None:
         session["status"] = status
+    if context_usage is not None:
+        session["context_usage"] = context_usage
     return save_session(project_id, session)
 
 
