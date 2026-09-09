@@ -14,6 +14,14 @@ body,
   margin: 0;
 }
 
+/* 应用为全视口外壳布局，所有滚动都发生在页面内部分区容器中；
+ * 根元素禁止滚动，避免浏览器在亚像素舍入/选中文字等场景下
+ * 让整个根页面冒出滚动条（或被选择滚动机制带着轻微上下滚动）。 */
+html,
+body {
+  overflow: hidden;
+}
+
 body {
   font-family: var(--font-sans);
   font-size: var(--text-body-md);
@@ -24,9 +32,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  min-height: 100svh;
-}
+/* #root 依赖 html/body 的 100% 高度链撑满视口；
+ * 不再叠加 min-height:100svh——缩放产生小数像素时它可能略大于 100%，
+ * 使根文档出现微小溢出（根滚动条在选中/悬停时被点亮露出）。 */
 
 h1,
 h2,
@@ -61,4 +69,41 @@ textarea,
 select {
   font-family: inherit;
   font-size: inherit;
+}
+
+/* ===== 全局滚动条：更细，悬停滚动区域时才显示 =====
+ * 默认把轨道/滑块都做成透明（Firefox 用 scrollbar-color 全透明，
+ * WebKit/Chromium 用 webkit 伪元素透明），滚动区域本身仍可滚；
+ * 鼠标悬停到该滚动容器上时再显示一条细滑块。 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* 悬停滚动区域（含其子内容）时显示细滚动条 */
+*:hover::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+}
+*:hover::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-muted);
+}
+/* Firefox：悬停到滚动容器时把滑块颜色点亮 */
+*:hover {
+  scrollbar-color: var(--color-border-strong) transparent;
 }

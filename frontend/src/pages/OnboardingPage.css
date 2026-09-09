@@ -336,14 +336,7 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.onboarding-scroller::-webkit-scrollbar {
-  height: 6px;
-}
-
-.onboarding-scroller::-webkit-scrollbar-thumb {
-  background: var(--color-border-strong);
-  border-radius: 3px;
-}
+/* 滚动条样式统一交给全局规则（更细、悬停容器时才显示），此处不再单独覆盖 */
 
 .onboarding-card {
   display: flex;

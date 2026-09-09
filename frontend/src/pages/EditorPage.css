@@ -143,8 +143,10 @@
   padding: 20px 36px 28px;
   gap: 4px;
   min-height: 0;
-  /* 整栏作为滚动容器：标题/图例/正文随内容一起上下滚动 */
+  /* 整栏作为滚动容器：标题/图例/正文随内容一起上下滚动；
+   * 常驻预留滚动条槽位，避免选中/悬停时滚动条出现挤占宽度导致正文重排跳动 */
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .editor-page__error,
