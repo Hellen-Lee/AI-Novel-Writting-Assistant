@@ -18,6 +18,7 @@ export function EditorRightRail({
   currentContent,
   selectedText,
   contentAnchor = null,
+  onClearSelection,
   setAiDraft,
   draft,
   onRegisterRetry,
@@ -72,6 +73,7 @@ export function EditorRightRail({
           currentContent={currentContent}
           selectedText={selectedText}
           contentAnchor={contentAnchor}
+          onClearSelection={onClearSelection}
           setAiDraft={setAiDraft}
           draft={draft}
           onRegisterRetry={onRegisterRetry}

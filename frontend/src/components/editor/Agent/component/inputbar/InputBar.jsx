@@ -1,7 +1,45 @@
-import { ArrowUp, Plus, Square, X } from 'lucide-react'
+import { ArrowUp, Plus, Square, TextQuote, X } from 'lucide-react'
+import { countWords } from '../../../../../utils/format'
 import '../../styles/InputBar.css'
 import { ContextUsageRing } from './ContextUsageRing'
 import { ModelPicker } from './ModelPicker'
+
+/** 选区预览：压缩空白后截断，chip 内单行展示 */
+function selectionPreview(text, max = 48) {
+  const flat = String(text || '').replace(/\s+/g, ' ').trim()
+  return flat.length > max ? `${flat.slice(0, max)}…` : flat
+}
+
+/** 正文选区 chip：提示"选中段落将随本条消息一起发给模型" */
+function SelectionChip({ selection, onClear }) {
+  const { text, anchor } = selection
+  const range =
+    anchor && anchor.startPara
+      ? anchor.startPara === anchor.endPara
+        ? `第 ${anchor.startPara} 段`
+        : `第 ${anchor.startPara}–${anchor.endPara} 段`
+      : '选中文本'
+  return (
+    <div className="agent-panel__selection" title={text}>
+      <TextQuote size={12} aria-hidden />
+      <span className="agent-panel__selection-range">
+        已选 {range} · {countWords(text)} 字
+      </span>
+      <span className="agent-panel__selection-preview">
+        {selectionPreview(text)}
+      </span>
+      <button
+        type="button"
+        className="agent-panel__selection-clear"
+        aria-label="移除选区"
+        title="移除选区"
+        onClick={onClear}
+      >
+        <X size={12} />
+      </button>
+    </div>
+  )
+}
 
 /** 底栏：notice + 输入区（快捷指令仅出现在无消息空态） */
 export function InputBar({
@@ -13,6 +51,8 @@ export function InputBar({
   onSend,
   onStop,
   onShowAttachNotice,
+  selection = null,
+  onClearSelection,
   contextUsage = null,
   modelOptions = [],
   selectedModel,
@@ -38,6 +78,9 @@ export function InputBar({
       ) : null}
 
       <div className="agent-panel__composer">
+        {selection?.text ? (
+          <SelectionChip selection={selection} onClear={onClearSelection} />
+        ) : null}
         <textarea
           className="agent-panel__input"
           rows={2}

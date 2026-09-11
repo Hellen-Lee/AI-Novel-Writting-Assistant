@@ -1,0 +1,169 @@
+/* 正文画布（章节正文 textarea + AI 草稿卡）样式，类名与 pages/EditorPage 共用 */
+
+.editor-page__loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-muted);
+  font-size: var(--text-body-md);
+  padding-top: 24px;
+}
+
+.editor-page__spin {
+  animation: editor-spin 0.8s linear infinite;
+}
+
+@keyframes editor-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.editor-page__textarea {
+  width: 100%;
+  min-height: 280px;
+  flex: 0 0 auto;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  field-sizing: content;
+  background: transparent;
+  font-family: var(--font-display);
+  font-size: var(--text-body-lg);
+  line-height: 1.875;
+  color: var(--color-text-primary);
+}
+
+.editor-page__textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.editor-page__ai-draft {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(27, 107, 90, 0.2);
+  background: #e8f5f0;
+  flex-shrink: 0;
+}
+
+.editor-page__ai-draft-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-ai);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.editor-page__ai-draft-text {
+  font-family: var(--font-display);
+  font-size: var(--text-body-lg);
+  line-height: 1.875;
+  color: var(--color-ai);
+}
+
+/* 流式中的原文预览：保留单换行（顺带修复草稿卡丢换行的既有问题） */
+.editor-page__ai-draft-text--raw {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 草稿卡 markdown（保守子集）与正文基线对齐 */
+.editor-page__md {
+  font-family: var(--font-display);
+  font-size: var(--text-body-lg);
+  line-height: 1.875;
+  color: var(--color-ai);
+}
+
+/* 草稿卡落点说明（将插入第 X 段后 / 作用于第 X–Y 段） */
+.editor-page__ai-draft-note {
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm, 6px);
+  background: rgba(27, 107, 90, 0.08);
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.editor-page__md p {
+  margin: 0 0 0.75em;
+}
+.editor-page__md p:last-child {
+  margin-bottom: 0;
+}
+.editor-page__md > :first-child {
+  margin-top: 0;
+}
+.editor-page__md h1,
+.editor-page__md h2,
+.editor-page__md h3,
+.editor-page__md h4,
+.editor-page__md h5,
+.editor-page__md h6 {
+  font-size: 1em;
+  font-weight: 600;
+  margin: 0.6em 0;
+  color: inherit;
+}
+
+.editor-page__stream-tail {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-ai);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.editor-page__cursor {
+  display: inline-block;
+  width: 2px;
+  height: 16px;
+  background: var(--color-ai);
+  border-radius: 1px;
+  animation: editor-blink 1s step-end infinite;
+}
+
+@keyframes editor-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.editor-page__ai-draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.editor-page__draft-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-bg-surface);
+  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+}
+
+.editor-page__draft-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.editor-page__draft-btn--primary {
+  background: var(--color-primary);
+  border-color: transparent;
+  color: var(--color-text-inverse);
+  font-weight: 600;
+}
+
+.editor-page__draft-btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text-muted);
+}

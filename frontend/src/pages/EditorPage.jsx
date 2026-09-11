@@ -2,13 +2,12 @@ import {
   useCallback,
   useEffect,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { LoaderCircle, Plus, Sparkles } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { getErrorMessage } from '../api/client'
 import {
   createChapter,
@@ -16,11 +15,10 @@ import {
   listChapters,
   updateChapter,
 } from '../api/chapters'
+import { EditorCanvas } from '../components/editor/EditorCanvas'
 import { EditorRightRail } from '../components/editor/EditorRightRail'
 import { useAgentRules } from '../components/editor/Agent/hook/useAgentRules'
-import { AGENT_PHASE, REPLACE_SKILLS } from '../components/editor/Agent/utils/constants'
 import { Button } from '../components/ui/Button'
-import { Markdown } from '../components/ui/Markdown'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
 import {
@@ -32,15 +30,6 @@ import './EditorPage.css'
 
 /** 仅章节正文（含一并提交的标题）防抖自动保存；设定库等其它页不使用 */
 const AUTOSAVE_MS = 1000
-
-/** 草稿卡的落点说明：有锚时说明可插入/替换到第几段，无锚时说明将追加到文末。 */
-function draftAnchorNote(aiDraft) {
-  const a = aiDraft?.anchor
-  if (!a) return '将插入到正文末尾'
-  const { startPara: s, endPara: e } = a
-  if (s === e) return `可插入到第 ${s} 段之后${REPLACE_SKILLS.has(aiDraft?.skill) ? '，或替换该段' : ''}`
-  return `作用于第 ${s}–${e} 段：可插入其后${REPLACE_SKILLS.has(aiDraft?.skill) ? '，或替换原段' : ''}`
-}
 
 function ChapterSidebar({
   chapters,
@@ -125,16 +114,6 @@ function ChapterMain({
   onDiscardDraft,
   onSelectText,
 }) {
-  const textareaRef = useRef(null)
-
-  // 正文随内容自动增高，滚动由 .editor-page__main 统一处理；textarea 自身不出现滚动条
-  useLayoutEffect(() => {
-    const el = textareaRef.current
-    if (!el) return
-    el.style.height = 'auto'
-    el.style.height = `${Math.max(el.scrollHeight, 280)}px`
-  }, [content, loadingChapter, aiDraft])
-
   return (
     <section className="editor-page__main">
       {error ? (
@@ -205,101 +184,17 @@ function ChapterMain({
           </div>
 
           <div className="editor-page__canvas">
-            {loadingChapter ? (
-              <div className="editor-page__loading">
-                <LoaderCircle size={18} className="editor-page__spin" />
-                加载正文…
-              </div>
-            ) : (
-              <>
-                <textarea
-                  ref={textareaRef}
-                  className="editor-page__textarea"
-                  value={content}
-                  onChange={(e) => onContentChange(e.target.value)}
-                  onSelect={onSelectText}
-                  placeholder="请输入内容…"
-                  spellCheck={false}
-                />
-
-                {aiDraft ? (
-                  <div className="editor-page__ai-draft">
-                    <div className="editor-page__ai-draft-head">
-                      <Sparkles size={14} />
-                      <span>
-                        AI {aiDraft.skill || '续写'}
-                        {aiDraft.phase === AGENT_PHASE.TOOL_CALL
-                          ? ' · 读取上下文中'
-                          : aiDraft.stopped
-                            ? ' · 已终止（部分内容）'
-                            : aiDraft.status === 'streaming'
-                              ? ' · 生成中'
-                              : ' · 待处理'}
-                      </span>
-                    </div>
-                    {aiDraft.status === 'streaming' &&
-                    aiDraft.phase !== AGENT_PHASE.TOOL_CALL ? (
-                      <p className="editor-page__ai-draft-text editor-page__ai-draft-text--raw">
-                        {aiDraft.text}
-                      </p>
-                    ) : (
-                      <>
-                        <p className="editor-page__ai-draft-note">
-                          {draftAnchorNote(aiDraft)}
-                        </p>
-                        <Markdown
-                          text={aiDraft.text}
-                          className="editor-page__md"
-                          conservative
-                        />
-                      </>
-                    )}
-                    {aiDraft.status === 'streaming' &&
-                    aiDraft.phase !== AGENT_PHASE.TOOL_CALL ? (
-                      <div className="editor-page__stream-tail">
-                        <i className="editor-page__cursor" />
-                        <span>流式输出中</span>
-                      </div>
-                    ) : null}
-                    <div className="editor-page__ai-draft-actions">
-                      <button
-                        type="button"
-                        className="editor-page__draft-btn editor-page__draft-btn--primary"
-                        disabled={aiDraft.status === 'streaming'}
-                        onClick={onApplyDraft}
-                      >
-                        插入
-                      </button>
-                      {REPLACE_SKILLS.has(aiDraft.skill) && aiDraft.anchor ? (
-                        <button
-                          type="button"
-                          className="editor-page__draft-btn"
-                          disabled={aiDraft.status === 'streaming'}
-                          onClick={onReplaceDraft}
-                        >
-                          替换
-                        </button>
-                      ) : null}
-                      <button
-                        type="button"
-                        className="editor-page__draft-btn"
-                        disabled={aiDraft.status === 'streaming'}
-                        onClick={onRewriteDraft}
-                      >
-                        改写
-                      </button>
-                      <button
-                        type="button"
-                        className="editor-page__draft-btn editor-page__draft-btn--ghost"
-                        onClick={onDiscardDraft}
-                      >
-                        弃用
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </>
-            )}
+            <EditorCanvas
+              loadingChapter={loadingChapter}
+              content={content}
+              onContentChange={onContentChange}
+              onSelectText={onSelectText}
+              aiDraft={aiDraft}
+              onApplyDraft={onApplyDraft}
+              onReplaceDraft={onReplaceDraft}
+              onRewriteDraft={onRewriteDraft}
+              onDiscardDraft={onDiscardDraft}
+            />
           </div>
         </>
       )}
@@ -587,12 +482,16 @@ export default function EditorPage() {
     )
   }
 
-  /** 正文 textarea 选中变化：记录选中文本 + 命中的段落区间（1-based）。 */
-  const handleEditorSelect = (e) => {
+  /**
+   * 正文 textarea 选中变化：记录选中文本 + 命中的段落区间（1-based）。
+   * baseOffset：拆段渲染时下段 textarea 的显示文本在完整正文中的起始偏移，
+   * 选区字符偏移需加上它再定位段落。
+   */
+  const handleEditorSelect = (e, baseOffset = 0) => {
     const el = e?.target
     if (!el || typeof el.selectionStart !== 'number') return
-    const start = el.selectionStart
-    const end = el.selectionEnd
+    const start = el.selectionStart + baseOffset
+    const end = el.selectionEnd + baseOffset
     const text = content.slice(start, end)
     if (!text.trim()) {
       // 光标无选中：不当作目标区间
@@ -603,6 +502,10 @@ export default function EditorPage() {
     }
     const anchor = locateSelection(content, start, end)
     setSelection({ text, anchor })
+  }
+
+  const handleClearSelection = () => {
+    setSelection({ text: '', anchor: null })
   }
 
   /**
@@ -738,6 +641,7 @@ export default function EditorPage() {
         currentContent={content}
         selectedText={selection.text}
         contentAnchor={selection.anchor}
+        onClearSelection={handleClearSelection}
         setAiDraft={setAiDraft}
         draft={aiDraft}
         onRegisterRetry={(fn) => {

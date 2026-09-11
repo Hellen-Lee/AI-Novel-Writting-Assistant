@@ -102,6 +102,47 @@ export function locateSelection(content, selStart, selEnd) {
 }
 
 /**
+ * 在第 paraCount 段之后把正文切成 head/tail 两段显示文本（保原文，不规整空白），
+ * 供编辑区"草稿卡落在第 N 段之后"的拆段渲染使用。
+ * - paraCount >= 实际段数 → tail 为空（落点在文末，无需拆分）
+ * - paraCount <= 0 → head 为空（落点在文首）
+ * 返回 { head, tail, tailBase, sep }：
+ * - head：第 1..paraCount 段的原文（从 0 到第 paraCount 段末，不含段后空行）
+ * - tail：第 paraCount+1.. 段的显示文本（剥掉前导空行分隔符）
+ * - tailBase：tail 显示文本在原文中的起始偏移（textarea 选区 → 全局偏移映射用）
+ * - sep：被剥离的分隔空白；head/tail 编辑后拼回时用 `head + sep + tail`，
+ *   保证用户未编辑分隔区时内容逐字节不变。
+ */
+export function splitContentAt(content, paraCount) {
+  const text = String(content ?? '')
+  const ranges = splitByBreakRanges(text)
+  const total = ranges.length
+  if (!total || paraCount >= total) {
+    return { head: text, tail: '', tailBase: text.length, sep: '\n\n' }
+  }
+  if (paraCount <= 0) {
+    const m = text.match(/^\s+/)
+    const sepLen = m ? m[0].length : 0
+    return {
+      head: '',
+      tail: text.slice(sepLen),
+      tailBase: sepLen,
+      sep: text.slice(0, sepLen),
+    }
+  }
+  const cut = ranges[paraCount - 1].end
+  const rawTail = text.slice(cut)
+  const m = rawTail.match(/^\s+/)
+  const sepLen = m ? m[0].length : 0
+  return {
+    head: text.slice(0, cut),
+    tail: rawTail.slice(sepLen),
+    tailBase: cut + sepLen,
+    sep: rawTail.slice(0, sepLen) || '\n\n',
+  }
+}
+
+/**
  * 解析模型回传的锚定哨兵行，形如：
  *   [[ANCHOR|insert_after|5]]
  *   [[ANCHOR|replace_range|1|5]]

@@ -126,6 +126,9 @@ export function useAgentGenerate({
         skill: skillLabel,
         status,
         phase: phaseRef,
+        // 带上当前已解析的锚（请求时选区锚 → meta 后模型哨兵锚），
+        // 使草稿卡在流式期间就渲染到目标段落之后
+        anchor: resolvedAnchor || undefined,
         ...extra,
       })
     }

@@ -22,6 +22,7 @@ export function AgentPanel({
   currentContent = '',
   selectedText = '',
   contentAnchor = null,
+  onClearSelection,
   setAiDraft,
   onRegisterRetry,
   onCollapse,
@@ -136,6 +137,10 @@ export function AgentPanel({
             onSend={handleSend}
             onStop={handleStop}
             onShowAttachNotice={() => showNotice('附加能力待后续版本接入。')}
+            selection={
+              selectedText ? { text: selectedText, anchor: contentAnchor } : null
+            }
+            onClearSelection={onClearSelection}
             contextUsage={activeSession?.contextUsage}
             modelOptions={modelOptions}
             selectedModel={selectedModel}
