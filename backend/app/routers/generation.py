@@ -38,6 +38,7 @@ def generate(project_id: str, payload: GenerateRequest):
             user_input=payload.user_input,
             chapter_rules=payload.chapter_rules,
             model=payload.model,
+            content_anchor=payload.content_anchor,
         ),
         media_type="text/event-stream",
         headers={

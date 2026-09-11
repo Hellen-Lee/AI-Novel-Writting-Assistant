@@ -17,6 +17,7 @@ export function EditorRightRail({
   chapterId,
   currentContent,
   selectedText,
+  contentAnchor = null,
   setAiDraft,
   draft,
   onRegisterRetry,
@@ -70,6 +71,7 @@ export function EditorRightRail({
           chapterId={chapterId}
           currentContent={currentContent}
           selectedText={selectedText}
+          contentAnchor={contentAnchor}
           setAiDraft={setAiDraft}
           draft={draft}
           onRegisterRetry={onRegisterRetry}

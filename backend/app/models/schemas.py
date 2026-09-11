@@ -345,6 +345,9 @@ class GenerateRequest(BaseModel):
     user_input: str = ""
     chapter_rules: str = ""
     model: Optional[str] = None
+    # 可选：前端选区/模型推断出的目标段落区间，形如
+    # {"mode": "insert_after"|"replace_range", "startPara": 1, "endPara": 5}
+    content_anchor: Optional[dict] = None
     # Future (not wired this phase): ask_reply: { ask_id, option_id | text }
 
 

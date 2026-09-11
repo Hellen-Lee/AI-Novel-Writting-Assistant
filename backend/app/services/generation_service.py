@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import time
 from collections.abc import Iterator
 from string import Template
@@ -80,6 +81,7 @@ def iter_generate(
     user_input: str = "",
     chapter_rules: str = "",
     model: Optional[str] = None,
+    content_anchor: Optional[dict] = None,
 ) -> Iterator[str]:
     """
     Yield SSE frames for one agentic generation turn.
@@ -551,6 +553,12 @@ def iter_generate(
             pass
         yield _sse({"type": "error", "error": err_text})
 
+    # --- Anchor: 段落级定位。若模型在末尾输出 [[ANCHOR|...]] 哨兵则解析并剥离，
+    # 使 aiDraft 落位与正文替换有据可依；否则沿用前端选区透传的 content_anchor。 ---
+    full, content_anchor = _resolve_content_anchor(
+        full, requested_anchor=content_anchor
+    )
+
     # --- Draft vs bubble routing (no separate Router call) ---
     draft = _decide_draft(
         preset=preset,
@@ -570,6 +578,7 @@ def iter_generate(
             "skill_name": preset or "",
             "preset": preset or "",
             "draft": draft,
+            "content_anchor": content_anchor,
             "context_usage": {
                 "used_est": int(budget_report.get("used_est", 0)),
                 "window": int(context_window),
@@ -626,6 +635,52 @@ def iter_generate(
     )
 
     yield _sse_done()
+
+
+# 模型在正文末尾单独一行输出锚定哨兵，供段落级定位/替换。
+# 形态: [[ANCHOR|insert_after|5]]  或  [[ANCHOR|replace_range|1|5]]
+_ANCHOR_SENTINEL_RE = re.compile(
+    r"\[\[\s*ANCHOR\s*\|\s*(?P<mode>insert_after|replace_range)\s*\|"
+    r"\s*(?P<start>\d+)(?:\s*\|\s*(?P<end>\d+))?\s*\]\]\s*$",
+    re.IGNORECASE,
+)
+
+
+def _normalize_anchor(anchor: Any) -> Optional[dict]:
+    """校验/归一化一个锚对象为 {mode,startPara,endPara}（正数）；非法返回 None。"""
+    if not isinstance(anchor, dict):
+        return None
+    mode = str(anchor.get("mode") or "").strip()
+    if mode not in ("insert_after", "replace_range"):
+        return None
+    start = anchor.get("startPara")
+    end = anchor.get("endPara", start)
+    try:
+        start = int(start)
+        end = int(end)
+    except (TypeError, ValueError):
+        return None
+    if start < 1 or end < start:
+        return None
+    return {"mode": mode, "startPara": start, "endPara": end}
+
+
+def _resolve_content_anchor(full: str, requested_anchor: Optional[dict]) -> tuple[str, Optional[dict]]:
+    """从模型输出末尾解析锚定哨兵并剥离；否则沿用前端透传的选区锚。
+
+    返回 (clean_full, anchor)。哨兵优先于请求锚（模型对自然语言"前五段"的推断
+    应覆盖无选区时的默认），且哨兵剥离后正文不残留标记。
+    """
+    m = _ANCHOR_SENTINEL_RE.search(full)
+    if m:
+        start = int(m.group("start"))
+        end = int(m.group("end")) if m.group("end") is not None else start
+        mode = str(m.group("mode")).lower()
+        clean = full[: m.start()].rstrip()
+        anchor: Optional[dict] = {"mode": mode, "startPara": start, "endPara": end}
+        return clean, anchor
+    anchor = _normalize_anchor(requested_anchor)
+    return full, anchor
 
 
 def _parse_tool_arguments(raw: Any) -> dict[str, Any]:

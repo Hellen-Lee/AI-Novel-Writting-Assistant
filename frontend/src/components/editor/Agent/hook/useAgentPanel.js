@@ -26,6 +26,7 @@ export function useAgentPanel({
   chapterId,
   currentContent = '',
   selectedText = '',
+  contentAnchor = null,
   draft = null,
   setAiDraft,
 }) {
@@ -113,6 +114,7 @@ export function useAgentPanel({
     chapterId,
     currentContent,
     selectedText,
+    contentAnchor,
     getSessionId: () => sessionIdRef.current,
     getModelId: () => modelIdRef.current || undefined,
     updateSessionById,

@@ -18,15 +18,29 @@ import {
 } from '../api/chapters'
 import { EditorRightRail } from '../components/editor/EditorRightRail'
 import { useAgentRules } from '../components/editor/Agent/hook/useAgentRules'
-import { AGENT_PHASE } from '../components/editor/Agent/utils/constants'
+import { AGENT_PHASE, REPLACE_SKILLS } from '../components/editor/Agent/utils/constants'
 import { Button } from '../components/ui/Button'
 import { Markdown } from '../components/ui/Markdown'
 import { useEditorChrome } from '../stores/useEditorChrome'
 import { countWords, formatWordCount } from '../utils/format'
+import {
+  joinParagraphs,
+  locateSelection,
+  splitParagraphs,
+} from '../utils/paragraphs'
 import './EditorPage.css'
 
 /** 仅章节正文（含一并提交的标题）防抖自动保存；设定库等其它页不使用 */
 const AUTOSAVE_MS = 1000
+
+/** 草稿卡的落点说明：有锚时说明可插入/替换到第几段，无锚时说明将追加到文末。 */
+function draftAnchorNote(aiDraft) {
+  const a = aiDraft?.anchor
+  if (!a) return '将插入到正文末尾'
+  const { startPara: s, endPara: e } = a
+  if (s === e) return `可插入到第 ${s} 段之后${REPLACE_SKILLS.has(aiDraft?.skill) ? '，或替换该段' : ''}`
+  return `作用于第 ${s}–${e} 段：可插入其后${REPLACE_SKILLS.has(aiDraft?.skill) ? '，或替换原段' : ''}`
+}
 
 function ChapterSidebar({
   chapters,
@@ -106,8 +120,10 @@ function ChapterMain({
   onSave,
   onCreateChapter,
   onApplyDraft,
+  onReplaceDraft,
   onRewriteDraft,
   onDiscardDraft,
+  onSelectText,
 }) {
   const textareaRef = useRef(null)
 
@@ -201,6 +217,7 @@ function ChapterMain({
                   className="editor-page__textarea"
                   value={content}
                   onChange={(e) => onContentChange(e.target.value)}
+                  onSelect={onSelectText}
                   placeholder="请输入内容…"
                   spellCheck={false}
                 />
@@ -217,7 +234,7 @@ function ChapterMain({
                             ? ' · 已终止（部分内容）'
                             : aiDraft.status === 'streaming'
                               ? ' · 生成中'
-                              : ' · 待插入'}
+                              : ' · 待处理'}
                       </span>
                     </div>
                     {aiDraft.status === 'streaming' &&
@@ -226,11 +243,16 @@ function ChapterMain({
                         {aiDraft.text}
                       </p>
                     ) : (
-                      <Markdown
-                        text={aiDraft.text}
-                        className="editor-page__md"
-                        conservative
-                      />
+                      <>
+                        <p className="editor-page__ai-draft-note">
+                          {draftAnchorNote(aiDraft)}
+                        </p>
+                        <Markdown
+                          text={aiDraft.text}
+                          className="editor-page__md"
+                          conservative
+                        />
+                      </>
                     )}
                     {aiDraft.status === 'streaming' &&
                     aiDraft.phase !== AGENT_PHASE.TOOL_CALL ? (
@@ -246,8 +268,18 @@ function ChapterMain({
                         disabled={aiDraft.status === 'streaming'}
                         onClick={onApplyDraft}
                       >
-                        插入正文
+                        插入
                       </button>
+                      {REPLACE_SKILLS.has(aiDraft.skill) && aiDraft.anchor ? (
+                        <button
+                          type="button"
+                          className="editor-page__draft-btn"
+                          disabled={aiDraft.status === 'streaming'}
+                          onClick={onReplaceDraft}
+                        >
+                          替换
+                        </button>
+                      ) : null}
                       <button
                         type="button"
                         className="editor-page__draft-btn"
@@ -299,6 +331,8 @@ export default function EditorPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [aiDraft, setAiDraft] = useState(null)
+  // 当前正文选区：text=选中文本，anchor=命中段落区间（无选中时为 null）
+  const [selection, setSelection] = useState({ text: '', anchor: null })
   const [rightPanel, setRightPanel] = useState({ open: true, mode: 'agent' })
 
   const rulesActive = rightPanel.open && rightPanel.mode === 'rules'
@@ -382,6 +416,7 @@ export default function EditorPage() {
       setLoadingChapter(true)
       setError('')
       setAiDraft(null)
+      setSelection({ text: '', anchor: null })
       try {
         const detail = await getChapter(projectId, id)
         setActiveChapterId(detail.id)
@@ -544,14 +579,69 @@ export default function EditorPage() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [handleSave])
 
-  const handleApplyDraft = () => {
+  const handleContentChange = (value) => {
+    setContent(value)
+    // 内容变更后选区偏移失效，清除，避免把过期选区当锚
+    setSelection((prev) =>
+      prev.text || prev.anchor ? { text: '', anchor: null } : prev,
+    )
+  }
+
+  /** 正文 textarea 选中变化：记录选中文本 + 命中的段落区间（1-based）。 */
+  const handleEditorSelect = (e) => {
+    const el = e?.target
+    if (!el || typeof el.selectionStart !== 'number') return
+    const start = el.selectionStart
+    const end = el.selectionEnd
+    const text = content.slice(start, end)
+    if (!text.trim()) {
+      // 光标无选中：不当作目标区间
+      setSelection((prev) =>
+        prev.text || prev.anchor ? { text: '', anchor: null } : prev,
+      )
+      return
+    }
+    const anchor = locateSelection(content, start, end)
+    setSelection({ text, anchor })
+  }
+
+  /**
+   * 按锚点把草稿写入正文。
+   * insert_after：在 endPara 段后插入（无锚→追加文末）。
+   * replace_range：用草稿替换 startPara..endPara 段。
+   */
+  const applyDraftByAnchor = (mode) => {
     if (!aiDraft?.text) return
+    const draftText = aiDraft.text
+    const anchor = aiDraft.anchor || selection.anchor || null
     setContent((prev) => {
-      const base = prev.replace(/\s+$/, '')
-      return base ? `${base}\n\n${aiDraft.text}` : aiDraft.text
+      const paras = splitParagraphs(prev)
+      const inserts = splitParagraphs(draftText)
+      if (!paras.length) return joinParagraphs(inserts)
+      if (!anchor) {
+        // 无锚兜底：沿用旧行为，直接在原文末尾追加，尽量不改变既有排版
+        const base = prev.replace(/\s+$/, '')
+        return base ? `${base}\n\n${draftText.trim()}` : draftText.trim()
+      }
+      const total = paras.length
+      const startPara = Math.max(1, Math.min(anchor.startPara || 1, total))
+      const endPara = Math.max(
+        startPara,
+        Math.min(anchor.endPara || startPara, total),
+      )
+      if (mode === 'replace_range') {
+        paras.splice(startPara - 1, endPara - startPara + 1, ...inserts)
+      } else {
+        paras.splice(endPara, 0, ...inserts)
+      }
+      return joinParagraphs(paras)
     })
+    setSelection({ text: '', anchor: null })
     setAiDraft(null)
   }
+
+  const handleApplyDraft = () => applyDraftByAnchor('insert_after')
+  const handleReplaceDraft = () => applyDraftByAnchor('replace_range')
 
   const handleDiscardDraft = () => {
     setAiDraft(null)
@@ -623,7 +713,7 @@ export default function EditorPage() {
         title={title}
         onTitleChange={setTitle}
         content={content}
-        onContentChange={setContent}
+        onContentChange={handleContentChange}
         liveWordCount={liveWordCount}
         dirty={dirty}
         saving={saving}
@@ -631,11 +721,13 @@ export default function EditorPage() {
         onSave={handleSave}
         onCreateChapter={handleCreateChapter}
         onApplyDraft={handleApplyDraft}
+        onReplaceDraft={handleReplaceDraft}
         onRewriteDraft={() => {
           setAiDraft(null)
           agentRetryRef.current?.()
         }}
         onDiscardDraft={handleDiscardDraft}
+        onSelectText={handleEditorSelect}
       />
       <EditorRightRail
         open={rightPanel.open}
@@ -644,7 +736,8 @@ export default function EditorPage() {
         tempRules={tempRules}
         chapterId={activeChapterId}
         currentContent={content}
-        selectedText=""
+        selectedText={selection.text}
+        contentAnchor={selection.anchor}
         setAiDraft={setAiDraft}
         draft={aiDraft}
         onRegisterRetry={(fn) => {

@@ -21,6 +21,7 @@ export function AgentPanel({
   chapterId,
   currentContent = '',
   selectedText = '',
+  contentAnchor = null,
   setAiDraft,
   onRegisterRetry,
   onCollapse,
@@ -58,6 +59,7 @@ export function AgentPanel({
     chapterId,
     currentContent,
     selectedText,
+    contentAnchor,
     draft,
     setAiDraft,
   })

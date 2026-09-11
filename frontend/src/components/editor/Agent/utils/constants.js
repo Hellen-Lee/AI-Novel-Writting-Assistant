@@ -24,6 +24,12 @@ export const TOOL_LABELS = {
   search_memory: '检索设定',
 }
 
+/**
+ * 哪些技能属于"改写既有段落"类，草稿卡允许显示「替换」。
+ * 续写（追加）、闲聊/设定（非草稿）不显示「替换」。
+ */
+export const REPLACE_SKILLS = new Set(['润色', '改写', '扩写'])
+
 /** 阶段中文短文案（气泡状态行 / 草稿卡 head 复用） */
 export const PHASE_TEXT = {
   [AGENT_PHASE.THINKING]: '正在思考',

@@ -14,6 +14,7 @@ export async function runAgentGenerate({
   currentContent = '',
   selectedText = '',
   model,
+  contentAnchor,
   signal,
   onEvent,
   onDelta,
@@ -26,6 +27,9 @@ export async function runAgentGenerate({
     user_input: userInput,
     chapter_rules: tempRules || '',
     model: model || undefined,
+  }
+  if (contentAnchor) {
+    body.content_anchor = contentAnchor
   }
   if (skillName) {
     body.skill_name = skillName

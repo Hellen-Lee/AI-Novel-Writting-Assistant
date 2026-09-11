@@ -1,6 +1,10 @@
 import { useRef, useState } from 'react'
 import { getErrorMessage } from '../../../../api/client'
 import { countWords } from '../../../../utils/format'
+import {
+  parseAnchorSentinel,
+  stripAnchorSentinel,
+} from '../../../../utils/paragraphs'
 import { runAgentGenerate } from '../service/generate'
 import { AGENT_PHASE, QUICK_ACTIONS } from '../utils/constants'
 import { isInFlight } from '../utils/phase'
@@ -17,6 +21,7 @@ export function useAgentGenerate({
   chapterId,
   currentContent = '',
   selectedText = '',
+  contentAnchor = null, // 请求发起时用户选区的目标段落区间（可为 null）
   getSessionId,
   getModelId,
   updateSessionById,
@@ -42,7 +47,6 @@ export function useAgentGenerate({
       return { ...d, status: 'ready', stopped: true, phase: AGENT_PHASE.STOPPED }
     })
   }
-
   /**
    * @param {string|null|undefined} skillId - null/undefined → unified agentic path
    * @param {string} userText
@@ -64,6 +68,12 @@ export function useAgentGenerate({
     }
 
     lastRequestRef.current = { skillId: explicitSkill, userText: text }
+
+    // 请求发起时刻的快照锚：若此刻用户在正文有选区，则本次草稿以该区间为落点
+    // （请求期间选区变化不影响本次锚定）。
+    const reqAnchor = contentAnchor || null
+    // 后端回传的最终锚（模型哨兵优先于选区锚）。meta 到达后填充。
+    let resolvedAnchor = reqAnchor
 
     const localUserId = `m_local_u_${Date.now()}`
     const localAssistId = `m_local_a_${Date.now()}`
@@ -109,8 +119,10 @@ export function useAgentGenerate({
         setAiDraft?.(null)
         return
       }
+      // 流式中剥掉模型可能附加的段落锚哨兵，避免展示 [[ANCHOR|...]]
+      const cleanText = stripAnchorSentinel(chunkText)
       setAiDraft?.({
-        text: chunkText,
+        text: cleanText,
         skill: skillLabel,
         status,
         phase: phaseRef,
@@ -157,6 +169,7 @@ export function useAgentGenerate({
         chapterId,
         currentContent,
         selectedText,
+        contentAnchor: reqAnchor,
         model: getModelId?.() || undefined,
         signal: controller.signal,
         onEvent: (ev) => {
@@ -186,6 +199,10 @@ export function useAgentGenerate({
               syncDraft(streamBuf, 'streaming')
             } else {
               setAiDraft?.(null)
+            }
+            // 后端解析出的最终锚（模型哨兵优先于选区锚）随 meta 回传
+            if (ev.content_anchor && typeof ev.content_anchor === 'object') {
+              resolvedAnchor = ev.content_anchor
             }
             const serverAssist = ev.assistant_message_id
             const serverUser = ev.user_message_id
@@ -250,7 +267,7 @@ export function useAgentGenerate({
         },
       })
 
-      const finalText = result.content || streamBuf
+      const finalText = stripAnchorSentinel(result.content || streamBuf)
       if (result.error && finalText) {
         showNotice(result.error)
       }
@@ -261,6 +278,11 @@ export function useAgentGenerate({
         skillLabel = resolveSkillLabel(result.meta.preset || result.meta.skill_name)
       } else if (!draftMode) {
         skillLabel = skillLabel || '闲聊'
+      }
+      // 兜底：若后端未随 meta 回传锚，仍可从正文末尾解析模型哨兵
+      if (!resolvedAnchor) {
+        const parsed = parseAnchorSentinel(result.content || streamBuf)
+        if (parsed) resolvedAnchor = parsed
       }
       const finalPhase = result.error ? AGENT_PHASE.ERROR : AGENT_PHASE.DONE
       phaseRef = finalPhase
@@ -281,6 +303,7 @@ export function useAgentGenerate({
           status: 'ready',
           phase: finalPhase,
           stopped: Boolean(result.error),
+          anchor: resolvedAnchor || undefined,
         })
       } else {
         setAiDraft?.(null)
@@ -300,11 +323,12 @@ export function useAgentGenerate({
         })
         if (draftMode && streamBuf) {
           setAiDraft?.({
-            text: streamBuf,
+            text: stripAnchorSentinel(streamBuf),
             skill: skillLabel,
             status: 'ready',
             phase: AGENT_PHASE.STOPPED,
             stopped: true,
+            anchor: resolvedAnchor || undefined,
           })
         } else {
           setAiDraft?.(null)
