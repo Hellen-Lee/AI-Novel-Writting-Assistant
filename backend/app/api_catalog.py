@@ -11,6 +11,7 @@ from fastapi import FastAPI
 
 from app.routers import (
     agent_viewer,
+    attachments,
     chapters,
     config,
     generation,
@@ -58,6 +59,11 @@ API_INDEX: list[tuple[str, str, str]] = [
     ("POST", "/api/projects/{id}/agent/sessions", "新建 Agent 会话"),
     ("GET", "/api/projects/{id}/agent/sessions/{sid}", "会话详情（含消息）"),
     ("DELETE", "/api/projects/{id}/agent/sessions/{sid}", "删除会话"),
+    # agent attachments
+    ("POST", "/api/projects/{id}/agent/attachments", "上传附件（multipart 批量，逐项返回 record）"),
+    ("GET", "/api/projects/{id}/agent/attachments/{att_id}", "读取附件原件（需 session_id 查询参数）"),
+    ("GET", "/api/projects/{id}/agent/attachments/{att_id}/thumb", "读取图片缩略图（需 session_id 查询参数）"),
+    ("DELETE", "/api/projects/{id}/agent/attachments/{att_id}", "删除孤儿附件（已被消息引用的拒绝）"),
     # generation (SSE)
     ("POST", "/api/projects/{id}/generate", "Agent 流式生成（SSE；可选 skill_name / Router）"),
     # onboarding (无状态引导生成，项目创建前)
@@ -78,6 +84,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(memory.router, prefix="/api", tags=["memory"])
     app.include_router(skills.router, prefix="/api", tags=["skills"])
     app.include_router(sessions.router, prefix="/api", tags=["sessions"])
+    app.include_router(attachments.router, prefix="/api", tags=["attachments"])
     app.include_router(generation.router, prefix="/api", tags=["generation"])
     app.include_router(onboarding.router, prefix="/api", tags=["onboarding"])
     app.include_router(agent_viewer.router, prefix="/api", tags=["agent-viewer"])

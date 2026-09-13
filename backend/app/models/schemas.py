@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import enum
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -289,6 +289,58 @@ class SkillListResponse(BaseModel):
     skills: list[SkillSummary] = Field(default_factory=list)
     count: int = 0
     load_errors: list[str] = Field(default_factory=list)
+
+
+# --- Agent attachments（上传 → 解析 → 发送链路，契约见 docs/changes/260913 待办清单 A1） ---
+
+
+class AttachmentImageParsed(BaseModel):
+    """图片解析产物（C1 阶段填充：落盘缩略图 + 尺寸）。"""
+
+    thumb_rel: str = ""
+    width: int = 0
+    height: int = 0
+
+
+class AttachmentFileParsed(BaseModel):
+    """文件解析产物（D 阶段填充：文本提取 + 截断标记）。"""
+
+    kind: str = ""
+    text: str = ""
+    text_truncated: bool = False
+    chars: int = 0
+    # 扫描版 PDF 等场景提示（D4）
+    note: str = ""
+
+
+class AttachmentRecord(BaseModel):
+    """附件统一契约（前后端对齐）。
+
+    - id: ``att_`` + uuid12（与 sess_ / m_ 命名风格一致）
+    - storage_rel: 相对项目目录的存储路径，形如 agent/attachments/{sid}/{att_id}.{ext}
+    - parsed: 按 type 区分——图片 → AttachmentImageParsed，文件 → AttachmentFileParsed；
+      A2 骨架阶段为 None，由 C/D 解析阶段填充
+    """
+
+    id: str
+    type: Literal["image", "file"]
+    name: str
+    mime: str = ""
+    size: int = 0
+    status: Literal["ready", "failed"] = "ready"
+    # 失败原因（中文，可直接展示）
+    error: str = ""
+    storage_rel: str = ""
+    parsed: Optional[AttachmentImageParsed | AttachmentFileParsed] = None
+
+
+class AttachmentUploadResponse(BaseModel):
+    """批量上传逐项结果：ready 与 failed 可混合，部分失败不影响同批其他文件。"""
+
+    records: list[AttachmentRecord] = Field(default_factory=list)
+    count: int = 0
+    ready_count: int = 0
+    failed_count: int = 0
 
 
 # --- Agent sessions & generation ---
