@@ -63,6 +63,8 @@ export function useAgentPanel({
   const [skillOptions, setSkillOptions] = useState([])
   const messagesEndRef = useRef(null)
   const abortRef = useRef(null)
+  const uploadQueueRef = useRef(Promise.resolve())
+  const pendingUploadCountRef = useRef(0)
 
   const sessionsApi = useAgentSessions({
     projectId,
@@ -233,7 +235,11 @@ export function useAgentPanel({
   const handleUploadFiles = async (fileList) => {
     const files = Array.from(fileList || [])
     if (!files.length) return
-    const available = MAX_ATTACHMENTS - attachmentItems.filter((item) => item.type !== 'skill').length
+    const currentAttachmentCount = attachmentItems.filter(
+      (item) => item.type !== 'skill',
+    ).length
+    const available =
+      MAX_ATTACHMENTS - currentAttachmentCount - pendingUploadCountRef.current
     if (files.length > available) {
       showNotice(`单条消息最多添加 ${MAX_ATTACHMENTS} 个文件或图片。`)
       return
@@ -259,22 +265,32 @@ export function useAgentPanel({
       showNotice('会话未就绪，请稍后重试。')
       return
     }
-    try {
-      const result = await uploadAttachments(projectId, sessionId, validFiles)
-      const mapped = (result?.records || []).map((record) => ({
-        ...record,
-        type: record.type,
-        url:
-          record.type === 'image'
-            ? attachmentThumbUrl(projectId, sessionId, record.id)
-            : undefined,
-      }))
-      setAttachmentItems((prev) => [...prev, ...mapped])
-      const failed = mapped.find((item) => item.status === 'failed')
-      if (failed) showNotice(failed.error || `${failed.name} 上传失败。`)
-    } catch (error) {
-      showNotice(getErrorMessage(error, '附件上传失败'))
-    }
+
+    // 连续选择/粘贴时复用同一条队列，避免多个 multipart 请求并发写入本地附件目录。
+    // pendingUploadCountRef 同时预占名额，防止队列尚未执行时绕过单轮 5 个上限。
+    pendingUploadCountRef.current += validFiles.length
+    uploadQueueRef.current = uploadQueueRef.current
+      .catch(() => {})
+      .then(async () => {
+        try {
+          const result = await uploadAttachments(projectId, sessionId, validFiles)
+          const mapped = (result?.records || []).map((record) => ({
+            ...record,
+            type: record.type,
+            url:
+              record.type === 'image'
+                ? attachmentThumbUrl(projectId, sessionId, record.id)
+                : undefined,
+          }))
+          setAttachmentItems((prev) => [...prev, ...mapped])
+          const failed = mapped.find((item) => item.status === 'failed')
+          if (failed) showNotice(failed.error || `${failed.name} 上传失败。`)
+        } catch (error) {
+          showNotice(getErrorMessage(error, '附件上传失败'))
+        } finally {
+          pendingUploadCountRef.current -= validFiles.length
+        }
+      })
   }
 
   const handleRemoveAttachment = async (item) => {

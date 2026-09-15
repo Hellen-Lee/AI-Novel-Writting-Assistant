@@ -98,6 +98,22 @@ async def upload_attachments(
             )
             continue
 
+        mime = (
+            upload.content_type
+            or mimetypes.guess_type(name)[0]
+            or "application/octet-stream"
+        )
+        if not attachment_store.is_allowed_mime(ext, mime):
+            records.append(
+                _failed_record(
+                    att_id,
+                    name,
+                    att_type,
+                    f"文件 MIME 类型不匹配（{mime}），请检查文件格式",
+                )
+            )
+            continue
+
         try:
             size, rel = attachment_store.save_upload_stream(
                 project_id,
@@ -120,11 +136,6 @@ async def upload_attachments(
 
         # 解析（C1 图片缩略图 / D1-D2 文本提取）：异常 → failed + 中文原因；
         # 原文件保留在磁盘上（failed chip 由用户移除时经 A4 清理），sidecar 照写。
-        mime = (
-            upload.content_type
-            or mimetypes.guess_type(name)[0]
-            or "application/octet-stream"
-        )
         status = "ready"
         error = ""
         parsed: Optional[AttachmentImageParsed | AttachmentFileParsed] = None

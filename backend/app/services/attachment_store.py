@@ -24,9 +24,28 @@ from app.services import project_store, session_store
 ATTACHMENT_ID_RE = re.compile(r"^att_[a-zA-Z0-9_]+$")
 
 # --- H1 格式白名单（前端 B2 有同名常量，P0 阶段两边各自维护、保持同步；P1 改由后端下发） ---
-IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"}
 FILE_EXTS = {".docx", ".pdf", ".txt", ".md", ".csv", ".json"}
 UNSUPPORTED_HINT = "暂不支持 {ext} 格式，可改用 docx / pdf / txt / md"
+
+# MIME 不能只看扩展名：浏览器/脚本可伪造文件名，因此后端同时校验声明的 MIME。
+# 同一格式允许少量常见别名，避免不同浏览器对纯文本与 CSV 的声明差异造成误拒。
+MIME_BY_EXT = {
+    ".jpg": {"image/jpeg"},
+    ".jpeg": {"image/jpeg"},
+    ".png": {"image/png"},
+    ".gif": {"image/gif"},
+    ".webp": {"image/webp"},
+    ".bmp": {"image/bmp", "image/x-ms-bmp"},
+    ".docx": {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    },
+    ".pdf": {"application/pdf"},
+    ".txt": {"text/plain"},
+    ".md": {"text/markdown", "text/plain"},
+    ".csv": {"text/csv", "application/csv", "application/vnd.ms-excel"},
+    ".json": {"application/json", "text/plain"},
+}
 
 # --- H2 单文件大小上限 ---
 IMAGE_MAX_BYTES = 5 * 1024 * 1024
@@ -64,6 +83,12 @@ def classify(filename: str) -> tuple[Optional[str], str]:
     if ext in FILE_EXTS:
         return "file", ext
     return None, ext
+
+
+def is_allowed_mime(ext: str, mime: str) -> bool:
+    """校验 MIME 是否与已允许的扩展名匹配。"""
+    normalized = (mime or "").split(";", 1)[0].strip().lower()
+    return normalized in MIME_BY_EXT.get(ext.lower(), set())
 
 
 def max_bytes_for(att_type: str) -> int:
