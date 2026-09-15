@@ -253,7 +253,7 @@ export function AttachmentBundle({
   )
 }
 
-/* --------------- TODO 占位：上传解析与发送组装（后续补充） --------------- */
+/* --------------- 上传解析与发送组装辅助 --------------- */
 
 /** TODO: 解析用户选中的 File 列表 → 工作区条目 */
 // eslint-disable-next-line react/only-export-components -- TODO 占位：接入上传入口后移到独立文件
@@ -262,20 +262,26 @@ export function parseUploadedFiles(fileList) {
   // 1. 图片 → URL.createObjectURL 生成缩略图 url，发送/上传后替换为服务端地址
   // 2. 文件 → 按扩展名分类，超限或格式不支持的给出提示
   // 3. 生成稳定 id，并对同名文件去重
-  void fileList
-  return []
+  return Array.from(fileList || []).map((file, index) => ({
+    id: `local_${file.name}_${file.lastModified}_${index}`,
+    type: file.type.startsWith('image/') ? 'image' : 'file',
+    name: file.name,
+    file,
+    status: 'uploading',
+    url: file.type.startsWith('image/') ? URL.createObjectURL(file) : undefined,
+  }))
 }
 
 /** TODO: 发送时把工作区内容组装进消息 payload */
 // eslint-disable-next-line react/only-export-components -- TODO 占位：接入发送链路后移到独立文件
 export function buildAttachmentPayload(items, selection) {
-  // TODO: 未实现。接入发送链路时补充：
-  // 1. images → 多模态图片消息 / 上传后引用
-  // 2. files  → 解析出的文本内容注入 user 上下文
-  // 3. skills → 映射为 skill_name
-  // 4. selection → 映射为 $selected_text
+  const list = Array.isArray(items) ? items : []
+  const skill = [...list].reverse().find((item) => item.type === 'skill')
   return {
-    attachments: items,
+    attachments: list
+      .filter((item) => item.type !== 'skill' && item.status !== 'failed')
+      .map((item) => item.id),
+    skill_name: skill?.skill_name || skill?.name || undefined,
     selected_text: pickText(selection),
   }
 }

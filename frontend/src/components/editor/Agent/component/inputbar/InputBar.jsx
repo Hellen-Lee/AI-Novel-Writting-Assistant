@@ -1,42 +1,51 @@
-import { ArrowUp, Plus, Square, TextQuote, X } from 'lucide-react'
-import { countWords } from '../../../../../utils/format'
+import { useRef, useState } from 'react'
+import { ArrowUp, FilePlus2, Plus, Square, Sparkles, X } from 'lucide-react'
 import '../../styles/InputBar.css'
 import { ContextUsageRing } from './ContextUsageRing'
 import { ModelPicker } from './ModelPicker'
+import { AttachmentWorkspace } from './workspace'
 
-/** 选区预览：压缩空白后截断，chip 内单行展示 */
-function selectionPreview(text, max = 48) {
-  const flat = String(text || '').replace(/\s+/g, ' ').trim()
-  return flat.length > max ? `${flat.slice(0, max)}…` : flat
+function AttachMenu({ skills, onChooseFile, onChooseSkill }) {
+  return (
+    <div className="agent-panel__attach-menu" role="menu">
+      <button type="button" role="menuitem" onClick={onChooseFile}>
+        <FilePlus2 size={15} aria-hidden />
+        添加文件
+      </button>
+      <button type="button" role="menuitem" onClick={onChooseSkill}>
+        <Sparkles size={15} aria-hidden />
+        添加技能
+        <span className="agent-panel__attach-menu-count">
+          {skills.length ? `${skills.length} 个` : '暂无'}
+        </span>
+      </button>
+    </div>
+  )
 }
 
-/** 正文选区 chip：提示"选中段落将随本条消息一起发给模型" */
-function SelectionChip({ selection, onClear }) {
-  const { text, anchor } = selection
-  const range =
-    anchor && anchor.startPara
-      ? anchor.startPara === anchor.endPara
-        ? `第 ${anchor.startPara} 段`
-        : `第 ${anchor.startPara}–${anchor.endPara} 段`
-      : '选中文本'
+function SkillMenu({ skills, onSelect, onClose }) {
   return (
-    <div className="agent-panel__selection" title={text}>
-      <TextQuote size={12} aria-hidden />
-      <span className="agent-panel__selection-range">
-        已选 {range} · {countWords(text)} 字
-      </span>
-      <span className="agent-panel__selection-preview">
-        {selectionPreview(text)}
-      </span>
-      <button
-        type="button"
-        className="agent-panel__selection-clear"
-        aria-label="移除选区"
-        title="移除选区"
-        onClick={onClear}
-      >
-        <X size={12} />
-      </button>
+    <div className="agent-panel__skill-menu" role="menu">
+      <div className="agent-panel__skill-menu-title">选择技能</div>
+      {skills.length ? (
+        skills.map((skill) => (
+          <button
+            key={skill.name}
+            type="button"
+            role="menuitem"
+            title={skill.description}
+            onClick={() => {
+              onSelect(skill)
+              onClose()
+            }}
+          >
+            <Sparkles size={14} aria-hidden />
+            <span>{skill.name}</span>
+          </button>
+        ))
+      ) : (
+        <div className="agent-panel__skill-empty">暂无可用技能</div>
+      )}
     </div>
   )
 }
@@ -50,9 +59,13 @@ export function InputBar({
   onInputChange,
   onSend,
   onStop,
-  onShowAttachNotice,
   selection = null,
   onClearSelection,
+  attachmentItems = [],
+  skillOptions = [],
+  onUploadFiles,
+  onRemoveAttachment,
+  onAddSkill,
   contextUsage = null,
   modelOptions = [],
   selectedModel,
@@ -61,6 +74,9 @@ export function InputBar({
   onToggleModel,
   onSelectModel,
 }) {
+  const [attachOpen, setAttachOpen] = useState(false)
+  const [skillOpen, setSkillOpen] = useState(false)
+  const fileInputRef = useRef(null)
   return (
     <footer className="agent-panel__foot">
       {notice ? (
@@ -78,9 +94,12 @@ export function InputBar({
       ) : null}
 
       <div className="agent-panel__composer">
-        {selection?.text ? (
-          <SelectionChip selection={selection} onClear={onClearSelection} />
-        ) : null}
+        <AttachmentWorkspace
+          items={attachmentItems}
+          selection={selection}
+          onRemoveItem={onRemoveAttachment}
+          onClearSelection={onClearSelection}
+        />
         <textarea
           className="agent-panel__input"
           rows={2}
@@ -92,6 +111,15 @@ export function InputBar({
               : '直接对话，或输入 /技能名、点下方快捷指令…'
           }
           onChange={(e) => onInputChange(e.target.value)}
+          onPaste={(e) => {
+            const imageFiles = Array.from(e.clipboardData?.files || []).filter((file) =>
+              file.type.startsWith('image/'),
+            )
+            if (imageFiles.length) {
+              e.preventDefault()
+              onUploadFiles?.(imageFiles)
+            }
+          }}
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault()
@@ -100,15 +128,52 @@ export function InputBar({
           }}
         />
         <div className="agent-panel__toolrow">
-          <button
-            type="button"
-            className="agent-panel__tool-btn"
-            aria-label="附加"
-            title="附加（占位）"
-            onClick={onShowAttachNotice}
-          >
-            <Plus size={16} />
-          </button>
+          <div className="agent-panel__attach-wrap">
+            <button
+              type="button"
+              className={`agent-panel__tool-btn${attachOpen ? ' is-open' : ''}`}
+              aria-label="添加文件或技能"
+              aria-expanded={attachOpen}
+              title="添加文件或技能"
+              onClick={() => {
+                setAttachOpen((open) => !open)
+                setSkillOpen(false)
+              }}
+            >
+              <Plus size={16} />
+            </button>
+            {attachOpen ? (
+              <AttachMenu
+                skills={skillOptions}
+                onChooseFile={() => {
+                  fileInputRef.current?.click()
+                  setAttachOpen(false)
+                }}
+                onChooseSkill={() => {
+                  setSkillOpen(true)
+                  setAttachOpen(false)
+                }}
+              />
+            ) : null}
+            {skillOpen ? (
+              <SkillMenu
+                skills={skillOptions}
+                onSelect={onAddSkill}
+                onClose={() => setSkillOpen(false)}
+              />
+            ) : null}
+            <input
+              ref={fileInputRef}
+              className="agent-panel__file-input"
+              type="file"
+              multiple
+              accept="image/*,.txt,.md,.docx,.pdf,.csv,.json"
+              onChange={(e) => {
+                onUploadFiles?.(e.target.files)
+                e.target.value = ''
+              }}
+            />
+          </div>
 
           <ModelPicker
             options={modelOptions}

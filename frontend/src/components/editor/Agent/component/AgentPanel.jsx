@@ -52,6 +52,11 @@ export function AgentPanel({
     handleStop,
     handleRetry,
     handleQuickAction,
+    attachmentItems,
+    skillOptions,
+    handleUploadFiles,
+    handleRemoveAttachment,
+    handleAddSkill,
     setModelOpen,
     setModelId,
   } = useAgentPanel({
@@ -136,7 +141,11 @@ export function AgentPanel({
             onInputChange={setInput}
             onSend={handleSend}
             onStop={handleStop}
-            onShowAttachNotice={() => showNotice('附加能力待后续版本接入。')}
+            attachmentItems={attachmentItems}
+            skillOptions={skillOptions}
+            onUploadFiles={handleUploadFiles}
+            onRemoveAttachment={handleRemoveAttachment}
+            onAddSkill={handleAddSkill}
             selection={
               selectedText ? { text: selectedText, anchor: contentAnchor } : null
             }
