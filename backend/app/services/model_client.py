@@ -136,9 +136,9 @@ class ModelClient:
     def _build_messages(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
-    ) -> list[dict[str, str]]:
-        chat_messages: list[dict[str, str]] = []
+        messages: Optional[list[dict[str, Any]]] = None,
+    ) -> list[dict[str, Any]]:
+        chat_messages: list[dict[str, Any]] = []
         if system:
             chat_messages.append({"role": "system", "content": system})
         if messages:
@@ -150,7 +150,7 @@ class ModelClient:
     def _build_chat_payload(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
+        messages: Optional[list[dict[str, Any]]] = None,
         params: Optional[dict[str, Any]] = None,
         *,
         stream: bool = False,
@@ -269,7 +269,7 @@ class ModelClient:
     def generate(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
+        messages: Optional[list[dict[str, Any]]] = None,
         params: Optional[dict[str, Any]] = None,
     ) -> str:
         """
@@ -280,7 +280,7 @@ class ModelClient:
     def generate_detailed(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
+        messages: Optional[list[dict[str, Any]]] = None,
         params: Optional[dict[str, Any]] = None,
         timeout: float = 120.0,
     ) -> dict[str, Any]:
@@ -458,7 +458,7 @@ class ModelClient:
     def generate_stream(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
+        messages: Optional[list[dict[str, Any]]] = None,
         params: Optional[dict[str, Any]] = None,
     ) -> Iterator[str]:
         """
@@ -496,7 +496,7 @@ class ModelClient:
     def iter_sse(
         self,
         system: str = "",
-        messages: Optional[list[dict[str, str]]] = None,
+        messages: Optional[list[dict[str, Any]]] = None,
         params: Optional[dict[str, Any]] = None,
     ) -> Iterator[str]:
         """

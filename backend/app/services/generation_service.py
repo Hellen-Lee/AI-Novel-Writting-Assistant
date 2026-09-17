@@ -13,6 +13,7 @@ from app.config import load_config
 from app.services import (
     agent_tools,
     context_budget,
+    attachment_store,
     prompt_builder,
     run_store,
     session_store,
@@ -44,6 +45,25 @@ DRAFT_PRESETS = {"续写", "润色", "扩写"}
 BUBBLE_PRESETS = {"生成设定"}
 # 最终流式返回空内容时给用户的提示
 EMPTY_RESULT_MESSAGE = "模型未返回任何内容，请重试或调整输入"
+
+
+def _attachment_summary(record: dict[str, Any]) -> dict[str, Any]:
+    """生成轻量消息摘要，不把附件全文写入会话 JSON。"""
+    parsed = record.get("parsed")
+    parsed_summary: dict[str, Any] = {}
+    if isinstance(parsed, dict):
+        for key in ("kind", "text_truncated", "chars", "note", "width", "height", "thumb_rel"):
+            if key in parsed:
+                parsed_summary[key] = parsed[key]
+    return {
+        "id": str(record.get("id") or ""),
+        "type": str(record.get("type") or ""),
+        "name": str(record.get("name") or ""),
+        "mime": str(record.get("mime") or ""),
+        "size": int(record.get("size") or 0),
+        "status": str(record.get("status") or ""),
+        "parsed": parsed_summary,
+    }
 
 
 def _sse(payload: dict[str, Any]) -> str:
@@ -82,6 +102,7 @@ def iter_generate(
     chapter_rules: str = "",
     model: Optional[str] = None,
     content_anchor: Optional[dict] = None,
+    attachments: Optional[list[str]] = None,
 ) -> Iterator[str]:
     """
     Yield SSE frames for one agentic generation turn.
@@ -107,6 +128,31 @@ def iter_generate(
         yield _sse_done()
         return
 
+    attachment_records: list[dict[str, Any]] = []
+    attachment_ids = list(dict.fromkeys(str(item).strip() for item in (attachments or []) if str(item).strip()))
+    if len(attachment_ids) > 5:
+        yield _sse({"type": "error", "error": "单条消息最多携带 5 个附件"})
+        yield _sse_done()
+        return
+    for att_id in attachment_ids:
+        try:
+            record = attachment_store.read_record(project_id, session_id, att_id)
+        except (FileNotFoundError, ValueError):
+            record = None
+        if not record:
+            yield _sse({"type": "error", "error": f"附件不存在或不属于当前会话: {att_id}"})
+            yield _sse_done()
+            return
+        if record.get("status") != "ready":
+            yield _sse({"type": "error", "error": f"附件解析失败，请先移除: {record.get('name') or att_id}"})
+            yield _sse_done()
+            return
+        if attachment_store.original_path(project_id, session_id, record) is None:
+            yield _sse({"type": "error", "error": f"附件文件已缺失: {record.get('name') or att_id}"})
+            yield _sse_done()
+            return
+        attachment_records.append(record)
+
     overrides: dict[str, Any] = {}
     if model and str(model).strip():
         overrides["model"] = str(model).strip()
@@ -126,10 +172,9 @@ def iter_generate(
 
     text = (user_input or "").strip()
     if not text:
-        if preset:
-            text = f"使用「{preset}」"
-        else:
-            text = "（空输入）"
+        yield _sse({"type": "error", "error": "请输入内容"})
+        yield _sse_done()
+        return
 
     # --- Router: for free text, let the model pick a skill from the
     # auto-invocable catalog, else fall through to the generic chat path. ---
@@ -203,6 +248,22 @@ def iter_generate(
     try:
         rules = prompt_builder.build_rules_block(project_id, chapter_rules or "")
         system = f"{system}\n\n【项目规则】\n{rules}"
+        base_user = prompt_builder.build_thin_user(
+            project_id,
+            chapter_id=chapter_id,
+            current_content=current_content or "",
+            selected_text=selected_text or "",
+            user_input=text,
+            chapter_rules=chapter_rules or "",
+        )
+        attachment_materials, degraded_attachment_indexes = (
+            prompt_builder.fit_attachment_materials(
+                attachment_records,
+                system=system,
+                base_user=base_user,
+                context_window=context_window,
+            )
+        )
         user = prompt_builder.build_thin_user(
             project_id,
             chapter_id=chapter_id,
@@ -210,6 +271,7 @@ def iter_generate(
             selected_text=selected_text or "",
             user_input=text,
             chapter_rules=chapter_rules or "",
+            attachments=attachment_materials,
         )
     except FileNotFoundError as exc:
         yield _sse({"type": "error", "error": str(exc)})
@@ -243,7 +305,12 @@ def iter_generate(
 
     # --- Persist user + pending assistant ---
     skill_label = preset or "Agent"
-    user_msg = session_store.make_message("user", text)
+    user_msg = session_store.make_message(
+        "user",
+        text,
+        attachments=[_attachment_summary(record) for record in attachment_records],
+        selection=(selected_text or "").strip(),
+    )
     assistant_msg = session_store.make_message(
         "assistant",
         "",
@@ -616,7 +683,12 @@ def iter_generate(
             response=full,
             budget_report=budget_report,
             latency_ms=int((time.perf_counter() - t1) * 1000),
-            extra={"error": errored, "draft": draft},
+            extra={
+                "error": errored,
+                "draft": draft,
+                "attachments": [record.get("id") for record in attachment_records],
+                "attachments_degraded": degraded_attachment_indexes,
+            },
         )
     )
 

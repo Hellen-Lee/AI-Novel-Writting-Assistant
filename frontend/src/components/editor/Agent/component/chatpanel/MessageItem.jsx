@@ -4,11 +4,16 @@ import { isToolCalling } from '../../utils/phase'
 import { AssistantPhase } from './AssistantPhase'
 import { DraftNotice } from './DraftNotice'
 import { ToolCallList } from './toolcall'
+import { AttachmentBundle } from '../inputbar/workspace'
 
 export function MessageItem({ message }) {
   if (message.role === 'user') {
     return (
       <div className="agent-panel__msg agent-panel__msg--user">
+        <AttachmentBundle
+          items={message.attachments || []}
+          selection={message.selection || null}
+        />
         <div className="agent-panel__bubble agent-panel__bubble--user">
           {message.content}
         </div>

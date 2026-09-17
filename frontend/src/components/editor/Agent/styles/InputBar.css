@@ -313,6 +313,11 @@
   background: var(--color-primary-hover);
 }
 
+.agent-panel__send:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .agent-panel__send--stop {
   background: var(--color-primary);
 }

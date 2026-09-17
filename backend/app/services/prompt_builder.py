@@ -99,6 +99,71 @@ def _format_volumes(volumes: list[Any]) -> str:
     return "\n".join(lines) if lines else "（无）"
 
 
+def format_attachment_materials(
+    records: list[dict[str, Any]],
+    *,
+    degraded_indexes: Optional[set[int]] = None,
+) -> str:
+    """将已校验的附件记录转换成可注入 user prompt 的材料块。"""
+    degraded_indexes = degraded_indexes or set()
+    blocks: list[str] = []
+    for index, record in enumerate(records):
+        name = str(record.get("name") or "未命名附件").strip()
+        kind = str(record.get("type") or "file")
+        label = "图片" if kind == "image" else "文件"
+        if index in degraded_indexes:
+            body = "（为控制上下文长度，附件内容已降级为名称提示）"
+        elif kind == "image":
+            body = "（当前模型未启用识图能力，已跳过图片内容）"
+        else:
+            parsed = record.get("parsed")
+            text = str(parsed.get("text") or "").strip() if isinstance(parsed, dict) else ""
+            note = str(parsed.get("note") or "").strip() if isinstance(parsed, dict) else ""
+            truncated = bool(parsed.get("text_truncated")) if isinstance(parsed, dict) else False
+            if text:
+                body = text
+                if truncated:
+                    body += "\n…（附件内容已截断）"
+            elif note:
+                body = f"（{note}）"
+            else:
+                body = "（暂未提取到可注入的文本内容）"
+        blocks.append(f"【附件·{label}】{name}\n{body}")
+    return "\n\n".join(blocks) if blocks else ""
+
+
+def fit_attachment_materials(
+    records: list[dict[str, Any]],
+    *,
+    system: str,
+    base_user: str,
+    context_window: Optional[int] = None,
+) -> tuple[str, list[int]]:
+    """按预算优先降级最早附件，返回材料块与降级索引。"""
+    if not records:
+        return "", []
+    degraded: set[int] = set()
+    limit = context_budget_limit(context_window)
+    while True:
+        materials = format_attachment_materials(records, degraded_indexes=degraded)
+        used = _estimate_prompt_tokens(system) + _estimate_prompt_tokens(
+            f"{base_user}\n\n{materials}"
+        )
+        if used <= limit or len(degraded) >= len(records):
+            return materials, sorted(degraded)
+        degraded.add(len(degraded))
+
+
+def context_budget_limit(context_window: Optional[int]) -> int:
+    """避免 prompt_builder 依赖 context_budget 模块，保持纯文本计算可测试。"""
+    window = context_window or 131_072
+    return max(512, int(window * 0.7))
+
+
+def _estimate_prompt_tokens(text: str) -> int:
+    return max(1, int(len(text or "") / 2)) if text else 0
+
+
 def _format_previous_chapters(
     project_id: str,
     *,
@@ -360,6 +425,7 @@ def build_thin_user(
     selected_text: str = "",
     user_input: str = "",
     chapter_rules: str = "",
+    attachments: str = "",
     chapter_tail_chars: int = THIN_CHAPTER_TAIL_CHARS,
 ) -> str:
     """Thin user context: book identity + current chapter tail + selection + input.
@@ -394,6 +460,8 @@ def build_thin_user(
     ]
     if selected_text:
         parts.append(f"选中文本：\n{selected_text}")
+    if attachments:
+        parts.append(f"【附件材料】\n{attachments}")
     parts.append("【用户本轮输入】\n" + ((user_input or "").strip() or "（空）"))
     return "\n\n".join(parts)
 

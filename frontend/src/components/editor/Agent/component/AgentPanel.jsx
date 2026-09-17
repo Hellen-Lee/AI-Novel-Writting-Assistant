@@ -42,6 +42,7 @@ export function AgentPanel({
     setNotice,
     showNotice,
     generating,
+    sendDisabled,
     modelId,
     modelOpen,
     modelOptions,
@@ -132,6 +133,7 @@ export function AgentPanel({
             messagesEndRef={messagesEndRef}
             onQuickAction={handleQuickAction}
             generating={generating || sessionsLoading}
+            sendDisabled={sendDisabled || sessionsLoading}
           />
           <InputBar
             notice={notice}

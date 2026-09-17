@@ -50,8 +50,9 @@ export function useAgentGenerate({
   /**
    * @param {string|null|undefined} skillId - null/undefined → unified agentic path
    * @param {string} userText
+   * @param {{attachments?: string[], selected_text?: string, items?: object[]}} payload
    */
-  const handleTriggerGenerate = async (skillId, userText) => {
+  const handleTriggerGenerate = async (skillId, userText, payload = {}) => {
     const sessionId = getSessionId?.()
     if (!projectId || !sessionId) {
       showNotice('会话未就绪，请稍后重试。')
@@ -67,7 +68,40 @@ export function useAgentGenerate({
       return
     }
 
-    lastRequestRef.current = { skillId: explicitSkill, userText: text }
+    const attachmentIds = Array.isArray(payload.attachments)
+      ? [...payload.attachments]
+      : []
+    const messageItems = Array.isArray(payload.items) ? [...payload.items] : []
+    const messageAttachments = messageItems.map((item) => ({
+      id: item.id,
+      type: item.type,
+      name: item.name,
+      mime: item.mime || '',
+      size: item.size || 0,
+      status: item.status || 'ready',
+      error: item.error || '',
+      url: item.url,
+      parsed: item.parsed
+        ? {
+            kind: item.parsed.kind,
+            text_truncated: item.parsed.text_truncated,
+            chars: item.parsed.chars,
+            note: item.parsed.note,
+            width: item.parsed.width,
+            height: item.parsed.height,
+          }
+        : undefined,
+    }))
+    const messageSelection = String(payload.selected_text || '').trim()
+    lastRequestRef.current = {
+      skillId: explicitSkill,
+      userText: text,
+      payload: {
+        attachments: attachmentIds,
+        selected_text: messageSelection,
+        items: messageItems,
+      },
+    }
 
     // 请求发起时刻的快照锚：若此刻用户在正文有选区，则本次草稿以该区间为落点
     // （请求期间选区变化不影响本次锚定）。
@@ -150,7 +184,13 @@ export function useAgentGenerate({
       title: s.messages.length === 0 ? text.slice(0, 24) : s.title,
       messages: [
         ...s.messages,
-        { id: localUserId, role: 'user', content: text },
+        {
+          id: localUserId,
+          role: 'user',
+          content: text,
+          attachments: messageAttachments,
+          selection: messageSelection,
+        },
         initialMsg,
       ],
     }))
@@ -171,7 +211,8 @@ export function useAgentGenerate({
         tempRules,
         chapterId,
         currentContent,
-        selectedText,
+        selectedText: messageSelection,
+        attachments: attachmentIds,
         contentAnchor: reqAnchor,
         model: getModelId?.() || undefined,
         signal: controller.signal,
@@ -371,7 +412,7 @@ export function useAgentGenerate({
       return
     }
     setAiDraft?.(null)
-    handleTriggerGenerate(last.skillId, last.userText)
+    handleTriggerGenerate(last.skillId, last.userText, last.payload)
   }
 
   return {

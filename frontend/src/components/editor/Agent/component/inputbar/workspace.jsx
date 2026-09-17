@@ -241,5 +241,6 @@ export function buildAttachmentPayload(items, selection) {
       .map((item) => item.id),
     skill_name: skill?.skill_name || skill?.name || undefined,
     selected_text: pickText(selection),
+    items: list.filter((item) => item.type !== 'skill' && item.status !== 'failed'),
   }
 }

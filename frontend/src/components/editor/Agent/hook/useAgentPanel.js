@@ -8,6 +8,7 @@ import { getConfig, getSavedModels } from '../../../../api/config'
 import { getErrorMessage } from '../../../../api/client'
 import { listSkills } from '../../../../api/skills'
 import { parseCommand } from '../utils/parseCommand'
+import { buildAttachmentPayload } from '../component/inputbar/workspace'
 import { useAgentGenerate } from './useAgentGenerate'
 import { useAgentSessions } from './useAgentSessions'
 
@@ -60,6 +61,7 @@ export function useAgentPanel({
   const [modelId, setModelId] = useState('')
   const [modelOpen, setModelOpen] = useState(false)
   const [attachmentItems, setAttachmentItems] = useState([])
+  const [uploadingCount, setUploadingCount] = useState(0)
   const [skillOptions, setSkillOptions] = useState([])
   const messagesEndRef = useRef(null)
   const abortRef = useRef(null)
@@ -269,6 +271,7 @@ export function useAgentPanel({
     // 连续选择/粘贴时复用同一条队列，避免多个 multipart 请求并发写入本地附件目录。
     // pendingUploadCountRef 同时预占名额，防止队列尚未执行时绕过单轮 5 个上限。
     pendingUploadCountRef.current += validFiles.length
+    setUploadingCount((count) => count + validFiles.length)
     uploadQueueRef.current = uploadQueueRef.current
       .catch(() => {})
       .then(async () => {
@@ -289,6 +292,7 @@ export function useAgentPanel({
           showNotice(getErrorMessage(error, '附件上传失败'))
         } finally {
           pendingUploadCountRef.current -= validFiles.length
+          setUploadingCount((count) => Math.max(0, count - validFiles.length))
         }
       })
   }
@@ -322,6 +326,10 @@ export function useAgentPanel({
   const handleSend = () => {
     if (generating) return
     const raw = input.trim()
+    if (pendingUploadCountRef.current > 0 || uploadingCount > 0) {
+      showNotice('附件正在上传，请稍候再发送。')
+      return
+    }
     const failedAttachment = attachmentItems.find(
       (item) => item.type !== 'skill' && item.status === 'failed',
     )
@@ -332,24 +340,33 @@ export function useAgentPanel({
     const referencedSkill = [...attachmentItems]
       .reverse()
       .find((item) => item.type === 'skill')
-    if (!raw && !referencedSkill) {
+    if (!raw) {
       showNotice('请输入内容，或点击快捷指令 / 输入 /技能名。')
       return
     }
 
     const { skillId, userText, matched } = parseCommand(raw)
+    const attachmentPayload = buildAttachmentPayload(attachmentItems, selectedText)
     if (matched && skillId) {
       setSelectedSkill(skillId)
-      handleTriggerGenerate(skillId, userText)
+      handleTriggerGenerate(skillId, userText, attachmentPayload)
       return
     }
     // Free text → unified agentic path (model decides prose vs chat)
-    handleTriggerGenerate(referencedSkill?.skill_name || null, userText)
+    handleTriggerGenerate(
+      referencedSkill?.skill_name || null,
+      userText,
+      attachmentPayload,
+    )
   }
 
   const handleQuickAction = (id, label) => {
     setSelectedSkill(id)
-    handleTriggerGenerate(id, `请${label}`)
+    handleTriggerGenerate(
+      id,
+      `请${label}`,
+      buildAttachmentPayload(attachmentItems, selectedText),
+    )
   }
 
   const handleClearInputAttachments = () => {
@@ -391,6 +408,8 @@ export function useAgentPanel({
     setNotice,
     showNotice,
     generating,
+    uploading: uploadingCount > 0,
+    sendDisabled: generating || uploadingCount > 0 || !input.trim(),
     modelId,
     modelOpen,
     modelOptions,

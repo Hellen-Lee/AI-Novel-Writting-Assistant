@@ -36,6 +36,7 @@ def generate(project_id: str, payload: GenerateRequest):
             current_content=payload.current_content,
             selected_text=payload.selected_text,
             user_input=payload.user_input,
+            attachments=payload.attachments,
             chapter_rules=payload.chapter_rules,
             model=payload.model,
             content_anchor=payload.content_anchor,

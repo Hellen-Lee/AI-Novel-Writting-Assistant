@@ -307,7 +307,18 @@ def format_messages_for_summary(messages: list[dict[str, Any]], *, max_chars: in
         label = "用户" if role == "user" else "助手"
         skill = str(msg.get("skill") or "").strip()
         prefix = f"{label}" + (f"[{skill}]" if skill else "")
-        lines.append(f"{prefix}：{content}")
+        attachments = msg.get("attachments") or []
+        attachment_names = [
+            str(item.get("name") or "").strip()
+            for item in attachments
+            if isinstance(item, dict) and str(item.get("name") or "").strip()
+        ]
+        attachment_note = (
+            f"（附件：{'、'.join(attachment_names)}）"
+            if attachment_names
+            else ""
+        )
+        lines.append(f"{prefix}{attachment_note}：{content}")
     text = "\n".join(lines)
     if len(text) > max_chars:
         return text[: max_chars - 20] + "\n…（已截断）"
@@ -363,6 +374,8 @@ def make_message(
     error: str = "",
     message_id: Optional[str] = None,
     tools: Optional[list[dict[str, Any]]] = None,
+    attachments: Optional[list[dict[str, Any]]] = None,
+    selection: str = "",
 ) -> dict[str, Any]:
     msg: dict[str, Any] = {
         "id": message_id or _new_message_id(),
@@ -378,6 +391,10 @@ def make_message(
         msg["error"] = error
     if tools is not None:
         msg["tools"] = tools
+    if attachments:
+        msg["attachments"] = attachments
+    if selection:
+        msg["selection"] = selection
     return msg
 
 

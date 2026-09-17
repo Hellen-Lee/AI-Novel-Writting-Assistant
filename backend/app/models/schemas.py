@@ -356,6 +356,10 @@ class AgentMessage(BaseModel):
     created_at: str = ""
     # 本消息 AI 生成过程中调用过的工具（[{name, arguments(dict)}]，可空）
     tools: list[dict[str, Any]] = Field(default_factory=list)
+    # user 消息携带的附件摘要；assistant 消息保持为空
+    attachments: list[dict[str, Any]] = Field(default_factory=list)
+    # user 消息发送时的选中文本快照
+    selection: str = ""
 
 
 class SessionSummary(BaseModel):
@@ -394,13 +398,16 @@ class GenerateRequest(BaseModel):
     chapter_id: Optional[str] = None
     current_content: str = ""
     selected_text: str = ""
-    user_input: str = ""
+    user_input: str = Field(..., min_length=1)
+    attachments: list[str] = Field(default_factory=list, max_length=5)
     chapter_rules: str = ""
     model: Optional[str] = None
     # 可选：前端选区/模型推断出的目标段落区间，形如
     # {"mode": "insert_after"|"replace_range", "startPara": 1, "endPara": 5}
     content_anchor: Optional[dict] = None
     # Future (not wired this phase): ask_reply: { ask_id, option_id | text }
+
+    _check_user_input = non_blank("user_input")
 
 
 # --- 引导页 AI 一键生成设定（无状态，项目创建前） ---

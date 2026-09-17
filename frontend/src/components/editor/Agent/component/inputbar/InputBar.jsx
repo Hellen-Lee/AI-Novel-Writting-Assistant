@@ -55,6 +55,7 @@ export function InputBar({
   notice,
   onDismissNotice,
   generating,
+  sendDisabled = false,
   input,
   onInputChange,
   onSend,
@@ -206,6 +207,7 @@ export function InputBar({
               type="button"
               className="agent-panel__send"
               aria-label="发送"
+              disabled={sendDisabled}
               onClick={onSend}
             >
               <ArrowUp size={14} strokeWidth={2.5} />

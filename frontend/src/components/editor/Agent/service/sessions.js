@@ -4,6 +4,7 @@ import {
   getSession as apiGetSession,
   listSessions as apiListSessions,
 } from '../../../../api/sessions'
+import { attachmentThumbUrl } from '../../../../api/attachments'
 import { countWords } from '../../../../utils/format'
 import { AGENT_PHASE } from '../utils/constants'
 
@@ -20,7 +21,7 @@ export function mapSessionSummary(item) {
 }
 
 /** Map API session detail → UI session */
-export function mapSessionDetail(detail) {
+export function mapSessionDetail(detail, projectId = '') {
   return {
     id: detail.id,
     title: detail.title || '新对话',
@@ -39,6 +40,14 @@ export function mapSessionDetail(detail) {
         charCount: countWords(content),
         // 工具调用记录（[{name, arguments}]），完成态消息据此渲染工具行
         tools: Array.isArray(m.tools) ? m.tools : [],
+        attachments: (m.attachments || []).map((item) => ({
+          ...item,
+          url:
+            item.type === 'image' && projectId
+              ? attachmentThumbUrl(projectId, detail.id, item.id)
+              : item.url,
+        })),
+        selection: m.selection || '',
       }
     }),
     updatedAt: detail.updated_at || Date.now(),
@@ -98,12 +107,12 @@ export async function ensureActiveSession(projectId) {
 
 export async function loadSessionDetail(projectId, sessionId) {
   const detail = await apiGetSession(projectId, sessionId)
-  return mapSessionDetail(detail)
+  return mapSessionDetail(detail, projectId)
 }
 
 export async function createRemoteSession(projectId, title = '新对话') {
   const detail = await apiCreateSession(projectId, title)
-  return mapSessionDetail(detail)
+  return mapSessionDetail(detail, projectId)
 }
 
 export async function removeRemoteSession(projectId, sessionId) {
