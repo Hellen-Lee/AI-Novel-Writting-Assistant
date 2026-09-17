@@ -1,7 +1,5 @@
 import { useRef, useState } from 'react'
 import {
-  ChevronDown,
-  ChevronUp,
   FileText,
   Image as ImageIcon,
   Star,
@@ -25,9 +23,6 @@ import './workspace.css'
 
 /** 第一行 chip 排列顺序：图片 → 技能 → 附件文件 */
 const ROW_ORDER = { image: 0, skill: 1, file: 2 }
-
-/** 气泡上方折叠态最多直接展示的 chip 数，超出部分收进 “+N” */
-const COLLAPSED_VISIBLE = 2
 
 /** 识别文件名末尾的后缀（如 .docx / .xlsx），省略时保留 */
 const EXT_RE = /(\.[A-Za-z0-9]{1,5})$/
@@ -67,7 +62,7 @@ function ChipName({ name }) {
 }
 
 /**
- * 第一行：图片 → 技能 → 附件文件，横向可滚动。
+ * 第一行：图片 → 技能 → 附件文件，按容器宽度自动换行。
  * 图片 chip hover 时在行上方弹出缩略图；缩略图挂在滚动容器外的 wrap 上，
  * 避免被 overflow 裁剪。compact = 气泡上方的紧凑尺寸（高 24）。
  */
@@ -129,7 +124,7 @@ function ChipRow({ items, compact = false, onRemoveItem, extra = null }) {
                   title="移除"
                   onClick={() => onRemoveItem(item)}
                 >
-                  <X size={10} />
+                  <X size={12} />
                 </button>
               ) : null}
             </span>
@@ -193,62 +188,25 @@ export function AttachmentWorkspace({
 }
 
 /**
- * 用户消息气泡上方的附件摘要：与工作区同样的两行结构，可折叠展示。
- * 折叠态只显示前 COLLAPSED_VISIBLE 个 chip + “+N” 展开；
- * 展开态显示 “N 个附件 · 收起” 头部 + 完整两行。
+ * 用户消息气泡上方的附件摘要：与工作区同样的两行结构，完整展示并自动换行。
  */
 export function AttachmentBundle({
   items = [],
   selection = null,
-  defaultCollapsed = true,
 }) {
-  const [collapsed, setCollapsed] = useState(defaultCollapsed)
   const rowItems = sortRowItems(items)
   const text = pickText(selection)
   if (!rowItems.length && !text) return null
 
   const totalCount = rowItems.length + (text ? 1 : 0)
-  const collapsible = totalCount > COLLAPSED_VISIBLE
-  const showAll = !collapsible || !collapsed
-  const visibleItems = showAll ? rowItems : rowItems.slice(0, COLLAPSED_VISIBLE)
-  const hiddenCount = totalCount - visibleItems.length
 
   return (
     <div className="agent-ws agent-ws--bubble">
-      {showAll ? (
-        <div className="agent-ws__bundle-head">
-          <span className="agent-ws__bundle-count">{totalCount} 个附件</span>
-          {collapsible ? (
-            <button
-              type="button"
-              className="agent-ws__bundle-toggle"
-              onClick={() => setCollapsed(true)}
-            >
-              收起
-              <ChevronUp size={12} aria-hidden />
-            </button>
-          ) : null}
-        </div>
-      ) : null}
-      {visibleItems.length ? (
-        <ChipRow
-          items={visibleItems}
-          compact
-          extra={
-            !showAll ? (
-              <button
-                type="button"
-                className="agent-ws__chip agent-ws__chip--sm agent-ws__more"
-                onClick={() => setCollapsed(false)}
-              >
-                +{hiddenCount}
-                <ChevronDown size={12} aria-hidden />
-              </button>
-            ) : null
-          }
-        />
-      ) : null}
-      {showAll && text ? <QuoteRow text={text} compact /> : null}
+      <div className="agent-ws__bundle-head">
+        <span className="agent-ws__bundle-count">{totalCount} 个附件</span>
+      </div>
+      {rowItems.length ? <ChipRow items={rowItems} compact /> : null}
+      {text ? <QuoteRow text={text} compact /> : null}
     </div>
   )
 }

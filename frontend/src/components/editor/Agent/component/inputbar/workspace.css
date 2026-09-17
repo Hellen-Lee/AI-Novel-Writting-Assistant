@@ -11,7 +11,7 @@
   min-width: 0;
 }
 
-/* ---------- 第一行：图片 / 技能 / 附件文件（横向滚动） ---------- */
+/* ---------- 第一行：图片 / 技能 / 附件文件（空间不足时换行） ---------- */
 
 .agent-ws__row-wrap {
   position: relative;
@@ -23,25 +23,16 @@
 .agent-ws__row {
   display: flex;
   align-items: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
   min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scrollbar-width: thin;
 }
 
 .agent-ws__row--sm {
   gap: 4px;
-}
-
-.agent-ws__row::-webkit-scrollbar {
-  height: 3px;
-}
-
-.agent-ws__row::-webkit-scrollbar-thumb {
-  background: var(--color-border-default);
-  border-radius: 2px;
 }
 
 .agent-ws__chip {
@@ -105,10 +96,18 @@
   height: 16px;
   margin-right: -2px;
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   background: transparent;
   color: var(--color-text-muted);
   cursor: pointer;
+}
+
+.agent-ws__chip-remove svg,
+.agent-ws__quote-remove svg {
+  display: block;
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 .agent-ws__chip-remove:hover,
@@ -117,7 +116,7 @@
   color: var(--color-primary);
 }
 
-/* 图片 chip hover 缩略图：挂在滚动容器外的 wrap 上，向上弹出、按 chip 居中 */
+/* 图片 chip hover 缩略图：挂在行容器外的 wrap 上，向上弹出、按 chip 居中 */
 .agent-ws__thumb {
   position: absolute;
   bottom: calc(100% + 6px);
@@ -199,6 +198,7 @@
 
 .agent-ws--bubble {
   align-items: flex-end;
+  width: 100%;
   max-width: 88%; /* 与用户气泡 max-width 对齐 */
 }
 
@@ -216,31 +216,3 @@
   color: var(--color-text-muted);
 }
 
-.agent-ws__bundle-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  font-family: var(--font-sans);
-  font-size: 10px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.agent-ws__bundle-toggle:hover {
-  color: var(--color-text-primary);
-}
-
-/* 折叠态行尾 “+N” 展开按钮 */
-.agent-ws__more {
-  gap: 2px;
-  padding: 0 6px;
-  color: var(--color-text-muted);
-  cursor: pointer;
-}
-
-.agent-ws__more:hover {
-  color: var(--color-text-primary);
-}
