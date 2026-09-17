@@ -7,12 +7,14 @@ from __future__ import annotations
 
 import unittest
 import sys
+from tempfile import TemporaryDirectory
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.models.schemas import GenerateRequest
-from app.services import prompt_builder, session_store
+from app.services import project_store, prompt_builder, session_store
 
 
 class AttachmentSendTest(unittest.TestCase):
@@ -61,6 +63,48 @@ class AttachmentSendTest(unittest.TestCase):
         )
         self.assertEqual(message["attachments"][0]["id"], "att_1")
         self.assertEqual(message["selection"], "选中的文字")
+
+    def test_attachment_message_survives_session_roundtrip_without_file_text(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            projects_dir = Path(temp_dir) / "projects"
+            with patch.object(project_store, "PROJECTS_DIR", projects_dir):
+                project = project_store.create_project(name="附件回显测试")
+                session = session_store.create_session(project["meta"]["id"])
+                attachment = {
+                    "id": "att_roundtrip",
+                    "type": "file",
+                    "name": "设定.txt",
+                    "mime": "text/plain",
+                    "size": 128,
+                    "status": "ready",
+                    "parsed": {
+                        "kind": "txt",
+                        "text_truncated": True,
+                        "chars": 9000,
+                    },
+                }
+                message = session_store.make_message(
+                    "user",
+                    "请阅读附件",
+                    attachments=[attachment],
+                    selection="旧城区",
+                )
+                session_store.append_messages(
+                    project["meta"]["id"],
+                    session["id"],
+                    [message],
+                )
+
+                loaded = session_store.get_session(project["meta"]["id"], session["id"])
+                loaded_message = loaded["messages"][0]
+                self.assertEqual(loaded_message["attachments"], [attachment])
+                self.assertEqual(loaded_message["selection"], "旧城区")
+                self.assertNotIn("text", loaded_message["attachments"][0]["parsed"])
+
+                raw = session_store._session_path(
+                    project["meta"]["id"], session["id"]
+                ).read_text(encoding="utf-8")
+                self.assertNotIn("人物住在旧城区", raw)
 
 
 if __name__ == "__main__":

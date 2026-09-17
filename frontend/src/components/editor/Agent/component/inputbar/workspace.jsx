@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import {
   FileText,
+  FileWarning,
   Image as ImageIcon,
   Star,
   TextQuote,
@@ -69,6 +70,7 @@ function ChipName({ name }) {
 function ChipRow({ items, compact = false, onRemoveItem, extra = null }) {
   const wrapRef = useRef(null)
   const [preview, setPreview] = useState(null)
+  const [missingIds, setMissingIds] = useState(() => new Set())
 
   const openPreview = (item, el) => {
     if (item.type !== 'image') return
@@ -91,7 +93,7 @@ function ChipRow({ items, compact = false, onRemoveItem, extra = null }) {
           style={{ left: preview.left }}
           role="tooltip"
         >
-          {preview.item.url ? (
+          {preview.item.url && !missingIds.has(preview.item.id) ? (
             <img
               className="agent-ws__thumb-img"
               src={preview.item.url}
@@ -105,17 +107,41 @@ function ChipRow({ items, compact = false, onRemoveItem, extra = null }) {
       ) : null}
       <div className={`agent-ws__row${compact ? ' agent-ws__row--sm' : ''}`}>
         {items.map((item) => {
-          const Icon = CHIP_ICONS[item.type] || FileText
+          const missing = missingIds.has(item.id)
+          const failed = item.status === 'failed' || missing
+          const Icon = failed ? FileWarning : CHIP_ICONS[item.type] || FileText
+          const statusTitle = item.status === 'failed'
+            ? item.error || '附件解析失败'
+            : missing
+              ? '附件文件缺失'
+              : item.parsed?.text_truncated
+                ? '内容已截断'
+                : item.name
           return (
             <span
               key={item.id}
-              className={`agent-ws__chip agent-ws__chip--${item.type}${compact ? ' agent-ws__chip--sm' : ''}`}
+              className={`agent-ws__chip agent-ws__chip--${item.type}${failed ? ' agent-ws__chip--failed' : ''}${compact ? ' agent-ws__chip--sm' : ''}`}
+              title={statusTitle}
               onMouseEnter={(e) => openPreview(item, e.currentTarget)}
             >
               <span className="agent-ws__chip-icon" aria-hidden>
                 <Icon size={compact ? 11 : 12} />
               </span>
               <ChipName name={item.name} />
+              {item.type === 'image' && !failed && item.url ? (
+                <img
+                  src={item.url}
+                  alt=""
+                  hidden
+                  onError={() =>
+                    setMissingIds((current) => {
+                      const next = new Set(current)
+                      next.add(item.id)
+                      return next
+                    })
+                  }
+                />
+              ) : null}
               {onRemoveItem ? (
                 <button
                   type="button"
