@@ -5,6 +5,7 @@
 - D1 注册表：``{kind → extract(file_path) -> ParsedContent}``，新格式即新注册项，
   调用方无感；解析异常一律捕获转 ParseError（中文原因），绝不抛出阻断整批上传。
 - D2 纯文本：txt / md，UTF-8 读取、解码失败回退 GBK（中文小说场景常见）。
+- D3/D4：docx 提取段落与表格；PDF 提取文本层并识别扫描版/加密文件。
 - D6 截断：单文件上限 MAX_TEXT_CHARS，MVP 只保留头部 + 末尾标注。
 - C1 图片：Pillow 试开（二道防线，H1）→ 等比缩略图（最长边 256px 转 JPEG），
   EXIF 方向仅纠正缩略图、原图不动；GIF 取第一帧。
@@ -19,6 +20,8 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from PIL import Image, ImageOps
+from docx import Document
+from pypdf import PdfReader
 
 # --- D6 文本截断策略 ---
 MAX_TEXT_CHARS = 8000
@@ -55,7 +58,7 @@ def register_file_parser(*kinds: str):
 def parse_file_attachment(ext: str, path: Path) -> Optional[dict[str, Any]]:
     """按扩展名分发到已注册解析器；未注册的格式返回 None（解析待接入）。
 
-    D3/D4/D5（docx/pdf/csv/json）落地前，这些格式保持 ready + parsed=None。
+    D5（csv/json）尚未接入，保持 ready + parsed=None。
     """
     kind = ext.lstrip(".").lower()
     parser = _FILE_PARSERS.get(kind)
@@ -96,6 +99,54 @@ def _extract_plain_text(path: Path) -> dict[str, Any]:
     if text is None:
         raise ParseError("文本编码无法识别（仅支持 UTF-8 / GBK）")
     return _truncate_text(kind, text)
+
+
+@register_file_parser("docx")
+def _extract_docx(path: Path) -> dict[str, Any]:
+    """D3：提取段落与表格，保留文档的基本阅读节奏。"""
+    try:
+        document = Document(path)
+        parts = [
+            paragraph.text
+            for paragraph in document.paragraphs
+            if paragraph.text
+        ]
+        for table in document.tables:
+            for row in table.rows:
+                parts.append("\t".join(cell.text for cell in row.cells))
+        return _truncate_text("docx", "\n\n".join(parts))
+    except Exception as exc:
+        raise ParseError("DOCX 文件解析失败，请检查文件是否损坏") from exc
+
+
+@register_file_parser("pdf")
+def _extract_pdf(path: Path) -> dict[str, Any]:
+    """D4：提取 PDF 文本层；扫描版 PDF 保持 ready 并给出提示。"""
+    try:
+        reader = PdfReader(str(path))
+        if reader.is_encrypted:
+            try:
+                decrypted = reader.decrypt("")
+            except Exception as exc:
+                raise ParseError("PDF 已加密，请先解除密码") from exc
+            if not decrypted:
+                raise ParseError("PDF 已加密，请先解除密码")
+
+        page_texts = [(page.extract_text() or "") for page in reader.pages]
+        text = "\n\n".join(page_texts).strip()
+        if not text:
+            return {
+                "kind": "pdf",
+                "text": "",
+                "text_truncated": False,
+                "chars": 0,
+                "note": "扫描版PDF，无文本层",
+            }
+        return _truncate_text("pdf", text)
+    except ParseError:
+        raise
+    except Exception as exc:
+        raise ParseError("PDF 文件解析失败，请检查文件是否损坏") from exc
 
 
 # ---------------------------------------------------------------------------

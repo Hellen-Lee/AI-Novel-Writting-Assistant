@@ -154,6 +154,11 @@ def delete_session(project_id: str, session_id: str) -> None:
     path = _session_path(project_id, session_id)
     if not path.exists():
         raise FileNotFoundError(f"会话不存在: {session_id}")
+    # G2：先清理附件目录，再删除会话 JSON。清理失败时保留会话，
+    # 避免产生「无会话的附件」孤儿文件。
+    from app.services import attachment_store
+
+    attachment_store.delete_session_attachments(project_id, session_id)
     path.unlink(missing_ok=True)
     index = _load_index(project_id)
     index["sessions"] = [

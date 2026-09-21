@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import uuid
 from pathlib import Path
 from typing import Any, BinaryIO, Optional
@@ -199,6 +200,13 @@ def delete_attachment_files(project_id: str, session_id: str, att_id: str) -> No
             base.rmdir()
     except OSError:
         pass
+
+
+def delete_session_attachments(project_id: str, session_id: str) -> None:
+    """删除会话的全部附件及解析产物（G1/G2）。"""
+    directory = attachments_dir(project_id, session_id)
+    if directory.exists():
+        shutil.rmtree(directory)
 
 
 def is_referenced(project_id: str, session_id: str, att_id: str) -> bool:

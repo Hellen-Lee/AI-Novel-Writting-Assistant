@@ -11,10 +11,19 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from unittest.mock import patch
 
+from docx import Document
+from pypdf import PdfWriter
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.models.schemas import GenerateRequest
-from app.services import project_store, prompt_builder, session_store
+from app.services import (
+    attachment_parser,
+    attachment_store,
+    project_store,
+    prompt_builder,
+    session_store,
+)
 
 
 class AttachmentSendTest(unittest.TestCase):
@@ -105,6 +114,65 @@ class AttachmentSendTest(unittest.TestCase):
                     project["meta"]["id"], session["id"]
                 ).read_text(encoding="utf-8")
                 self.assertNotIn("人物住在旧城区", raw)
+
+    def test_docx_parser_keeps_paragraphs_and_tables(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            path = Path(temp_dir) / "设定.docx"
+            document = Document()
+            document.add_paragraph("第一段")
+            table = document.add_table(rows=1, cols=2)
+            table.cell(0, 0).text = "角色"
+            table.cell(0, 1).text = "林舟"
+            document.save(path)
+
+            parsed = attachment_parser.parse_file_attachment("docx", path)
+
+            self.assertIsNotNone(parsed)
+            assert parsed is not None
+            self.assertIn("第一段", parsed["text"])
+            self.assertIn("角色\t林舟", parsed["text"])
+            self.assertEqual(parsed["chars"], len("第一段\n\n角色\t林舟"))
+
+    def test_pdf_parser_marks_scanned_pdf_and_rejects_encrypted_pdf(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            blank_path = Path(temp_dir) / "扫描.pdf"
+            PdfWriter().write(blank_path)
+            parsed = attachment_parser.parse_file_attachment("pdf", blank_path)
+            self.assertIsNotNone(parsed)
+            assert parsed is not None
+            self.assertEqual(parsed["text"], "")
+            self.assertEqual(parsed["note"], "扫描版PDF，无文本层")
+
+            encrypted_path = Path(temp_dir) / "加密.pdf"
+            writer = PdfWriter()
+            writer.add_blank_page(width=100, height=100)
+            writer.encrypt("secret")
+            writer.write(encrypted_path)
+            with self.assertRaises(attachment_parser.ParseError) as error:
+                attachment_parser.parse_file_attachment("pdf", encrypted_path)
+            self.assertIn("PDF 已加密", str(error.exception))
+
+    def test_delete_session_removes_attachment_directory_before_session(self) -> None:
+        with TemporaryDirectory() as temp_dir:
+            projects_dir = Path(temp_dir) / "projects"
+            with patch.object(project_store, "PROJECTS_DIR", projects_dir):
+                project = project_store.create_project(name="级联删除测试")
+                session = session_store.create_session(project["meta"]["id"])
+                attachment_dir = attachment_store.attachments_dir(
+                    project["meta"]["id"], session["id"]
+                )
+                attachment_dir.mkdir(parents=True)
+                (attachment_dir / "att_test.txt").write_text("内容", encoding="utf-8")
+
+                session_store.delete_session(project["meta"]["id"], session["id"])
+
+                self.assertFalse(attachment_dir.exists())
+                self.assertFalse(
+                    session_store._session_path(
+                        project["meta"]["id"], session["id"]
+                    ).exists()
+                )
+                self.assertEqual(session_store.list_sessions(project["meta"]["id"]), [])
 
 
 if __name__ == "__main__":

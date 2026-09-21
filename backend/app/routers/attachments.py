@@ -1,8 +1,8 @@
 """Agent 附件 API：上传（A2）/ 读取（A3）/ 孤儿删除（A4）。
 
 契约见 docs/changes/260913 待办清单。上传流程：
-校验（H1-H3）→ 流式落盘 → 解析（C1 图片缩略图 / D1-D2 txt/md 文本提取，
-docx/pdf/csv/json 解析器待 D3-D5 接入）→ 生成 AttachmentRecord + sidecar。
+校验（H1-H3）→ 流式落盘 → 解析（C1 图片缩略图 / D1-D4 文本提取，
+csv/json 解析器待 D5 接入）→ 生成 AttachmentRecord + sidecar。
 """
 
 from __future__ import annotations
@@ -152,8 +152,8 @@ async def upload_attachments(
                     height=img["height"],
                 )
             else:
-                # TODO(D3/D4/D5)：docx/pdf/csv/json 解析器接入后自动生效；
-                # 未注册格式 parse_file_attachment 返回 None（ready + parsed=None）
+                # D3/D4 已由注册表自动分发；D5 未注册格式返回 None
+                # （ready + parsed=None）
                 file_parsed = attachment_parser.parse_file_attachment(ext, abs_path)
                 if file_parsed is not None:
                     parsed = AttachmentFileParsed(**file_parsed)
