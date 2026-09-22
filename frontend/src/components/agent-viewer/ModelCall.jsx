@@ -89,6 +89,12 @@ export function ModelCall({ step, index }) {
               Agent 决定读取项目上下文后输出正文/回复。
             </p>
           ) : null}
+          {mode === 'agent' && step?.reasoning ? (
+            <TextPane
+              label="reasoning（思考过程 · 不进会话气泡）"
+              text={step.reasoning}
+            />
+          ) : null}
           {candidates.length ? (
             <p className="agent-viewer-call__note">
               候选 skill：{candidates.join('、')}

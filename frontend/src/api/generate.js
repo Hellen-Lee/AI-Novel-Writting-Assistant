@@ -1,6 +1,6 @@
 /**
  * POST /projects/:id/generate — consume SSE stream.
- * Events: meta | tool_progress | content | error | [DONE]  (ask reserved)
+ * Events: meta | tool_progress | thinking | content | error | [DONE]  (ask reserved)
  */
 
 function parseSseChunk(block) {
@@ -93,6 +93,14 @@ export async function streamGenerate({
       onEvent?.({
         type: 'tool_progress',
         tools: Array.isArray(ev.tools) ? ev.tools : [],
+      })
+      return
+    }
+    if (type === 'thinking') {
+      onEvent?.({
+        type: 'thinking',
+        text: String(ev.text ?? ''),
+        ...(ev.source ? { source: ev.source } : {}),
       })
       return
     }

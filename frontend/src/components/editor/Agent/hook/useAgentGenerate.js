@@ -113,6 +113,7 @@ export function useAgentGenerate({
     const localAssistId = `m_local_a_${Date.now()}`
     let assistId = localAssistId
     let streamBuf = ''
+    let thinkingBuf = ''
     let draftMode = false
     let draftResolved = false
     let skillLabel = explicitSkill ? resolveSkillLabel(explicitSkill) : ''
@@ -172,6 +173,7 @@ export function useAgentGenerate({
       role: 'assistant',
       skill: skillLabel,
       content: '',
+      thinking: '',
       pending: true,
       phase: AGENT_PHASE.THINKING,
       tools: [],
@@ -265,6 +267,12 @@ export function useAgentGenerate({
                 }),
               }))
             }
+          } else if (ev?.type === 'thinking') {
+            const chunk = String(ev.text || '')
+            if (!chunk) return
+            thinkingBuf += chunk
+            // 思考只保存在当前前端消息对象，不能混入正文或字数统计。
+            patchAssist({ thinking: thinkingBuf })
           } else if (ev?.type === 'tool_progress') {
             const incoming = Array.isArray(ev.tools)
               ? ev.tools

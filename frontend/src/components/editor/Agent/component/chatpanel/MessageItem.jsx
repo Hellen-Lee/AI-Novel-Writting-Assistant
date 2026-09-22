@@ -3,6 +3,7 @@ import { AGENT_PHASE } from '../../utils/constants'
 import { isToolCalling } from '../../utils/phase'
 import { AssistantPhase } from './AssistantPhase'
 import { DraftNotice } from './DraftNotice'
+import { ThinkingBlock } from './ThinkingBlock'
 import { ToolCallList } from './toolcall'
 import { AttachmentBundle } from '../inputbar/workspace'
 
@@ -47,6 +48,11 @@ export function MessageItem({ message }) {
       </div>
       <div className="agent-panel__bubble agent-panel__bubble--ai">
         <AssistantPhase phase={message.phase} />
+        <ThinkingBlock
+          messageId={message.id}
+          phase={message.phase}
+          text={message.thinking}
+        />
         <ToolCallList tools={message.tools} running={isToolCalling(message.phase)} />
         {body}
         {streaming && !collapsed && hasBody ? (

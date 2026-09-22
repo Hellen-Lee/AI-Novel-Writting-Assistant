@@ -366,6 +366,8 @@ class ModelClient:
         Streaming completion supporting both content and tool_call deltas.
 
         Yields per-chunk dicts:
+          {"type":"reasoning","text":"..."}   # 推理模型思考增量（reasoning_content
+                                              # 优先、reasoning 兜底；无则不产出）
           {"type":"content","text":"..."}
           {"type":"tool_call","index":0,"id":"call_..","name":"fn","arguments":"..."}
         and a final {"type":"done","finish_reason":"stop"|"tool_calls"}.
@@ -432,6 +434,13 @@ class ModelClient:
             delta = choice.get("delta") or {}
             if not isinstance(delta, dict):
                 continue
+
+            # 推理模型（DeepSeek/Kimi/Qwen/GLM 等约定）的思考增量恒在 content
+            # 之前；两字段名即厂商兼容策略，不按厂商分支。无字段时零产出，
+            # 非推理模型行为与改造前完全一致。
+            reasoning = delta.get("reasoning_content") or delta.get("reasoning")
+            if reasoning:
+                yield {"type": "reasoning", "text": str(reasoning)}
 
             content = delta.get("content")
             if content:

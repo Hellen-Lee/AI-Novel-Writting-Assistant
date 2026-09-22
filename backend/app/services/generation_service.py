@@ -111,6 +111,7 @@ def iter_generate(
       {"type":"meta", session_id, user_message_id, assistant_message_id,
        mode:"agent", skill_name, preset, draft:bool}
       {"type":"tool_progress","tools":[{name, arguments}]}   # per tool round
+      {"type":"thinking","text":"..."}   # 推理模型思考增量；不进正文，可能穿插
       {"type":"content","content":"..."}
       {"type":"error","error":"..."}
       [DONE]
@@ -374,6 +375,9 @@ def iter_generate(
     t1 = time.perf_counter()
     errored = False
     parts: list[str] = []
+    # 本次 turn 最终流的思考增量：不进正文（parts）、不进会话历史，
+    # 仅在 turn 结束时随 run_store 的 agent step 落盘（A3 持久化策略）。
+    reasoning_parts: list[str] = []
     tool_steps: list[dict[str, Any]] = []
     # 跨所有工具轮累积的工具调用（[{name, arguments(dict)}]），随消息落盘保留
     tools_called: list[dict[str, Any]] = []
@@ -513,6 +517,12 @@ def iter_generate(
             messages=final_messages,
             params={},
         ):
+            if delta.get("type") == "reasoning":
+                # 思考增量只透传给前端展示：不进 parts、不参与 draft 判定/
+                # 锚哨兵解析/字数统计（计划书 0.3 总原则 2）。
+                reasoning_parts.append(delta.get("text") or "")
+                yield _sse({"type": "thinking", "text": delta.get("text") or ""})
+                continue
             if delta.get("type") == "content":
                 text_delta = delta.get("text") or ""
                 parts.append(text_delta)
@@ -551,6 +561,10 @@ def iter_generate(
         except (FileNotFoundError, OSError):
             pass
         steps.extend(tool_steps)
+        aborted_extra: dict[str, Any] = {"aborted": True}
+        reasoning_text = "".join(reasoning_parts)
+        if reasoning_text:
+            aborted_extra["reasoning"] = reasoning_text
         steps.append(
             run_store.make_step(
                 "agent",
@@ -563,7 +577,7 @@ def iter_generate(
                 response=partial,
                 budget_report=budget_report,
                 latency_ms=int((time.perf_counter() - t1) * 1000),
-                extra={"aborted": True},
+                extra=aborted_extra,
             )
         )
         _try_save_run(
@@ -671,6 +685,17 @@ def iter_generate(
             pass
 
     steps.extend(tool_steps)
+    final_extra: dict[str, Any] = {
+        "error": errored,
+        "draft": draft,
+        "attachments": [record.get("id") for record in attachment_records],
+        "attachments_degraded": degraded_attachment_indexes,
+    }
+    reasoning_text = "".join(reasoning_parts)
+    if reasoning_text:
+        # A3：思考文本只进 run_store（Agent Viewer 可回看），
+        # 不进 session_store 消息（原则 0.3-1）。非推理模型无该字段。
+        final_extra["reasoning"] = reasoning_text
     steps.append(
         run_store.make_step(
             "agent",
@@ -683,12 +708,7 @@ def iter_generate(
             response=full,
             budget_report=budget_report,
             latency_ms=int((time.perf_counter() - t1) * 1000),
-            extra={
-                "error": errored,
-                "draft": draft,
-                "attachments": [record.get("id") for record in attachment_records],
-                "attachments_degraded": degraded_attachment_indexes,
-            },
+            extra=final_extra,
         )
     )
 

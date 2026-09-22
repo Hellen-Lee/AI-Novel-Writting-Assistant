@@ -157,6 +157,54 @@
   }
 }
 
+/* --- 原生思考折叠块 --- */
+.agent-panel__thinking {
+  margin: 0 0 8px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-surface);
+  overflow: hidden;
+}
+.agent-panel__thinking-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 30px;
+  padding: 6px 8px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+.agent-panel__thinking-toggle:hover {
+  background: var(--color-primary-soft);
+  color: var(--color-text-secondary);
+}
+.agent-panel__thinking-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.agent-panel__thinking-body {
+  max-height: 160px;
+  padding: 0 8px 8px;
+  overflow-y: auto;
+  color: var(--color-text-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.agent-panel__thinking-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font: inherit;
+}
+
 /* 流式光标（非折叠写作轮气泡尾部） */
 .agent-panel__cursor {
   display: inline-block;

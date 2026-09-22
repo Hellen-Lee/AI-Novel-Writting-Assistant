@@ -68,6 +68,8 @@ SSE:
   data: {"type":"meta","session_id","user_message_id","assistant_message_id",
          "mode":"agent","skill_name","preset","draft":bool}   # 发两次：开头与定稿
   data: {"type":"tool_progress","tools":[{name,arguments}]}   # 每工具轮
+  data: {"type":"thinking","text":"..."}   # 推理模型思考增量（A 阶段新增）；
+                                           # 不进正文、不参与 draft 判定，可能穿插在 content 之间
   data: {"type":"content","content":"..."}
   data: {"type":"error","error":"..."}
   data: [DONE]
@@ -84,7 +86,7 @@ SSE:
    - 记录 `agent_tool` step（**`tools` 终于被填充**，Agent Viewer 会显示工具名+参数）；
    - 无 tool_calls → 跳出；有 → `execute_tool` 逐条 append `{role:"tool",...}`，发 `tool_progress`；
    - 达轮上限 → 追加「请直接作答勿再调工具」再取一次。
-5. **最终流式**：`client.chat_stream(..., tools=None)`（保证纯 content，不打断正文），逐 chunk 发 `content`。
+5. **最终流式**：`client.chat_stream(..., tools=None)`，逐 chunk 发 `content`；推理模型的 `reasoning` delta 转发为 `thinking` 帧（不进 parts、不参与判定链路）；非推理模型无该字段，输出与此前逐字节一致。
 6. 定稿：`_decide_draft` 出最终 `draft` → 再发一个 `meta`（携带解析后的 draft）→ 写助手消息（`pending = draft`）→ 摘要刷新 → `save_run` → `[DONE]`。
 
 ---
