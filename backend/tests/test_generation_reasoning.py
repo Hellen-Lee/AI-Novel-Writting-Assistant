@@ -7,12 +7,15 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 import httpx
+from fastapi import HTTPException
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from app.routers import agent_viewer
 from app.services import generation_service, project_store, run_store, session_store
 from app.services.model_client import ModelClient
 
@@ -31,6 +34,32 @@ class FakeClient:
         if self.content:
             yield {"type": "content", "text": self.content}
         yield {"type": "done", "finish_reason": "stop"}
+
+
+class ToolAwareFakeClient(FakeClient):
+    def __init__(self, content: str = "") -> None:
+        super().__init__(content=content)
+        self.chat_messages: list[list[dict]] = []
+
+    def chat(self, messages=None, **_: object) -> dict:
+        snapshot = json.loads(json.dumps(messages or [], ensure_ascii=False))
+        self.chat_messages.append(snapshot)
+        if len(self.chat_messages) == 1:
+            return {
+                "content": "",
+                "reasoning_content": "工具决策思考",
+                "tool_calls": [
+                    {
+                        "id": "call_test",
+                        "type": "function",
+                        "function": {
+                            "name": "get_outline",
+                            "arguments": "{}",
+                        },
+                    }
+                ],
+            }
+        return {"content": "", "tool_calls": []}
 
 
 def parse_frames(frames: list[str]) -> list[dict]:
@@ -73,6 +102,45 @@ class ModelClientReasoningTest(unittest.TestCase):
                 {"type": "done", "finish_reason": ""},
             ],
         )
+
+    def test_chat_preserves_reasoning_content_for_tool_round(self) -> None:
+        client = ModelClient(
+            {
+                "api_base": "http://test.local/v1",
+                "api_key": "sk-test",
+                "model": "test-model",
+            }
+        )
+        response = {
+            "choices": [
+                {
+                    "message": {
+                        "content": None,
+                        "reasoning_content": "先判断是否需要工具",
+                        "tool_calls": [],
+                    }
+                }
+            ]
+        }
+        with patch.object(client, "_request", return_value=response):
+            result = client.chat(
+                messages=[{"role": "user", "content": "读取大纲"}],
+                tools=[{"type": "function", "function": {"name": "get_outline"}}],
+            )
+
+        self.assertEqual(result["reasoning_content"], "先判断是否需要工具")
+
+
+class AgentViewerAccessTest(unittest.TestCase):
+    def test_agent_viewer_rejects_non_local_client(self) -> None:
+        request = SimpleNamespace(
+            client=SimpleNamespace(host="192.168.1.20"),
+        )
+
+        with self.assertRaises(HTTPException) as context:
+            agent_viewer._require_local_request(request)
+
+        self.assertEqual(context.exception.status_code, 403)
 
 
 class GenerationReasoningTest(unittest.TestCase):
@@ -157,6 +225,60 @@ class GenerationReasoningTest(unittest.TestCase):
         self.run_turn(FakeClient((), "普通模型正文"))
 
         self.assertNotIn("reasoning", self.agent_step())
+
+    def test_tool_round_replays_reasoning_content_in_follow_up_messages(self) -> None:
+        client = ToolAwareFakeClient("工具结果正文")
+        with patch.object(
+            generation_service.agent_tools,
+            "execute_tool",
+            return_value={"tool_call_id": "call_test", "content": "大纲内容"},
+        ):
+            self.run_turn(client, user_input="请读取大纲后继续")
+
+        self.assertGreaterEqual(len(client.chat_messages), 2)
+        follow_up = client.chat_messages[1]
+        assistant = next(message for message in follow_up if message["role"] == "assistant")
+        self.assertEqual(assistant["reasoning_content"], "工具决策思考")
+
+    def test_run_store_caps_persisted_reasoning(self) -> None:
+        long_reasoning = "思考" * run_store.REASONING_PERSIST_MAX_CHARS
+        step = run_store.make_step(
+            "agent",
+            extra={"reasoning": long_reasoning},
+        )
+
+        self.assertTrue(step["reasoning_truncated"])
+        self.assertLessEqual(
+            len(step["reasoning"]),
+            run_store.REASONING_PERSIST_MAX_CHARS,
+        )
+        self.assertTrue(step["reasoning"].endswith(run_store.REASONING_TRUNCATION_SUFFIX))
+
+        stored = run_store.save_run(
+            self.project_id,
+            session_id=self.session_id,
+            run_id="run_reasoning_cap",
+            steps=[{"mode": "agent", "reasoning": long_reasoning}],
+        )
+        self.assertLessEqual(
+            len(stored["steps"][0]["reasoning"]),
+            run_store.REASONING_PERSIST_MAX_CHARS,
+        )
+
+    def test_delete_session_removes_run_ledgers(self) -> None:
+        run_store.save_run(
+            self.project_id,
+            session_id=self.session_id,
+            run_id="run_delete_test",
+            steps=[],
+        )
+
+        session_store.delete_session(self.project_id, self.session_id)
+
+        self.assertEqual(
+            run_store.list_runs_for_session(self.project_id, self.session_id),
+            [],
+        )
 
     def test_interrupted_stream_persists_partial_reasoning(self) -> None:
         generator = generation_service.iter_generate(

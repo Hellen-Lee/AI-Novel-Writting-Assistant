@@ -23,6 +23,18 @@ class ModelClientError(Exception):
         self.status_code = status_code
 
 
+def _extract_reasoning_content(message: dict[str, Any]) -> Optional[str]:
+    """Normalize provider reasoning fields while preserving field presence."""
+    for key in ("reasoning_content", "reasoning"):
+        if key not in message:
+            continue
+        value = message.get(key)
+        if value is None:
+            return ""
+        return value if isinstance(value, str) else str(value)
+    return None
+
+
 def _extract_error_message(response: httpx.Response) -> str:
     try:
         data = response.json()
@@ -323,8 +335,9 @@ class ModelClient:
         """
         Non-streaming completion with optional native function-calling.
 
-        Returns the full assistant message dict:
-          {"content": str|None, "tool_calls": [{"id","type","function":{"name","arguments"}}]|None}
+        Returns the assistant message fields needed by the tool loop:
+          {"content": str|None, "reasoning_content": str?,
+           "tool_calls": [{"id","type","function":{"name","arguments"}}]|None}
         When no tools are given (or none invoked), returns
           {"content": <str>, "tool_calls": []} for call-site convenience.
         """
@@ -344,15 +357,16 @@ class ModelClient:
         if not isinstance(message, dict):
             raise ModelClientError("模型响应格式无效，未找到生成内容")
         tool_calls = message.get("tool_calls") or []
-        if not tool_calls:
-            return {
-                "content": message.get("content") or "",
-                "tool_calls": [],
-            }
-        return {
+        reasoning_content = _extract_reasoning_content(message)
+        result: dict[str, Any] = {
             "content": message.get("content") or "",
-            "tool_calls": list(tool_calls),
+            "tool_calls": list(tool_calls) if tool_calls else [],
         }
+        if reasoning_content is not None:
+            # 推理模型的工具决策轮需要把原始字段原样带回下一轮；
+            # 不写入跨 turn 的 session，只作为本次内存消息的一部分。
+            result["reasoning_content"] = reasoning_content
+        return result
 
     def chat_stream(
         self,

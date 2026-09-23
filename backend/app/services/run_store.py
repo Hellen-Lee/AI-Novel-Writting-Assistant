@@ -11,6 +11,29 @@ from typing import Any, Optional
 from app.services import project_store
 
 USER_INPUT_PREVIEW_LEN = 200
+REASONING_PERSIST_MAX_CHARS = 16_000
+REASONING_TRUNCATION_SUFFIX = "…（思考过程已截断）"
+
+
+def _bound_reasoning(value: Any) -> tuple[str, bool]:
+    reasoning = str(value or "")
+    if len(reasoning) <= REASONING_PERSIST_MAX_CHARS:
+        return reasoning, False
+    keep = max(
+        0,
+        REASONING_PERSIST_MAX_CHARS - len(REASONING_TRUNCATION_SUFFIX),
+    )
+    return reasoning[:keep] + REASONING_TRUNCATION_SUFFIX, True
+
+
+def _sanitize_step_reasoning(step: Any) -> Any:
+    if not isinstance(step, dict) or "reasoning" not in step:
+        return step
+    sanitized = dict(step)
+    sanitized["reasoning"], truncated = _bound_reasoning(sanitized["reasoning"])
+    if truncated:
+        sanitized["reasoning_truncated"] = True
+    return sanitized
 
 
 def _now_iso() -> str:
@@ -56,7 +79,7 @@ def save_run(
         "session_id": session_id,
         "created_at": _now_iso(),
         "model": model or "",
-        "steps": list(steps or []),
+        "steps": [_sanitize_step_reasoning(step) for step in (steps or [])],
     }
     if extra:
         payload.update(extra)
@@ -103,6 +126,7 @@ def make_step(
     }
     if extra:
         step.update(extra)
+    step = _sanitize_step_reasoning(step)
     return step
 
 
@@ -162,6 +186,25 @@ def list_runs_for_session(project_id: str, session_id: str) -> list[dict[str, An
 
     items.sort(key=lambda row: str(row.get("created_at") or ""))
     return items
+
+
+def delete_runs_for_session(project_id: str, session_id: str) -> None:
+    """Delete all run ledgers belonging to one session."""
+    if not project_store.project_exists(project_id):
+        raise FileNotFoundError(f"项目不存在: {project_id}")
+
+    sid = str(session_id or "").strip()
+    directory = _runs_dir(project_id)
+    if not directory.exists():
+        return
+
+    for path in directory.glob("*.json"):
+        data = _read_run_file(path)
+        if data is None:
+            continue
+        if str(data.get("session_id") or "").strip() != sid:
+            continue
+        path.unlink(missing_ok=True)
 
 
 def summarize_run(
@@ -274,6 +317,7 @@ def _normalize_step(step: Any) -> dict[str, Any]:
         out["candidate_skills"] = []
     if not isinstance(out.get("tools"), list):
         out["tools"] = []
+    out = _sanitize_step_reasoning(out)
     out.setdefault("system", "")
     out.setdefault("user", "")
     out.setdefault("response", "")

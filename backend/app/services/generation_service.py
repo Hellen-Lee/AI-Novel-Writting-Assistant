@@ -426,13 +426,18 @@ def iter_generate(
                     break
 
                 # Execute tools and append to the conversation.
-                messages.append(
-                    {
-                        "role": "assistant",
-                        "content": assistant.get("content") or None,
-                        "tool_calls": tool_calls,
-                    }
-                )
+                assistant_message: dict[str, Any] = {
+                    "role": "assistant",
+                    "content": assistant.get("content") or None,
+                    "tool_calls": tool_calls,
+                }
+                if "reasoning_content" in assistant:
+                    # DeepSeek 等推理模型要求工具循环的后续请求回传
+                    # reasoning_content；它只存在于本次 turn 的内存消息中。
+                    assistant_message["reasoning_content"] = assistant.get(
+                        "reasoning_content"
+                    )
+                messages.append(assistant_message)
                 tool_called = True
                 progress: list[dict[str, Any]] = []
                 for tc in tool_calls:

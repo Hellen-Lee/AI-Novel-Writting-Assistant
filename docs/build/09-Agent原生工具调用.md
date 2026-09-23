@@ -83,11 +83,12 @@ SSE:
 3. 落 user + pending 助手消息 → 发首个 `meta`（`draft` 由预设初判）。
 4. **Agentic 工具循环**（`MAX_TOOL_ROUNDS=3`）：
    - `client.chat(system, messages, tools=TOOLS, tool_choice="auto", params={max_tokens:256,temp:0.4})`；
+   - 推理模型若返回 `reasoning_content`，仅保留在本次 turn 的内存 assistant 消息中，并在下一轮工具请求原样回传；不写入会话历史；
    - 记录 `agent_tool` step（**`tools` 终于被填充**，Agent Viewer 会显示工具名+参数）；
    - 无 tool_calls → 跳出；有 → `execute_tool` 逐条 append `{role:"tool",...}`，发 `tool_progress`；
    - 达轮上限 → 追加「请直接作答勿再调工具」再取一次。
 5. **最终流式**：`client.chat_stream(..., tools=None)`，逐 chunk 发 `content`；推理模型的 `reasoning` delta 转发为 `thinking` 帧（不进 parts、不参与判定链路）；非推理模型无该字段，输出与此前逐字节一致。
-6. 定稿：`_decide_draft` 出最终 `draft` → 再发一个 `meta`（携带解析后的 draft）→ 写助手消息（`pending = draft`）→ 摘要刷新 → `save_run` → `[DONE]`。
+6. 定稿：`_decide_draft` 出最终 `draft` → 再发一个 `meta`（携带解析后的 draft）→ 写助手消息（`pending = draft`）→ 摘要刷新 → `save_run` → `[DONE]`。run 中的 reasoning 最多保存 16,000 字符；删除会话时同步清理该会话的 runs，Agent Viewer 仅允许本机访问。
 
 ---
 
