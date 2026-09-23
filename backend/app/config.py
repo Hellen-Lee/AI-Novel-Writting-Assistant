@@ -27,6 +27,15 @@ class AppConfig(BaseModel):
     temperature: float = Field(default=0.7, ge=0, le=2)
     top_p: float = Field(default=0.9, ge=0, le=1)
     max_tokens: int = Field(default=2048, ge=1, le=128000)
+    # Agent Viewer reasoning sidecar limits; measured before gzip compression.
+    reasoning_step_max_chars: int = Field(default=64_000, ge=1_024, le=2_000_000)
+    reasoning_run_max_chars: int = Field(default=256_000, ge=1_024, le=8_000_000)
+    reasoning_project_quota_bytes: int = Field(
+        default=128 * 1024 * 1024,
+        ge=1 * 1024 * 1024,
+        le=4 * 1024 * 1024 * 1024,
+    )
+    reasoning_retention_runs: int = Field(default=200, ge=1, le=10_000)
 
     @field_validator("api_base")
     @classmethod

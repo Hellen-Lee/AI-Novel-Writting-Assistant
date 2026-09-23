@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, Request
 
 from app.models.schemas import RunListItem, RunListResponse
-from app.services import run_store
+from app.services import reasoning_store, run_store
 
 router = APIRouter()
 
@@ -36,6 +36,35 @@ def get_agent_run(request: Request, project_id: str, run_id: str):
     _require_local_request(request)
     try:
         return run_store.get_run(project_id, run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get(
+    "/dev/projects/{project_id}/agent/runs/{run_id}/steps/{step_index}/reasoning"
+)
+def get_agent_step_reasoning(
+    request: Request,
+    project_id: str,
+    run_id: str,
+    step_index: int,
+):
+    _require_local_request(request)
+    try:
+        run = run_store.get_run(project_id, run_id)
+        steps = run.get("steps") or []
+        if step_index < 0 or step_index >= len(steps):
+            raise FileNotFoundError(f"步骤不存在: {step_index}")
+        step = steps[step_index]
+        reference = step.get("reasoning_ref") if isinstance(step, dict) else None
+        if not isinstance(reference, dict):
+            raise FileNotFoundError(f"思考记录不存在: {step_index}")
+        return reasoning_store.read_reasoning(
+            project_id,
+            run_id,
+            step_index,
+            reference=reference,
+        )
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 

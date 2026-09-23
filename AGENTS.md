@@ -285,6 +285,7 @@ $user_input
 | POST | `/api/onboarding/generate` | 引导页 AI 一键生成设定（无状态，JSON 响应） | `OnboardingGenerateRequest` |
 | GET | `/api/dev/projects/{id}/agent/runs` | Agent Viewer：run 列表（无 prompt 正文） | — |
 | GET | `/api/dev/projects/{id}/agent/runs/{run_id}` | Agent Viewer：run 详情（含 prompt/回复） | — |
+| GET | `/api/dev/projects/{id}/agent/runs/{run_id}/steps/{step_index}/reasoning` | Agent Viewer：按需读取单 step 完整 reasoning（仅本机） | — |
 | GET | `/api/dev/projects/{id}/agent/sessions/{sid}/runs` | Agent Viewer：某会话全部 run 详情 | — |
 
 ### 6.2 核心 Schema 摘要
@@ -302,7 +303,11 @@ $user_input
   "context_window": 131072,                   // ∈ {32768, 65536, 131072}
   "temperature": 0.7,                          // 0..2
   "top_p": 0.9,                                // 0..1
-  "max_tokens": 2048                           // 1..128000
+  "max_tokens": 2048,                           // 1..128000
+  "reasoning_step_max_chars": 64000,            // 未压缩字符上限
+  "reasoning_run_max_chars": 256000,            // 单 run 未压缩字符上限
+  "reasoning_project_quota_bytes": 134217728,   // 项目 sidecar 磁盘配额
+  "reasoning_retention_runs": 200               // 最多保留含 sidecar 的 run 数
 }
 // ConfigResponse = 上述字段 + api_key_configured: bool（密钥返回脱敏值）
 // ConfigTestResponse { ok, message, model, models_count?, models: [str], preview? }
@@ -390,6 +395,7 @@ $user_input
 // SSE 帧：{"type":"meta", session_id, user_message_id, assistant_message_id,
 //          mode:"agent", skill_name, preset, draft: bool}
 //        {"type":"tool_progress","tools":[{name, arguments}]}
+//        {"type":"thinking","text":"..."}       // reasoning 增量，不进正文
 //        {"type":"content","content":"增量文本"}
 //        {"type":"error","error":"..."}
 //        data: [DONE]
@@ -422,6 +428,8 @@ $user_input
 //               tools: [str], truncated, remaining_pct?, latency_ms_total, step_count }
 // RunListResponse { runs: [RunListItem], count }
 // run 详情见 run_store.get_run 的 JSON 结构（含 steps、system/user/response、budget_report 等）
+// step.reasoning 为受限预览；step.reasoning_ref 指向
+// agent/reasoning/{run_id}/step_{step_index}.txt.gz，完整内容通过按需接口读取
 ```
 
 ---

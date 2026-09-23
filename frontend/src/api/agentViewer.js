@@ -10,6 +10,13 @@ export async function getAgentRun(projectId, runId) {
   return data
 }
 
+export async function getAgentStepReasoning(projectId, runId, stepIndex) {
+  const { data } = await api.get(
+    `/dev/projects/${projectId}/agent/runs/${runId}/steps/${stepIndex}/reasoning`,
+  )
+  return data
+}
+
 export async function listSessionAgentRuns(projectId, sessionId) {
   const { data } = await api.get(
     `/dev/projects/${projectId}/agent/sessions/${sessionId}/runs`,

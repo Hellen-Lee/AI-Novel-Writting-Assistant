@@ -4,6 +4,7 @@ import { formatRunTime, NONE_SESSION_ID } from './format'
 import './SessionDetail.css'
 
 export function SessionDetail({
+  projectId,
   session,
   sessionInfo,
   runs,
@@ -73,6 +74,7 @@ export function SessionDetail({
           {runs.map((run, index) => (
             <li key={run.run_id}>
               <TurnCard
+                projectId={projectId}
                 run={run}
                 index={index}
                 selected={run.run_id === selectedRunId}

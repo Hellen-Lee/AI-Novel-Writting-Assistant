@@ -16,7 +16,13 @@ from fastapi import HTTPException
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from app.routers import agent_viewer
-from app.services import generation_service, project_store, run_store, session_store
+from app.services import (
+    generation_service,
+    project_store,
+    reasoning_store,
+    run_store,
+    session_store,
+)
 from app.services.model_client import ModelClient
 
 
@@ -247,12 +253,7 @@ class GenerationReasoningTest(unittest.TestCase):
             extra={"reasoning": long_reasoning},
         )
 
-        self.assertTrue(step["reasoning_truncated"])
-        self.assertLessEqual(
-            len(step["reasoning"]),
-            run_store.REASONING_PERSIST_MAX_CHARS,
-        )
-        self.assertTrue(step["reasoning"].endswith(run_store.REASONING_TRUNCATION_SUFFIX))
+        self.assertEqual(step["reasoning"], long_reasoning)
 
         stored = run_store.save_run(
             self.project_id,
@@ -260,9 +261,22 @@ class GenerationReasoningTest(unittest.TestCase):
             run_id="run_reasoning_cap",
             steps=[{"mode": "agent", "reasoning": long_reasoning}],
         )
+        persisted_step = stored["steps"][0]
+        self.assertTrue(persisted_step["reasoning_truncated"])
         self.assertLessEqual(
-            len(stored["steps"][0]["reasoning"]),
+            persisted_step["reasoning_ref"]["chars"],
             run_store.REASONING_PERSIST_MAX_CHARS,
+        )
+        self.assertEqual(persisted_step["reasoning_ref"]["status"], "partial")
+        loaded = reasoning_store.read_reasoning(
+            self.project_id,
+            "run_reasoning_cap",
+            0,
+            reference=persisted_step["reasoning_ref"],
+        )
+        self.assertEqual(
+            loaded["text"],
+            long_reasoning[: run_store.REASONING_PERSIST_MAX_CHARS],
         )
 
     def test_delete_session_removes_run_ledgers(self) -> None:
@@ -270,8 +284,17 @@ class GenerationReasoningTest(unittest.TestCase):
             self.project_id,
             session_id=self.session_id,
             run_id="run_delete_test",
-            steps=[],
+            steps=[{"mode": "agent", "reasoning": "待清理的思考"}],
         )
+        sidecar = (
+            self.projects_dir
+            / self.project_id
+            / "agent"
+            / "reasoning"
+            / "run_delete_test"
+            / "step_0.txt.gz"
+        )
+        self.assertTrue(sidecar.is_file())
 
         session_store.delete_session(self.project_id, self.session_id)
 
@@ -279,6 +302,32 @@ class GenerationReasoningTest(unittest.TestCase):
             run_store.list_runs_for_session(self.project_id, self.session_id),
             [],
         )
+        self.assertFalse(sidecar.exists())
+
+    def test_run_reasoning_limit_is_shared_across_steps(self) -> None:
+        with patch.object(
+            reasoning_store,
+            "load_config",
+            return_value={
+                "reasoning_step_max_chars": 5,
+                "reasoning_run_max_chars": 7,
+                "reasoning_project_quota_bytes": 1024 * 1024,
+                "reasoning_retention_runs": 20,
+            },
+        ):
+            stored = run_store.save_run(
+                self.project_id,
+                session_id=self.session_id,
+                run_id="run_shared_reasoning_limit",
+                steps=[
+                    {"mode": "agent_tool", "reasoning": "abcdefghij"},
+                    {"mode": "agent", "reasoning": "klmnopqrst"},
+                ],
+            )
+
+        self.assertEqual(stored["steps"][0]["reasoning_ref"]["chars"], 5)
+        self.assertEqual(stored["steps"][1]["reasoning_ref"]["chars"], 2)
+        self.assertTrue(stored["steps"][1]["reasoning_ref"]["truncated"])
 
     def test_interrupted_stream_persists_partial_reasoning(self) -> None:
         generator = generation_service.iter_generate(

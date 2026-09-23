@@ -8,10 +8,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
-from app.services import project_store
+from app.services import project_store, reasoning_store
 
 USER_INPUT_PREVIEW_LEN = 200
-REASONING_PERSIST_MAX_CHARS = 16_000
+REASONING_PERSIST_MAX_CHARS = reasoning_store.DEFAULT_STEP_MAX_CHARS
 REASONING_TRUNCATION_SUFFIX = "…（思考过程已截断）"
 
 
@@ -24,16 +24,6 @@ def _bound_reasoning(value: Any) -> tuple[str, bool]:
         REASONING_PERSIST_MAX_CHARS - len(REASONING_TRUNCATION_SUFFIX),
     )
     return reasoning[:keep] + REASONING_TRUNCATION_SUFFIX, True
-
-
-def _sanitize_step_reasoning(step: Any) -> Any:
-    if not isinstance(step, dict) or "reasoning" not in step:
-        return step
-    sanitized = dict(step)
-    sanitized["reasoning"], truncated = _bound_reasoning(sanitized["reasoning"])
-    if truncated:
-        sanitized["reasoning_truncated"] = True
-    return sanitized
 
 
 def _now_iso() -> str:
@@ -74,12 +64,19 @@ def save_run(
         raise FileNotFoundError(f"项目不存在: {project_id}")
 
     rid = run_id or new_run_id()
+    persisted_steps = _prepare_steps(project_id, rid, steps or [])
     payload: dict[str, Any] = {
+        "schema_version": 2,
         "run_id": rid,
         "session_id": session_id,
         "created_at": _now_iso(),
         "model": model or "",
-        "steps": [_sanitize_step_reasoning(step) for step in (steps or [])],
+        "execution": {
+            "turn_id": "",
+            "attempt": 1,
+            "parent_run_id": "",
+        },
+        "steps": persisted_steps,
     }
     if extra:
         payload.update(extra)
@@ -88,6 +85,10 @@ def save_run(
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False, indent=2)
+    reasoning_store.remove_stale_parts(project_id)
+    evicted = reasoning_store.cleanup_project(project_id)
+    for evicted_run_id in evicted:
+        _mark_reasoning_evicted(project_id, evicted_run_id)
     return payload
 
 
@@ -104,6 +105,7 @@ def make_step(
     response: str = "",
     budget_report: Optional[dict[str, Any]] = None,
     latency_ms: int = 0,
+    step_index: Optional[int] = None,
     extra: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     step: dict[str, Any] = {
@@ -124,9 +126,10 @@ def make_step(
         "budget_report": budget_report or {},
         "latency_ms": int(latency_ms),
     }
+    if step_index is not None:
+        step["step_index"] = int(step_index)
     if extra:
         step.update(extra)
-    step = _sanitize_step_reasoning(step)
     return step
 
 
@@ -204,6 +207,8 @@ def delete_runs_for_session(project_id: str, session_id: str) -> None:
             continue
         if str(data.get("session_id") or "").strip() != sid:
             continue
+        run_id = str(data.get("run_id") or path.stem)
+        reasoning_store.delete_run(project_id, run_id)
         path.unlink(missing_ok=True)
 
 
@@ -234,7 +239,13 @@ def summarize_run(
             if tname and tname not in tool_names:
                 tool_names.append(tname)
         report = step.get("budget_report") or {}
-        if report.get("truncated"):
+        reference = step.get("reasoning_ref") or {}
+        if (
+            report.get("truncated")
+            or step.get("reasoning_truncated")
+            or reference.get("truncated")
+            or reference.get("status") == "evicted"
+        ):
             truncated = True
         if "remaining_pct" in report:
             try:
@@ -286,6 +297,68 @@ def _hydrate_run(
     return data
 
 
+def _prepare_steps(
+    project_id: str,
+    run_id: str,
+    steps: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Normalize step indexes and move legacy inline reasoning to sidecars."""
+    policy = reasoning_store.ReasoningPolicy.from_config()
+    writer = reasoning_store.ReasoningWriter(project_id, run_id, policy=policy)
+    pending: dict[int, dict[str, Any]] = {}
+    prepared: list[dict[str, Any]] = []
+    for index, raw_step in enumerate(steps):
+        step = dict(raw_step) if isinstance(raw_step, dict) else make_step("unknown")
+        step.setdefault("step_index", index)
+        step_index = int(step["step_index"])
+        inline_reasoning = step.get("reasoning")
+        reference = step.get("reasoning_ref")
+        if isinstance(reference, dict):
+            preview = str(reference.get("preview") or inline_reasoning or "")
+            step["reasoning"] = preview
+            step["reasoning_ref"] = reference
+            if reference.get("truncated"):
+                step["reasoning_truncated"] = True
+        elif isinstance(inline_reasoning, str) and inline_reasoning:
+            writer.append(step_index, inline_reasoning)
+            pending[step_index] = step
+        prepared.append(step)
+    references = writer.finalize_all()
+    for step_index, step in pending.items():
+        reference = references.get(step_index)
+        if not reference:
+            continue
+        step["reasoning"] = reference["preview"]
+        step["reasoning_ref"] = reference
+        if reference.get("truncated"):
+            step["reasoning_truncated"] = True
+    return prepared
+
+
+def _mark_reasoning_evicted(project_id: str, run_id: str) -> None:
+    """Mark sidecar references after quota cleanup without deleting the run."""
+    try:
+        path = _run_path(project_id, run_id)
+    except FileNotFoundError:
+        return
+    data = _read_run_file(path)
+    if data is None:
+        return
+    changed = False
+    for step in data.get("steps") or []:
+        if not isinstance(step, dict):
+            continue
+        reference = step.get("reasoning_ref")
+        if isinstance(reference, dict) and reference.get("status") != "evicted":
+            updated = dict(reference)
+            updated["status"] = "evicted"
+            step["reasoning_ref"] = updated
+            changed = True
+    if changed:
+        with path.open("w", encoding="utf-8") as stream:
+            json.dump(data, stream, ensure_ascii=False, indent=2)
+
+
 def _clip(text: Any, limit: int = USER_INPUT_PREVIEW_LEN) -> str:
     preview = str(text or "")
     if len(preview) > limit:
@@ -317,7 +390,7 @@ def _normalize_step(step: Any) -> dict[str, Any]:
         out["candidate_skills"] = []
     if not isinstance(out.get("tools"), list):
         out["tools"] = []
-    out = _sanitize_step_reasoning(out)
+    out.setdefault("step_index", None)
     out.setdefault("system", "")
     out.setdefault("user", "")
     out.setdefault("response", "")

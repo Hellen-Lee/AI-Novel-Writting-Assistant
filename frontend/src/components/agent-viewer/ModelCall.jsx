@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Check, Copy } from 'lucide-react'
+import { getErrorMessage } from '../../api/client'
+import { getAgentStepReasoning } from '../../api/agentViewer'
 import {
   formatMs,
   formatPct,
@@ -23,8 +25,11 @@ function agentToolCalls(tools) {
     .filter((t) => t.name)
 }
 
-export function ModelCall({ step, index }) {
+export function ModelCall({ projectId, runId, step, index }) {
   const [open, setOpen] = useState(false)
+  const [reasoningText, setReasoningText] = useState(null)
+  const [reasoningLoading, setReasoningLoading] = useState(false)
+  const [reasoningError, setReasoningError] = useState('')
   const mode = step?.mode || 'unknown'
   const background = mode === 'summary'
   const tools = toolNames(step?.tools)
@@ -34,6 +39,31 @@ export function ModelCall({ step, index }) {
     : []
   const source = SOURCE_LABEL[step?.skill_source] || ''
   const remaining = step?.budget_report?.remaining_pct
+  const reasoningRef = step?.reasoning_ref
+  const hasReasoning = Boolean(step?.reasoning || reasoningRef)
+
+  const toggleOpen = () => {
+    const nextOpen = !open
+    setOpen(nextOpen)
+    if (!nextOpen || !reasoningRef || reasoningText !== null || reasoningLoading) {
+      return
+    }
+    if (reasoningRef.status === 'evicted') {
+      setReasoningError('完整思考已按配额清理')
+      return
+    }
+    setReasoningLoading(true)
+    getAgentStepReasoning(projectId, runId, index)
+      .then((data) => {
+        setReasoningText(String(data?.text || ''))
+      })
+      .catch((error) => {
+        setReasoningError(getErrorMessage(error, '无法读取完整思考'))
+      })
+      .finally(() => {
+        setReasoningLoading(false)
+      })
+  }
 
   return (
     <li
@@ -43,7 +73,7 @@ export function ModelCall({ step, index }) {
         type="button"
         className="agent-viewer-call__toggle"
         aria-expanded={open}
-        onClick={() => setOpen((value) => !value)}
+        onClick={toggleOpen}
       >
         <span className="agent-viewer-call__index">{index + 1}</span>
         <span className={`agent-viewer-chip agent-viewer-chip--${mode}`}>
@@ -89,11 +119,21 @@ export function ModelCall({ step, index }) {
               Agent 决定读取项目上下文后输出正文/回复。
             </p>
           ) : null}
-          {mode === 'agent' && step?.reasoning ? (
+          {hasReasoning && (mode === 'agent' || mode === 'agent_tool') ? (
+            <>
+              {reasoningLoading ? (
+                <p className="agent-viewer-call__note">正在读取完整思考…</p>
+              ) : null}
+              {reasoningError ? (
+                <p className="agent-viewer-call__note">{reasoningError}</p>
+              ) : null}
             <TextPane
-              label="reasoning（思考过程 · 不进会话气泡）"
-              text={step.reasoning}
+              label={`reasoning（思考过程 · 不进会话气泡${
+                reasoningRef?.truncated ? ' · 已截断' : ''
+              }）`}
+              text={reasoningText ?? step.reasoning}
             />
+            </>
           ) : null}
           {candidates.length ? (
             <p className="agent-viewer-call__note">

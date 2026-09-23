@@ -210,6 +210,7 @@ export default function AgentViewerPage() {
         </aside>
         <main className="agent-viewer-page__detail">
           <SessionDetail
+            projectId={projectId}
             session={selectedSession}
             sessionInfo={sessionInfo}
             runs={sessionRuns}

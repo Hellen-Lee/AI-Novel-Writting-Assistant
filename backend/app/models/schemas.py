@@ -42,6 +42,14 @@ class ConfigUpdateRequest(BaseModel):
     temperature: Optional[float] = Field(default=None, ge=0, le=2)
     top_p: Optional[float] = Field(default=None, ge=0, le=1)
     max_tokens: Optional[int] = Field(default=None, ge=1, le=128000)
+    reasoning_step_max_chars: Optional[int] = Field(default=None, ge=1_024, le=2_000_000)
+    reasoning_run_max_chars: Optional[int] = Field(default=None, ge=1_024, le=8_000_000)
+    reasoning_project_quota_bytes: Optional[int] = Field(
+        default=None,
+        ge=1 * 1024 * 1024,
+        le=4 * 1024 * 1024 * 1024,
+    )
+    reasoning_retention_runs: Optional[int] = Field(default=None, ge=1, le=10_000)
 
 
 class ConfigResponse(AppConfig):

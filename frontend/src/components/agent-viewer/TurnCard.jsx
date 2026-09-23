@@ -10,11 +10,17 @@ import {
 } from './pipeline'
 import './TurnCard.css'
 
-export function TurnCard({ run, index, selected }) {
+export function TurnCard({ projectId, run, index, selected }) {
   const { exec } = splitPipeline(run?.steps)
   const nodes = pipelineNodes(run)
   const remaining = remainingFromSteps(run?.steps)
-  const truncated = (run?.steps || []).some((step) => step?.budget_report?.truncated)
+  const truncated = (run?.steps || []).some(
+    (step) =>
+      step?.budget_report?.truncated ||
+      step?.reasoning_truncated ||
+      step?.reasoning_ref?.truncated ||
+      step?.reasoning_ref?.status === 'evicted',
+  )
   const failed = Boolean(exec?.error || exec?.aborted)
   const agentText = exec?.response || ''
   const promptBlocks = assembledPromptBlocks(run)
@@ -66,6 +72,8 @@ export function TurnCard({ run, index, selected }) {
           {(run.steps || []).map((step, stepIndex) => (
             <ModelCall
               key={`${step.mode || 'call'}-${stepIndex}`}
+              projectId={projectId}
+              runId={run.run_id}
               step={step}
               index={stepIndex}
             />

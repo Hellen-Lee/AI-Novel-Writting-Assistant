@@ -15,6 +15,7 @@ from app.services import (
     context_budget,
     attachment_store,
     prompt_builder,
+    reasoning_store,
     run_store,
     session_store,
     skill_loader,
@@ -170,6 +171,7 @@ def iter_generate(
 
     steps: list[dict[str, Any]] = []
     run_id = run_store.new_run_id()
+    reasoning_writer = reasoning_store.ReasoningWriter(project_id, run_id)
 
     text = (user_input or "").strip()
     if not text:
@@ -375,9 +377,8 @@ def iter_generate(
     t1 = time.perf_counter()
     errored = False
     parts: list[str] = []
-    # 本次 turn 最终流的思考增量：不进正文（parts）、不进会话历史，
-    # 仅在 turn 结束时随 run_store 的 agent step 落盘（A3 持久化策略）。
-    reasoning_parts: list[str] = []
+    # 本次 turn 的最终流 reasoning 直接增量写入 sidecar；
+    # 不进正文（parts）或会话历史，step 仅保存预览和引用。
     tool_steps: list[dict[str, Any]] = []
     # 跨所有工具轮累积的工具调用（[{name, arguments(dict)}]），随消息落盘保留
     tools_called: list[dict[str, Any]] = []
@@ -516,6 +517,7 @@ def iter_generate(
 
     # --- Final streaming generation ---
     final_messages = messages
+    agent_step_index = len(steps) + len(tool_steps)
     try:
         for delta in client.chat_stream(
             system=system,
@@ -525,8 +527,9 @@ def iter_generate(
             if delta.get("type") == "reasoning":
                 # 思考增量只透传给前端展示：不进 parts、不参与 draft 判定/
                 # 锚哨兵解析/字数统计（计划书 0.3 总原则 2）。
-                reasoning_parts.append(delta.get("text") or "")
-                yield _sse({"type": "thinking", "text": delta.get("text") or ""})
+                reasoning_text = delta.get("text") or ""
+                reasoning_writer.append(agent_step_index, reasoning_text)
+                yield _sse({"type": "thinking", "text": reasoning_text})
                 continue
             if delta.get("type") == "content":
                 text_delta = delta.get("text") or ""
@@ -567,9 +570,10 @@ def iter_generate(
             pass
         steps.extend(tool_steps)
         aborted_extra: dict[str, Any] = {"aborted": True}
-        reasoning_text = "".join(reasoning_parts)
-        if reasoning_text:
-            aborted_extra["reasoning"] = reasoning_text
+        reasoning_ref = reasoning_writer.finalize(agent_step_index)
+        if reasoning_ref:
+            aborted_extra["reasoning"] = reasoning_ref["preview"]
+            aborted_extra["reasoning_ref"] = reasoning_ref
         steps.append(
             run_store.make_step(
                 "agent",
@@ -696,11 +700,12 @@ def iter_generate(
         "attachments": [record.get("id") for record in attachment_records],
         "attachments_degraded": degraded_attachment_indexes,
     }
-    reasoning_text = "".join(reasoning_parts)
-    if reasoning_text:
+    reasoning_ref = reasoning_writer.finalize(agent_step_index)
+    if reasoning_ref:
         # A3：思考文本只进 run_store（Agent Viewer 可回看），
         # 不进 session_store 消息（原则 0.3-1）。非推理模型无该字段。
-        final_extra["reasoning"] = reasoning_text
+        final_extra["reasoning"] = reasoning_ref["preview"]
+        final_extra["reasoning_ref"] = reasoning_ref
     steps.append(
         run_store.make_step(
             "agent",
