@@ -101,6 +101,7 @@ export async function streamGenerate({
         type: 'thinking',
         text: String(ev.text ?? ''),
         ...(ev.source ? { source: ev.source } : {}),
+        ...(ev.phase ? { phase: ev.phase } : {}),
       })
       return
     }

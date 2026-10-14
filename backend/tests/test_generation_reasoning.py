@@ -1,4 +1,4 @@
-"""A1~A3 生成思考透传与持久化测试。"""
+"""A1~A3 生成思考透传与 D 工具轮流式化测试。"""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ from app.services import (
     run_store,
     session_store,
 )
-from app.services.model_client import ModelClient
+from app.services.model_client import ModelClient, ModelClientError
 
 
 class FakeClient:
@@ -33,6 +33,10 @@ class FakeClient:
 
     def chat(self, **_: object) -> dict:
         return {"content": "", "tool_calls": []}
+
+    def chat_stream_tools(self, **_: object):
+        # 工具轮无调用时直接结束；reasoning 测试关注最终正文流。
+        yield {"type": "done", "finish_reason": "stop"}
 
     def chat_stream(self, **_: object):
         for text in self.reasoning:
@@ -66,6 +70,51 @@ class ToolAwareFakeClient(FakeClient):
                 ],
             }
         return {"content": "", "tool_calls": []}
+
+    def chat_stream_tools(self, messages=None, **_: object):
+        assistant = self.chat(messages=messages)
+        if assistant.get("reasoning_content"):
+            yield {
+                "type": "reasoning",
+                "text": assistant["reasoning_content"],
+            }
+        for call in assistant.get("tool_calls") or []:
+            function = call["function"]
+            yield {
+                "type": "tool_call",
+                "index": 0,
+                "id": call["id"],
+                "name": function["name"],
+                "arguments": function["arguments"][:1],
+            }
+            yield {
+                "type": "tool_call",
+                "index": 0,
+                "arguments": function["arguments"][1:],
+            }
+        yield {
+            "type": "done",
+            "finish_reason": "tool_calls" if assistant.get("tool_calls") else "stop",
+        }
+
+
+class StreamRejectingToolClient(FakeClient):
+    def __init__(self) -> None:
+        super().__init__(content="回退后的正文")
+        self.fallback_calls = 0
+
+    def chat_stream_tools(self, **_: object):
+        raise ModelClientError("stream + tools 不支持")
+
+    def chat(self, **_: object) -> dict:
+        self.fallback_calls += 1
+        return {"content": "", "tool_calls": []}
+
+
+class InterruptingToolClient(FakeClient):
+    def chat_stream_tools(self, **_: object):
+        yield {"type": "reasoning", "text": "工具轮思考已开始"}
+        yield {"type": "done", "finish_reason": "tool_calls"}
 
 
 def parse_frames(frames: list[str]) -> list[dict]:
@@ -135,6 +184,36 @@ class ModelClientReasoningTest(unittest.TestCase):
             )
 
         self.assertEqual(result["reasoning_content"], "先判断是否需要工具")
+
+    def test_chat_stream_tools_reuses_normalized_tool_delta_channel(self) -> None:
+        client = ModelClient(
+            {
+                "api_base": "http://test.local/v1",
+                "api_key": "sk-test",
+                "model": "test-model",
+            }
+        )
+        expected = [
+            {"type": "reasoning", "text": "先判断"},
+            {
+                "type": "tool_call",
+                "index": 0,
+                "id": "call_test",
+                "name": "get_outline",
+                "arguments": "{}",
+            },
+            {"type": "done", "finish_reason": "tool_calls"},
+        ]
+        with patch.object(client, "chat_stream", return_value=iter(expected)):
+            actual = list(
+                client.chat_stream_tools(
+                    messages=[{"role": "user", "content": "读取大纲"}],
+                    tools=[{"type": "function"}],
+                    tool_choice="auto",
+                )
+            )
+
+        self.assertEqual(actual, expected)
 
 
 class AgentViewerAccessTest(unittest.TestCase):
@@ -239,12 +318,74 @@ class GenerationReasoningTest(unittest.TestCase):
             "execute_tool",
             return_value={"tool_call_id": "call_test", "content": "大纲内容"},
         ):
-            self.run_turn(client, user_input="请读取大纲后继续")
+            frames = self.run_turn(client, user_input="请读取大纲后继续")
 
         self.assertGreaterEqual(len(client.chat_messages), 2)
         follow_up = client.chat_messages[1]
         assistant = next(message for message in follow_up if message["role"] == "assistant")
         self.assertEqual(assistant["reasoning_content"], "工具决策思考")
+
+        events = parse_frames(frames)
+        thinking = [event for event in events if event["type"] == "thinking"]
+        self.assertEqual(
+            thinking[0],
+            {"type": "thinking", "text": "工具决策思考", "phase": "tool_round"},
+        )
+        self.assertTrue(any(event["type"] == "tool_progress" for event in events))
+        tool_steps = [
+            step
+            for run in run_store.list_runs_for_session(self.project_id, self.session_id)
+            for step in run["steps"]
+            if step.get("mode") == "agent_tool"
+        ]
+        self.assertEqual(tool_steps[0]["reasoning"], "工具决策思考")
+        self.assertEqual(
+            tool_steps[0]["tools"][0]["function"]["name"],
+            "get_outline",
+        )
+
+    def test_stream_tools_falls_back_to_non_stream_once(self) -> None:
+        client = StreamRejectingToolClient()
+        self.run_turn(client, user_input="测试 stream tools 回退")
+
+        self.assertEqual(client.fallback_calls, 1)
+        runs = run_store.list_runs_for_session(self.project_id, self.session_id)
+        tool_steps = [
+            step
+            for run in runs
+            for step in run["steps"]
+            if step.get("mode") == "agent_tool"
+        ]
+        self.assertTrue(tool_steps)
+        self.assertTrue(tool_steps[-1].get("stream_fallback"))
+
+    def test_interrupted_tool_stream_persists_partial_reasoning(self) -> None:
+        generator = generation_service.iter_generate(
+            self.project_id,
+            session_id=self.session_id,
+            skill_name="续写",
+            user_input="中断工具思考",
+        )
+        with patch.object(
+            generation_service,
+            "build_client",
+            return_value=InterruptingToolClient(),
+        ):
+            for frame in generator:
+                event = json.loads(frame[6:]) if frame.startswith("data: ") else {}
+                if event.get("type") == "thinking":
+                    break
+        generator.close()
+
+        runs = run_store.list_runs_for_session(self.project_id, self.session_id)
+        aborted = [
+            step
+            for run in runs
+            for step in run["steps"]
+            if step.get("mode") == "agent_tool" and step.get("aborted")
+        ]
+        self.assertEqual(len(aborted), 1)
+        self.assertEqual(aborted[0]["reasoning"], "工具轮思考已开始")
 
     def test_run_store_caps_persisted_reasoning(self) -> None:
         long_reasoning = "思考" * run_store.REASONING_PERSIST_MAX_CHARS

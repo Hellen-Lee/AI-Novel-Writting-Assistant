@@ -31,7 +31,7 @@ describe('streamGenerate', () => {
   it('透传 thinking 事件且不把思考内容累积到正文', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       streamResponse([
-        'data: {"type":"thinking","text":"先想"}\n\n' +
+        'data: {"type":"thinking","text":"先想","phase":"tool_round"}\n\n' +
           'data: {"type":"thinking","text":"后写"}\n',
         '\ndata: {"type":"content","content":"正文"}\n\n' +
           'data: [DONE]\n\n',
@@ -48,7 +48,7 @@ describe('streamGenerate', () => {
 
     expect(fetchMock).toHaveBeenCalledOnce()
     expect(events).toEqual([
-      { type: 'thinking', text: '先想' },
+      { type: 'thinking', text: '先想', phase: 'tool_round' },
       { type: 'thinking', text: '后写' },
       { type: 'content', content: '正文' },
     ])

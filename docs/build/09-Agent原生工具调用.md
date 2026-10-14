@@ -38,7 +38,7 @@
 
 | 模块 | 职责 |
 | --- | --- |
-| `model_client` | 新增 `chat` / `chat_stream`（tools 进 payload、解析 `delta.tool_calls`）、`aggregate_tool_calls`、`message_has_tool_calls`；原 `generate`/`generate_stream` 保留（摘要、连接测试） |
+| `model_client` | `chat` / `chat_stream_tools`（tools 进 payload、解析 `delta.reasoning_content` / `delta.tool_calls`）、`aggregate_tool_calls`、`message_has_tool_calls`；原 `chat`/`generate`/`generate_stream` 保留（回退、摘要、连接测试） |
 | `agent_tools` | 工具注册表 `TOOLS` + `TOOL_FUNCTIONS` + `execute_tool`；四个只读工具与字符截断 |
 | `prompt_builder` | 薄构建 `build_rules_block` / `build_thin_user`；`preset_intent` 读 skill `system` frontmatter 当意图 |
 | `generation_service` | `iter_generate` 跑 agentic 循环 → 最终流式；删 Router；`_decide_draft` 路由 |
@@ -68,7 +68,8 @@ SSE:
   data: {"type":"meta","session_id","user_message_id","assistant_message_id",
          "mode":"agent","skill_name","preset","draft":bool}   # 发两次：开头与定稿
   data: {"type":"tool_progress","tools":[{name,arguments}]}   # 每工具轮
-  data: {"type":"thinking","text":"..."}   # 推理模型思考增量（A 阶段新增）；
+  data: {"type":"thinking","text":"...","phase":"tool_round"} # 工具轮思考；
+  data: {"type":"thinking","text":"..."}   # 最终正文流 reasoning；
                                            # 不进正文、不参与 draft 判定，可能穿插在 content 之间
   data: {"type":"content","content":"..."}
   data: {"type":"error","error":"..."}
@@ -82,8 +83,8 @@ SSE:
 2. 组装**薄** prompt：`system = AGENT_SYSTEM`（+ preset 意图 + 项目规则）；`user = build_thin_user`。预设路径历史只留 `conversation_note`（≤500 字），自由文本路径保留最近轮次。
 3. 落 user + pending 助手消息 → 发首个 `meta`（`draft` 由预设初判）。
 4. **Agentic 工具循环**（`MAX_TOOL_ROUNDS=3`）：
-   - `client.chat(system, messages, tools=TOOLS, tool_choice="auto", params={max_tokens:256,temp:0.4})`；
-  - 推理模型若返回 `reasoning_content`，仅保留在本次 turn 的内存 assistant 消息中，并在下一轮工具请求原样回传；不写入会话历史；工具轮流式化及其 reasoning 展示属于后续 D 阶段；
+   - `client.chat_stream_tools(system, messages, tools=TOOLS, tool_choice="auto", params={max_tokens:1024,temp:0.4})`，实时转发 reasoning；流结束后按 index 聚合分片 `tool_calls`；
+   - 推理模型若返回 `reasoning_content`，仅保留在本次 turn 的内存 assistant 消息中，并在下一轮工具请求原样回传；不写入会话历史；若 stream+tools 不受网关支持，只回退一次非流式 `chat()`；
    - 记录 `agent_tool` step（**`tools` 终于被填充**，Agent Viewer 会显示工具名+参数）；
    - 无 tool_calls → 跳出；有 → `execute_tool` 逐条 append `{role:"tool",...}`，发 `tool_progress`；
    - 达轮上限 → 追加「请直接作答勿再调工具」再取一次。

@@ -414,6 +414,30 @@ class ModelClient:
         except httpx.RequestError as exc:
             raise ModelClientError(f"无法连接 API：{exc}") from exc
 
+    def chat_stream_tools(
+        self,
+        system: str = "",
+        messages: Optional[list[dict[str, Any]]] = None,
+        tools: Optional[list[dict[str, Any]]] = None,
+        tool_choice: Optional[Any] = None,
+        params: Optional[dict[str, Any]] = None,
+    ) -> Iterator[dict[str, Any]]:
+        """
+        Stream one native-tool decision round.
+
+        This is an explicit channel for the agentic tool loop.  It shares the
+        transport and delta normalization with ``chat_stream`` and yields
+        reasoning/content/tool_call/done events; callers aggregate tool_call
+        fragments after the stream ends.
+        """
+        yield from self.chat_stream(
+            system=system,
+            messages=messages,
+            tools=tools,
+            tool_choice=tool_choice,
+            params=params,
+        )
+
     @staticmethod
     def _iter_chat_deltas(response: httpx.Response) -> Iterator[dict[str, Any]]:
         for line in response.iter_lines():

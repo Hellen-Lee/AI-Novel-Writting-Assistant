@@ -22,6 +22,7 @@ from app.services import (
 )
 from app.services.model_client import (
     ModelClientError,
+    aggregate_tool_calls,
     build_client,
     message_has_tool_calls,
 )
@@ -383,34 +384,177 @@ def iter_generate(
     # 跨所有工具轮累积的工具调用（[{name, arguments(dict)}]），随消息落盘保留
     tools_called: list[dict[str, Any]] = []
 
+    # 工具决策轮的 reasoning 也按稳定 step index 写入同一个 sidecar writer。
+    # 这样流式中断时，已经收到的思考仍能和 agent_tool step 一起落盘。
+    pending_tool_step_index: Optional[int] = None
+    pending_tool_started_at = 0.0
+    pending_tool_reasoning: list[str] = []
+    pending_tool_content: list[str] = []
+    pending_tool_deltas: list[dict[str, Any]] = []
+
+    def flush_pending_tool_step(
+        *,
+        tool_calls: Optional[list[dict[str, Any]]] = None,
+        response: str = "",
+        extra: Optional[dict[str, Any]] = None,
+    ) -> None:
+        """Finalize the current streamed tool round into an agent_tool step."""
+        nonlocal pending_tool_step_index
+        nonlocal pending_tool_started_at
+        nonlocal pending_tool_reasoning
+        nonlocal pending_tool_content
+        nonlocal pending_tool_deltas
+
+        if pending_tool_step_index is None:
+            return
+
+        reasoning_text = "".join(pending_tool_reasoning)
+        if reasoning_text:
+            reasoning_writer.append(pending_tool_step_index, reasoning_text)
+        reasoning_ref = reasoning_writer.finalize(pending_tool_step_index)
+        step_extra = dict(extra or {})
+        if reasoning_ref:
+            step_extra["reasoning"] = reasoning_ref["preview"]
+            step_extra["reasoning_ref"] = reasoning_ref
+
+        tool_steps.append(
+            run_store.make_step(
+                "agent_tool",
+                skill_name=preset or "",
+                skill_kind=_skill_kind(preset) if preset else "",
+                skill_source=_skill_source(
+                    explicit=not preset_is_router,
+                    skill_name=preset,
+                ),
+                tools=list(tool_calls or []),
+                system=system,
+                user=messages[-1].get("content") or "",
+                response=response,
+                budget_report=budget_report,
+                latency_ms=int(
+                    (time.perf_counter() - pending_tool_started_at) * 1000
+                ),
+                step_index=pending_tool_step_index,
+                extra=step_extra,
+            )
+        )
+        pending_tool_step_index = None
+        pending_tool_started_at = 0.0
+        pending_tool_reasoning = []
+        pending_tool_content = []
+        pending_tool_deltas = []
+
     try:
         if tools_enabled:
             while True:
                 t0 = time.perf_counter()
-                assistant = client.chat(
-                    system=system,
-                    messages=messages,
-                    tools=agent_tools.TOOLS,
-                    tool_choice="auto",
-                    params={
-                        "max_tokens": TOOL_ROUND_MAX_TOKENS,
-                        "temperature": 0.4,
-                    },
-                )
-                tool_calls = assistant.get("tool_calls") or []
-                tool_steps.append(
-                    run_store.make_step(
-                        "agent_tool",
-                        skill_name=preset or "",
-                        skill_kind=_skill_kind(preset) if preset else "",
-                        skill_source=_skill_source(explicit=not preset_is_router, skill_name=preset),
-                        tools=tool_calls,
+                pending_tool_step_index = len(steps) + len(tool_steps)
+                pending_tool_started_at = t0
+                pending_tool_reasoning = []
+                pending_tool_content = []
+                pending_tool_deltas = []
+                finish_reason = ""
+                stream_fallback = False
+
+                try:
+                    stream_method = getattr(client, "chat_stream_tools", None)
+                    if not callable(stream_method):
+                        # 兼容测试替身和旧版自定义 client。
+                        stream_method = client.chat_stream
+                    for delta in stream_method(
                         system=system,
-                        user=messages[-1].get("content") or "",
-                        response=assistant.get("content") or "",
-                        budget_report=budget_report,
-                        latency_ms=int((time.perf_counter() - t0) * 1000),
+                        messages=messages,
+                        tools=agent_tools.TOOLS,
+                        tool_choice="auto",
+                        params={
+                            "max_tokens": TOOL_ROUND_MAX_TOKENS,
+                            "temperature": 0.4,
+                        },
+                    ):
+                        delta_type = delta.get("type")
+                        if delta_type == "reasoning":
+                            reasoning_text = str(delta.get("text") or "")
+                            if reasoning_text:
+                                pending_tool_reasoning.append(reasoning_text)
+                                yield _sse(
+                                    {
+                                        "type": "thinking",
+                                        "text": reasoning_text,
+                                        "phase": "tool_round",
+                                    }
+                                )
+                        elif delta_type == "content":
+                            content_text = str(delta.get("text") or "")
+                            if content_text:
+                                pending_tool_content.append(content_text)
+                        elif delta_type == "tool_call":
+                            pending_tool_deltas.append(delta)
+                        elif delta_type == "done":
+                            value = str(delta.get("finish_reason") or "")
+                            if value:
+                                finish_reason = value
+
+                    aggregated_calls = aggregate_tool_calls(pending_tool_deltas)
+                    tool_calls = _as_chat_tool_calls(aggregated_calls)
+                    round_content = "".join(pending_tool_content)
+                    # 推理 token 耗尽但没有完整 tool call 时，不能把截断的
+                    # content 当作最终回答；沿用工具轮的空结果兜底语义。
+                    if finish_reason == "length" and not tool_calls:
+                        assistant = {"content": "", "tool_calls": []}
+                    else:
+                        assistant = {
+                            "content": round_content,
+                            "tool_calls": tool_calls,
+                        }
+                        if pending_tool_reasoning:
+                            assistant["reasoning_content"] = "".join(
+                                pending_tool_reasoning
+                            )
+                except ModelClientError:
+                    aggregated_partial_calls = aggregate_tool_calls(
+                        pending_tool_deltas
                     )
+                    complete_partial_calls = bool(aggregated_partial_calls) and all(
+                        str(call.get("id") or "").strip()
+                        and str(call.get("name") or "").strip()
+                        for call in aggregated_partial_calls
+                    )
+                    if complete_partial_calls:
+                        # 网关在发送完完整 tool_call 后断流时，继续执行
+                        # 已聚合的调用，不再重复请求。
+                        assistant = {
+                            "content": "".join(pending_tool_content),
+                            "tool_calls": _as_chat_tool_calls(
+                                aggregated_partial_calls
+                            ),
+                        }
+                        if pending_tool_reasoning:
+                            assistant["reasoning_content"] = "".join(
+                                pending_tool_reasoning
+                            )
+                    else:
+                        # 某些网关不支持 stream + tools；只回退一次非流式
+                        # chat，失败后交给外层既有 tools 退化逻辑处理。
+                        stream_fallback = True
+                        assistant = client.chat(
+                            system=system,
+                            messages=messages,
+                            tools=agent_tools.TOOLS,
+                            tool_choice="auto",
+                            params={
+                                "max_tokens": TOOL_ROUND_MAX_TOKENS,
+                                "temperature": 0.4,
+                            },
+                        )
+                        fallback_reasoning = assistant.get("reasoning_content")
+                        if fallback_reasoning:
+                            pending_tool_reasoning.append(str(fallback_reasoning))
+
+                tool_calls = assistant.get("tool_calls") or []
+                flush_pending_tool_step(
+                    tool_calls=tool_calls,
+                    response=assistant.get("content") or "",
+                    extra={"stream_fallback": True} if stream_fallback else None,
                 )
                 if not message_has_tool_calls(assistant):
                     # 模型未调用工具、直接作答：记录内容，下一轮流式可能重复生成，
@@ -479,10 +623,52 @@ def iter_generate(
                     tools_called.append({"name": name, "arguments": args})
                 tool_rounds += 1
                 yield _sse({"type": "tool_progress", "tools": progress})
+    except GeneratorExit:
+        # 工具轮思考中被客户端中断时，保存已收到的增量；前端不会收到
+        # 额外帧，但 Agent Viewer 仍可看到该轮的 partial reasoning。
+        flush_pending_tool_step(
+            tool_calls=_as_chat_tool_calls(
+                aggregate_tool_calls(pending_tool_deltas)
+            ),
+            response="".join(pending_tool_content),
+            extra={"aborted": True},
+        )
+        try:
+            session_store.update_message(
+                project_id,
+                session_id,
+                assistant_msg["id"],
+                content="",
+                pending=False,
+                error="已中断",
+                status="idle",
+                tools=tools_called,
+            )
+        except (FileNotFoundError, OSError):
+            pass
+        steps.extend(tool_steps)
+        _try_save_run(
+            project_id,
+            session_id=session_id,
+            run_id=run_id,
+            model_name=model_name,
+            user_input=text,
+            steps=steps,
+        )
+        raise
     except ModelClientError as exc:
         # Model / provider may not support function calling → fall back to a
         # thin single-turn stream without tools.
-        if tool_steps or (tools_enabled and _tools_supported_error(exc)):
+        had_tool_steps = bool(tool_steps)
+        tools_error = tools_enabled and _tools_supported_error(exc)
+        flush_pending_tool_step(
+            tool_calls=_as_chat_tool_calls(
+                aggregate_tool_calls(pending_tool_deltas)
+            ),
+            response="".join(pending_tool_content),
+            extra={"stream_error": exc.message},
+        )
+        if had_tool_steps or tools_error:
             tools_enabled = False
         else:
             errored = True
@@ -796,6 +982,32 @@ def _parse_tool_arguments(raw: Any) -> dict[str, Any]:
     except json.JSONDecodeError:
         return {}
     return parsed if isinstance(parsed, dict) else {}
+
+
+def _as_chat_tool_calls(calls: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Convert aggregate_tool_calls output to OpenAI assistant-message shape."""
+    normalized: list[dict[str, Any]] = []
+    for call in calls:
+        if not isinstance(call, dict):
+            continue
+        arguments = call.get("arguments")
+        if not isinstance(arguments, dict):
+            arguments = _parse_tool_arguments(arguments)
+        normalized.append(
+            {
+                "id": str(call.get("id") or ""),
+                "type": "function",
+                "function": {
+                    "name": str(call.get("name") or ""),
+                    "arguments": json.dumps(
+                        arguments,
+                        ensure_ascii=False,
+                        separators=(",", ":"),
+                    ),
+                },
+            }
+        )
+    return normalized
 
 
 def _tools_supported_error(exc: ModelClientError) -> bool:
