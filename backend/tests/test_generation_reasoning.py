@@ -117,6 +117,50 @@ class InterruptingToolClient(FakeClient):
         yield {"type": "done", "finish_reason": "tool_calls"}
 
 
+class ChunkedClient(FakeClient):
+    """按给定分片流式输出，且可让工具轮先读一次正文。"""
+
+    def __init__(
+        self,
+        chunks: list[str],
+        *,
+        read_work: bool = False,
+        router_decision: str = "chat",
+    ) -> None:
+        super().__init__(content="")
+        self.chunks = chunks
+        self.read_work = read_work
+        self.router_decision = router_decision
+        self.tool_rounds = 0
+
+    def generate(self, **_: object) -> str:
+        return json.dumps(
+            {"decision": self.router_decision, "skill_name": "", "reason": "test"}
+        )
+
+    def chat(self, **_: object) -> dict:
+        return {"content": "", "tool_calls": []}
+
+    def chat_stream_tools(self, **_: object):
+        self.tool_rounds += 1
+        if self.read_work and self.tool_rounds == 1:
+            yield {
+                "type": "tool_call",
+                "index": 0,
+                "id": "call_read",
+                "name": "read_chapter",
+                "arguments": "{}",
+            }
+            yield {"type": "done", "finish_reason": "tool_calls"}
+            return
+        yield {"type": "done", "finish_reason": "stop"}
+
+    def chat_stream(self, **_: object):
+        for chunk in self.chunks:
+            yield {"type": "content", "text": chunk}
+        yield {"type": "done", "finish_reason": "stop"}
+
+
 def parse_frames(frames: list[str]) -> list[dict]:
     events = []
     for frame in frames:
@@ -498,6 +542,111 @@ class GenerationReasoningTest(unittest.TestCase):
         ]
         self.assertEqual(len(aborted), 1)
         self.assertEqual(aborted[0]["reasoning"], "思考开头思考后半")
+
+
+def draft_flags(events: list[dict]) -> list[bool]:
+    return [
+        event["draft"]
+        for event in events
+        if event.get("type") == "meta" and "draft" in event
+    ]
+
+
+class DraftClassificationTest(GenerationReasoningTest):
+    """端到端回归：非正文内容不得被归入 draft 卡片（方案 B+C）。"""
+
+    def run_free_text(
+        self,
+        client: FakeClient,
+        user_input: str = "请评估这一章的完整性",
+    ) -> list[dict]:
+        with patch.object(generation_service, "build_client", return_value=client):
+            frames = list(
+                generation_service.iter_generate(
+                    self.project_id,
+                    session_id=self.session_id,
+                    user_input=user_input,
+                )
+            )
+        return parse_frames(frames)
+
+    def test_long_review_after_reading_work_is_not_a_draft(self) -> None:
+        """截图场景：读过正文 + 长篇审阅分析 → 必须走气泡，不能进草稿卡。
+
+        旧实现里 reads_work 单信号成判，这种输出必然被误判成 draft。
+        """
+        review = (
+            "本章功能完整——清嘉报信、公主决意、废园取证、半枚鱼符到手。"
+            "作为「拿到第一件关键证物」的功能章，它站得住。但有三处硬伤："
+            "一是体量失衡；二是一日之内塞了太多环节；三是和第一章的钩子断了。"
+        )
+        events = self.run_free_text(
+            ChunkedClient([review], read_work=True),
+            user_input="评估第二章的完整性，给出修改建议",
+        )
+        self.assertTrue(draft_flags(events), "应有 meta 帧携带 draft")
+        self.assertFalse(draft_flags(events)[-1], "审阅分析不应判为 draft")
+        self.assertFalse(
+            any(event.get("type") == "draft_hint" for event in events),
+            "未声明成稿时不应发出 draft_hint",
+        )
+
+    def test_declared_head_sentinel_opens_draft_with_anchor(self) -> None:
+        """模型首行声明成稿 → 提前 draft_hint + 锚，正文不含哨兵。"""
+        events = self.run_free_text(
+            ChunkedClient(
+                ["[[DRAFT|insert_after|5]]", "\n他抬起头，雪落进衣领。"],
+                read_work=True,
+            ),
+            user_input="接着往下写",
+        )
+        hints = [event for event in events if event.get("type") == "draft_hint"]
+        self.assertEqual(len(hints), 1, "声明哨兵应触发一次 draft_hint")
+        self.assertTrue(hints[0]["draft"])
+        self.assertEqual(
+            hints[0]["content_anchor"],
+            {"mode": "insert_after", "startPara": 5, "endPara": 5},
+        )
+        body = "".join(
+            event["content"] for event in events if event.get("type") == "content"
+        )
+        self.assertNotIn("[[DRAFT", body, "哨兵不得出现在正文里")
+        self.assertIn("雪落进衣领", body)
+        self.assertTrue(draft_flags(events)[-1], "声明成稿应判为 draft")
+
+    def test_declaration_is_not_assumed_for_long_undeclared_text(self) -> None:
+        """无信号的长正文不再靠长度猜：落回只读气泡（判定后不提供转正文路径）。"""
+        prose = "夜色压过旧城区的屋脊。他沿着河堤走了很久，直到天边泛白。" * 30
+        events = self.run_free_text(ChunkedClient([prose]), user_input="随便写点")
+        self.assertFalse(draft_flags(events)[-1])
+        body = "".join(
+            event["content"] for event in events if event["type"] == "content"
+        )
+        self.assertEqual(body, prose, "未声明时正文必须逐字透传")
+
+    def test_preset_still_yields_draft_without_declaration(self) -> None:
+        """快捷指令不受影响：点「续写」仍是草稿卡。"""
+        with patch.object(
+            generation_service, "build_client", return_value=FakeClient((), "续写正文")
+        ):
+            frames = list(
+                generation_service.iter_generate(
+                    self.project_id,
+                    session_id=self.session_id,
+                    skill_name="续写",
+                    user_input="请续写",
+                )
+            )
+        self.assertTrue(draft_flags(parse_frames(frames))[-1])
+
+    def test_selection_anchor_dropped_when_not_a_draft(self) -> None:
+        """选段提问时不得回传选区锚，否则气泡会带「替换该段」按钮。"""
+        events = self.run_free_text(
+            ChunkedClient(["这段写得不错，但节奏偏快。"], read_work=True),
+            user_input="这段写得如何？",
+        )
+        metas = [event for event in events if event.get("type") == "meta"]
+        self.assertEqual(metas[-1].get("content_anchor"), None)
 
 
 if __name__ == "__main__":

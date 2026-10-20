@@ -12,6 +12,7 @@
     "build:install": "node scripts/build.mjs --install",
     "test": "npm run test:frontend && npm run test:backend",
     "test:frontend": "npm --prefix frontend test",
-    "test:backend": "python -m unittest discover -s backend/tests -p \"test_*.py\""
+    "test:backend": "python -m unittest discover -s backend/tests -p \"test_*.py\"",
+    "test:draft": "python backend/tests/repro_draft_misclassification.py"
   }
 }

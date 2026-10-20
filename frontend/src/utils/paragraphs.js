@@ -169,3 +169,34 @@ export function stripAnchorSentinel(text) {
     .replace(/\s*\[\[\s*ANCHOR\s*\|[^\]]*\]\]\s*$/i, '')
     .trimEnd()
 }
+
+const DRAFT_SENTINEL_RE =
+  /\[\[\s*DRAFT\s*\|\s*(\w+)\s*\|\s*(\d+)(?:\s*\|\s*(\d+))?\s*\]\]/i
+
+/**
+ * 解析模型在正文首行的成稿声明哨兵，形如：
+ *   [[DRAFT|insert_after|5]]
+ *   [[DRAFT|replace_range|1|5]]
+ * 未命中返回 null。仅看首部，避免吃掉正文中同形的文本。
+ * @param {string} text
+ */
+export function parseDraftSentinel(text) {
+  if (!text) return null
+  const head = String(text).replace(/^[\s\ufeff\u200b]+/, '')
+  const m = head.match(new RegExp(`^${DRAFT_SENTINEL_RE.source}`, 'i'))
+  if (!m) return null
+  const mode =
+    m[1].toLowerCase() === 'replace_range' ? 'replace_range' : 'insert_after'
+  const startPara = parseInt(m[2], 10)
+  const endPara = m[3] != null ? parseInt(m[3], 10) : startPara
+  return { mode, startPara, endPara }
+}
+
+/** 从正文首行剥离成稿声明哨兵，返回干净文本。 */
+export function stripDraftSentinel(text) {
+  if (!text) return text
+  return String(text).replace(
+    new RegExp(`^[\\s\\ufeff\\u200b]*${DRAFT_SENTINEL_RE.source}[ \\t]*\\r?\\n?`, 'i'),
+    '',
+  )
+}

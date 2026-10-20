@@ -14,6 +14,7 @@ from app.services import (
     agent_tools,
     context_budget,
     attachment_store,
+    draft_sentinel,
     prompt_builder,
     reasoning_store,
     run_store,
@@ -32,7 +33,7 @@ from app.services import prompt_loader
 SUMMARY_SYSTEM = prompt_loader.get("summary_system")
 AGENT_SYSTEM = prompt_loader.get("agent_system")
 
-# Tools loop safety / draft heuristics.
+# Tools loop safety bounds.
 MAX_TOOL_ROUNDS = 3
 # 工具决策轮的输出预算。注意：推理类模型（如 deepseek-v4-flash）会先消耗大量
 # reasoning token 再产出 tool_calls/content，预算过小会被整体截断，表现为
@@ -42,9 +43,6 @@ TOOL_ROUND_MAX_TOKENS = 1024
 # 路由决策与会话摘要同样会被推理 token 挤占，预算需大于常规输出量级。
 ROUTER_MAX_TOKENS = 1024
 SUMMARY_MAX_TOKENS = 2048
-DRAFT_PROSE_MIN_CHARS = 400
-DRAFT_PRESETS = {"续写", "润色", "扩写"}
-BUBBLE_PRESETS = {"生成设定"}
 # 最终流式返回空内容时给用户的提示
 EMPTY_RESULT_MESSAGE = "模型未返回任何内容，请重试或调整输入"
 
@@ -184,6 +182,9 @@ def iter_generate(
     # auto-invocable catalog, else fall through to the generic chat path. ---
     preset_is_router = False
     router_step: Optional[dict[str, Any]] = None
+    # Router 的判定结果（skill/chat/clarify）。判定层据此拒绝启发式翻盘：
+    # Router 已判讨论时，读过正文也不能把长篇分析当成成稿。
+    router_decision = ""
     if preset is None:
         candidates = skill_loader.list_skills(include_auto_invocable_only=True)
         allowed = {str(c.get("name") or "").strip() for c in candidates if c.get("name")}
@@ -221,6 +222,8 @@ def iter_generate(
             ):
                 preset = decision["skill_name"]
                 preset_is_router = True
+            else:
+                router_decision = str(decision.get("decision") or "chat")
 
             router_step = run_store.make_step(
                 "router",
@@ -371,13 +374,13 @@ def iter_generate(
     messages: list[dict[str, Any]] = [{"role": "user", "content": user}]
     tools_enabled = bool(cfg.get("enable_agent_tools", True))
     tool_rounds = 0
-    reads_work = False
-    tool_called = False
     # 模型在工具轮直接给出正文（未调用工具）时保留，供最终流式为空时回退使用
     tool_answer = ""
     t1 = time.perf_counter()
     errored = False
     parts: list[str] = []
+    # 模型在正文首行显式声明的 draft 意图（[[DRAFT|...]]），命中即视为成稿。
+    declared_anchor: Optional[dict] = None
     # 本次 turn 的最终流 reasoning 直接增量写入 sidecar；
     # 不进正文（parts）或会话历史，step 仅保存预览和引用。
     tool_steps: list[dict[str, Any]] = []
@@ -583,7 +586,6 @@ def iter_generate(
                         "reasoning_content"
                     )
                 messages.append(assistant_message)
-                tool_called = True
                 progress: list[dict[str, Any]] = []
                 for tc in tool_calls:
                     if not isinstance(tc, dict):
@@ -602,8 +604,6 @@ def iter_generate(
                         args,
                         tool_call_id=str(tc.get("id") or ""),
                     )
-                    if name in {"read_chapter", "read_recent_work"}:
-                        reads_work = True
                     messages.append(
                         {
                             "role": "tool",
@@ -704,6 +704,9 @@ def iter_generate(
     # --- Final streaming generation ---
     final_messages = messages
     agent_step_index = len(steps) + len(tool_steps)
+    # 首行 [[DRAFT|...]] 声明哨兵在流内剥离：命中即提前告知前端本轮是成稿，
+    # 草稿卡可在流式期间就落位（不必等末尾 meta 再翻转，避免气泡突跳）。
+    head_scanner = draft_sentinel.HeadSentinelScanner()
     try:
         for delta in client.chat_stream(
             system=system,
@@ -718,9 +721,24 @@ def iter_generate(
                 yield _sse({"type": "thinking", "text": reasoning_text})
                 continue
             if delta.get("type") == "content":
-                text_delta = delta.get("text") or ""
+                text_delta = head_scanner.feed(delta.get("text") or "")
+                if head_scanner.anchor is not None and declared_anchor is None:
+                    declared_anchor = head_scanner.anchor
+                    yield _sse(
+                        {
+                            "type": "draft_hint",
+                            "draft": True,
+                            "content_anchor": declared_anchor,
+                        }
+                    )
+                if not text_delta:
+                    continue
                 parts.append(text_delta)
                 yield _sse({"type": "content", "content": text_delta})
+        tail = head_scanner.finish()
+        if tail:
+            parts.append(tail)
+            yield _sse({"type": "content", "content": tail})
     except ModelClientError as exc:
         errored = True
         err_text = exc.message
@@ -805,10 +823,12 @@ def iter_generate(
     full = "".join(parts)
 
     # 流式为空时回退到工具轮已生成的正文（模型可能已在决策轮直接作答），
-    # 避免用户看到一条空白消息。
+    # 避免用户看到一条空白消息。该文本未过首行状态机，这里补一次同契约剥离。
     if not full.strip() and tool_answer:
-        full = tool_answer
-        yield _sse({"type": "content", "content": tool_answer})
+        full, fallback_anchor = draft_sentinel.strip_head_sentinel(tool_answer)
+        if fallback_anchor is not None and declared_anchor is None:
+            declared_anchor = fallback_anchor
+        yield _sse({"type": "content", "content": full})
 
     # 仍然为空：明确报错，而不是静默写入一条空消息
     if not full.strip() and not errored:
@@ -829,21 +849,28 @@ def iter_generate(
             pass
         yield _sse({"type": "error", "error": err_text})
 
-    # --- Anchor: 段落级定位。若模型在末尾输出 [[ANCHOR|...]] 哨兵则解析并剥离，
-    # 使 aiDraft 落位与正文替换有据可依；否则沿用前端选区透传的 content_anchor。 ---
-    full, content_anchor = _resolve_content_anchor(
-        full, requested_anchor=content_anchor
-    )
+    # --- Anchor: 段落级定位。模型声明的首行哨兵优先；否则若模型在末尾输出
+    # [[ANCHOR|...]] 则解析并剥离（兼容旧输出，prompt 已不再教）；最后才沿用前端
+    # 选区锚——**且仅在判定为正文时**，否则「选段提问」会拿到一个替换该段的按钮。 ---
+    full, legacy_anchor = _resolve_content_anchor(full, requested_anchor=None)
 
-    # --- Draft vs bubble routing (no separate Router call) ---
-    draft = _decide_draft(
+    # --- Draft vs bubble routing：模型声明 > 预设意图 > 旧落点标记 > Router 判定 > 默认闲聊 ---
+    kind = draft_sentinel.classify_output(
+        declared_anchor=declared_anchor,
         preset=preset,
-        reads_work=reads_work,
-        content=full,
-        tool_calls_requested=tool_called,
+        router_decision=router_decision,
+        legacy_anchor=legacy_anchor,
     )
+    draft = kind == "prose"
+    if draft:
+        content_anchor = declared_anchor or legacy_anchor or _normalize_anchor(
+            content_anchor
+        )
+    else:
+        content_anchor = None
+
     # Emit final meta so the frontend can open/close the aiDraft card with the
-    # resolved routing decision (length heuristic needs the full streamed text).
+    # resolved routing decision (模型声明需流式结束才能确认时用这里兜底)。
     yield _sse(
         {
             "type": "meta",
@@ -925,7 +952,7 @@ def iter_generate(
     yield _sse_done()
 
 
-# 模型在正文末尾单独一行输出锚定哨兵，供段落级定位/替换。
+# 模型在正文末尾单独一行输出锚定哨兵（旧契约，保留解析兼容；prompt 已不再教）。
 # 形态: [[ANCHOR|insert_after|5]]  或  [[ANCHOR|replace_range|1|5]]
 _ANCHOR_SENTINEL_RE = re.compile(
     r"\[\[\s*ANCHOR\s*\|\s*(?P<mode>insert_after|replace_range)\s*\|"
@@ -936,21 +963,7 @@ _ANCHOR_SENTINEL_RE = re.compile(
 
 def _normalize_anchor(anchor: Any) -> Optional[dict]:
     """校验/归一化一个锚对象为 {mode,startPara,endPara}（正数）；非法返回 None。"""
-    if not isinstance(anchor, dict):
-        return None
-    mode = str(anchor.get("mode") or "").strip()
-    if mode not in ("insert_after", "replace_range"):
-        return None
-    start = anchor.get("startPara")
-    end = anchor.get("endPara", start)
-    try:
-        start = int(start)
-        end = int(end)
-    except (TypeError, ValueError):
-        return None
-    if start < 1 or end < start:
-        return None
-    return {"mode": mode, "startPara": start, "endPara": end}
+    return draft_sentinel.normalize_anchor(anchor)
 
 
 def _resolve_content_anchor(full: str, requested_anchor: Optional[dict]) -> tuple[str, Optional[dict]]:
@@ -1024,38 +1037,9 @@ def _tools_supported_error(exc: ModelClientError) -> bool:
 
 def _preset_draft(preset: Optional[str]) -> bool:
     """Draft decision from preset alone (upfront, before any model call)."""
-    if preset:
-        if preset in DRAFT_PRESETS:
-            return True
-        if preset in BUBBLE_PRESETS:
-            return False
-    return False
-
-
-def _decide_draft(
-    *,
-    preset: Optional[str],
-    reads_work: bool,
-    content: str,
-    tool_calls_requested: bool,
-) -> bool:
-    """Decide whether this turn's output is prose (aiDraft) or a chat bubble.
-
-    Reuses the first agentic result — no extra model call. Reads-work implies
-    the model is continuing/revising prose, so it is a sufficient draft signal
-    (available before streaming). Free-text turns without tool calls fall back
-    to a content-length heuristic once the streamed text is known.
-    """
-    if preset:
-        if preset in DRAFT_PRESETS:
-            return True
-        if preset in BUBBLE_PRESETS:
-            return False
-    if reads_work:
-        return True
-    if not tool_calls_requested and len(content) > DRAFT_PROSE_MIN_CHARS:
-        return True
-    return False
+    return (
+        draft_sentinel.classify_output(declared_anchor=None, preset=preset) == "prose"
+    )
 
 
 def _try_save_run(

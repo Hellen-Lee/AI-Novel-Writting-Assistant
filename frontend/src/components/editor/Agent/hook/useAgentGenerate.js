@@ -3,7 +3,9 @@ import { getErrorMessage } from '../../../../api/client'
 import { countWords } from '../../../../utils/format'
 import {
   parseAnchorSentinel,
+  parseDraftSentinel,
   stripAnchorSentinel,
+  stripDraftSentinel,
 } from '../../../../utils/paragraphs'
 import { runAgentGenerate } from '../service/generate'
 import { AGENT_PHASE, QUICK_ACTIONS } from '../utils/constants'
@@ -154,14 +156,14 @@ export function useAgentGenerate({
         setAiDraft?.(null)
         return
       }
-      // 流式中剥掉模型可能附加的段落锚哨兵，避免展示 [[ANCHOR|...]]
-      const cleanText = stripAnchorSentinel(chunkText)
+      // 流式中剥掉模型可能附加的段落锚/成稿声明哨兵，避免展示 [[...]]
+      const cleanText = stripAnchorSentinel(stripDraftSentinel(chunkText))
       setAiDraft?.({
         text: cleanText,
         skill: skillLabel,
         status,
         phase: phaseRef,
-        // 带上当前已解析的锚（请求时选区锚 → meta 后模型哨兵锚），
+        // 带上当前已解析的锚（请求时选区锚 → draft_hint/meta 的声明锚），
         // 使草稿卡在流式期间就渲染到目标段落之后
         anchor: resolvedAnchor || undefined,
         ...extra,
@@ -273,6 +275,17 @@ export function useAgentGenerate({
             thinkingBuf += chunk
             // 思考只保存在当前前端消息对象，不能混入正文或字数统计。
             patchAssist({ thinking: thinkingBuf })
+          } else if (ev?.type === 'draft_hint') {
+            // 模型在正文首行声明了成稿：不必等末尾 meta，立刻开草稿卡并落位，
+            // 避免「先当闲聊气泡、结束后突跳成草稿卡」的闪动。
+            if (ev.content_anchor && typeof ev.content_anchor === 'object') {
+              resolvedAnchor = ev.content_anchor
+            }
+            draftMode = true
+            skillLabel = skillLabel || '续写'
+            patchAssist({ skill: skillLabel, pending: true, draftRound: true })
+            setPhase(AGENT_PHASE.STREAMING)
+            syncDraft(streamBuf, 'streaming')
           } else if (ev?.type === 'tool_progress') {
             const incoming = Array.isArray(ev.tools)
               ? ev.tools
@@ -319,7 +332,7 @@ export function useAgentGenerate({
         },
       })
 
-      const finalText = stripAnchorSentinel(result.content || streamBuf)
+      const finalText = stripAnchorSentinel(stripDraftSentinel(result.content || streamBuf))
       if (result.error && finalText) {
         showNotice(result.error)
       }
@@ -331,9 +344,11 @@ export function useAgentGenerate({
       } else if (!draftMode) {
         skillLabel = skillLabel || '闲聊'
       }
-      // 兜底：若后端未随 meta 回传锚，仍可从正文末尾解析模型哨兵
+      // 兜底：若后端未随 meta 回传锚，仍可从正文解析模型声明/末尾哨兵
       if (!resolvedAnchor) {
-        const parsed = parseAnchorSentinel(result.content || streamBuf)
+        const parsed =
+          parseDraftSentinel(result.content || streamBuf) ||
+          parseAnchorSentinel(result.content || streamBuf)
         if (parsed) resolvedAnchor = parsed
       }
       const finalPhase = result.error ? AGENT_PHASE.ERROR : AGENT_PHASE.DONE
@@ -375,7 +390,7 @@ export function useAgentGenerate({
         })
         if (draftMode && streamBuf) {
           setAiDraft?.({
-            text: stripAnchorSentinel(streamBuf),
+            text: stripAnchorSentinel(stripDraftSentinel(streamBuf)),
             skill: skillLabel,
             status: 'ready',
             phase: AGENT_PHASE.STOPPED,

@@ -688,6 +688,12 @@ def test_generate_continue(
         metas[-1].get("draft") is True,
         "draft 应为 True 以便前端展示「采纳」卡片",
     )
+    # draft 声明哨兵必须在服务端剥离，不能漏进正文
+    r.check(
+        "正文不含 draft 声明哨兵",
+        "[[DRAFT" not in text,
+        "首行 [[DRAFT|...]] 应由后端剥离",
+    )
 
     text = sse_text(events)
     if not r.check("流式返回正文", len(text) > 20, f"{len(text)} 字：{text[:40]}…"):
@@ -769,6 +775,13 @@ def test_generate_freetext(c: Client, r: Report, pid: str, sid: str) -> None:
         "自由输入返回内容",
         len(text) > 5,
         f"路由结果 skill={picked or '(闲聊)'} · {preview}…",
+    )
+    # 回归：讨论/提问类自由输入（读过正文但未声明成稿）不得被塞进草稿卡
+    draft_flag = metas[-1].get("draft") if metas else None
+    r.check(
+        "问答类自由输入不判为正文草稿",
+        draft_flag is not True,
+        f"draft={draft_flag}（读过正文的分析不应进草稿卡）",
     )
 
 

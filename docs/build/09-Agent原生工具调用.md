@@ -1,8 +1,14 @@
 # Agent 原生工具调用（统一 agentic 路径）
 
-> 前置：[`06-Agent生成与会话链路.md`](06-Agent生成与会话链路.md)、[`07-轻量Agent闲聊与Router.md`](07-轻量Agent闲聊与Router.md)（两者描述的是**已移除**的 Router 架构，本文件为其替代）  
-> 代码：`backend/app/services/{model_client,agent_tools,prompt_builder,generation_service}.py`、`models/schemas.py`；前端 `components/editor/Agent/hook/{useAgentGenerate,useAgentPanel}.js`、`components/agent-viewer/{format,pipeline,ModelCall}.jsx`  
-> 迭代记录：`docs/changes/260822-Agent原生工具调用与移除Router.md`
+> 前置：[`06-Agent生成与会话链路.md`](06-Agent生成与会话链路.md)、[`07-轻量Agent闲聊与Router.md`](07-轻量Agent闲聊与Router.md)  
+> 代码：`backend/app/services/{model_client,agent_tools,prompt_builder,generation_service,draft_sentinel}.py`、`models/schemas.py`；前端 `components/editor/Agent/hook/{useAgentGenerate,useAgentPanel}.js`、`components/agent-viewer/{format,pipeline,ModelCall}.jsx`  
+> 迭代记录：`docs/changes/260822-Agent原生工具调用与移除Router.md`、[`261016-draft判定重构与首行成稿声明.md`](../changes/261016-draft判定重构与首行成稿声明.md)
+
+> **架构现状勘误（261016）**：本文 §2 描述的「删除 Router」是 260822 的状态；此后
+> 自由文本路径**又重新接回了一次轻量 Router**（见 `generation_service.iter_generate`：
+> 未指定 `skill_name` 时先调 `build_router_prompt` 从可自动选用目录中选一个 skill）。
+> 因此当前的自由文本链路是「Router 分流 + agentic 工具循环 + 最终流式」，
+> 本文 §2 的「路由隐式化」描述**已不成立**，仅保留为历史决策记录。
 
 本文记录 Agent 生成链路为何从「线性单轮 + Router 分流 + 全量上下文预塞」改为「agentic 原生 function-calling + 统一路径」；**不是**字段说明书。
 
@@ -109,19 +115,30 @@ Session
 
 ---
 
-## 5. draft vs 气泡（`_decide_draft`）
+## 5. draft vs 气泡（`draft_sentinel.classify_output`）
 
-不额外调模型，复用第一跳 agentic 结果：
+> 261016 重构：判定从**事后启发式**换成**模型显式声明 + 分层判定**，默认偏非 draft。
+> 详见 [`261016-draft判定重构与首行成稿声明.md`](../changes/261016-draft判定重构与首行成稿声明.md)。
+
+依据可信度降序：
 
 | 判定 | 结果 |
 | --- | --- |
+| 首行声明哨兵 `[[DRAFT\|...]]` 命中 | **draft** + 落点（模型显式声明，最强） |
 | 预设 ∈ {续写, 润色, 扩写} | **draft**（无条件，明确写正文） |
 | 预设 = 生成设定 | **bubble**（JSON 结构输出，用户阅读/复制） |
-| 调用了 `read_chapter` / `read_recent_work` | **draft**（读了前文=在写正文） |
-| 自由文本、无读工具、输出 > `DRAFT_PROSE_MIN_CHARS`(400) | **draft** |
-| 其余 | **bubble**（闲聊） |
+| Router `decision ∈ {chat, clarify}` | **bubble**（不再被启发式翻盘） |
+| 其余（Router 被跳过/报错、无信号） | **bubble**（默认兜底） |
 
-前端 `useAgentGenerate` 据 `meta.draft` 打开/收拢 aiDraft 卡（复用既有组件，不新增）；`pending` 由此决定。
+已**删除**旧的两条启发式：`reads_work` 单信号成判（读过正文 ≠ 在写正文，审阅分析恰恰
+必须读稿）、长度启发式（`DRAFT_PROSE_MIN_CHARS`，分析天然超 400 字）。二者合起来会把
+「评估本章完整性」这类讨论输出误判成草稿卡。
+
+前端 `useAgentGenerate` 据 `draft_hint`（流式期间，声明命中即发）或 `meta.draft`
+（兜底）打开/收拢 aiDraft 卡（复用既有组件，不新增）；`pending` 由此决定。
+非成稿回复就是普通聊天气泡、只读——**不提供「送入正文」入口**：判定为非成稿后
+再给一条把它塞进正文的路径，与「默认偏非 draft」的原则自相矛盾。需要正文请显式
+点续写/润色/扩写，或让模型在首行输出成稿声明。
 
 ---
 
@@ -132,7 +149,8 @@ Session
 - **流式 tool_call 解析**：arguments 分片按 index 累积 + JSON 容错（失败视为 `{}`）。
 - **工具结果预算**：每工具结果按字符上限截断，保护上下文。
 - **`finish_reason` 不可靠**：routing 判定不依赖它。
-- **双 `meta`**：首个用于 id 映射（draft 预判），定稿 `meta` 承载最终 draft（长度启发需流式全文）。
+- **双 `meta`**：首个用于 id 映射（预设预判），定稿 `meta` 承载最终 draft（需流式全文才能确认）；模型声明命中时会先发 `draft_hint` 提前开卡，避免气泡突跳。
+- **首行状态机**：哨兵分片/前导空行/fence 包裹均容忍；首个正文字符出现即封口，正文中同形文本原样保留；段号非法或超长无进展缓冲时回退为正文。
 
 ---
 

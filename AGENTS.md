@@ -189,6 +189,7 @@ AINovel/
 - `system`：仅 `quick_action` 使用。
 - `disable-model-invocation`：为 `true` 时禁止模型根据 description 自动选用该技能（两种 kind 均可手动调用）。**模型自动选用**：自由输入（未指定 `skill_name`）时，后端先做一次轻量路由，从 `disable-model-invocation=false` 的 skill 目录中选一个注入其意图，未命中则走统一 agentic 自由文本路径；详见 `docs/changes/` 对应记录。
 - 正文：用户消息模板；常见变量如 `$worldview`、`$characters`（含内嵌关系）、`$story_core`、`$synopsis`、`$volumes`、`$previous_chapters`、`$current_content`、`$selected_text`、`$user_input`、`$global_rules`、`$chapter_rules` 等。
+- **成稿声明（首行哨兵）**：`quick_action` 中产出正文的技能（续写/润色/扩写），其 `system` 应要求模型在**正文第一行**输出 `[[DRAFT|insert_after|N]]` 或 `[[DRAFT|replace_range|a|b]]`，声明"这段是可以直接落进正文的成稿"及其落点。后端按首行状态机剥离并据此判定 `draft`；**不输出声明即视为非成稿**（讨论/分析/审阅）。末尾 `[[ANCHOR|...]]` 为旧契约，仍可解析但不再教模型输出。
 
 示例（quick_action）：
 
@@ -200,6 +201,8 @@ kind: quick_action
 disable-model-invocation: false
 system: |
   你是一位专业小说作者……
+  请在正文第一行单独输出成稿声明，标明插入位置，段号 1 起：
+  接在末段之后 → 首行写 [[DRAFT|insert_after|当前末段段号]]
 ---
 当前章节已有内容：
 $current_content
@@ -393,13 +396,24 @@ $user_input
   "model": "gpt-4o-mini"?       // 覆盖本次调用的默认模型
 }
 // SSE 帧：{"type":"meta", session_id, user_message_id, assistant_message_id,
-//          mode:"agent", skill_name, preset, draft: bool}
+//          mode:"agent", skill_name, preset, draft: bool, content_anchor?}
 //        {"type":"tool_progress","tools":[{name, arguments}]}
 //        {"type":"thinking","text":"..."}       // reasoning 增量，不进正文
+//        {"type":"draft_hint","draft":true,"content_anchor":{...}}  // 模型首行声明成稿，流式期提前开卡
 //        {"type":"content","content":"增量文本"}
 //        {"type":"error","error":"..."}
 //        data: [DONE]
-// draft=true → 前端展示「采纳/丢弃/重新生成」卡片；draft=false → 聊天气泡
+// draft=true → 前端展示「采纳/丢弃/重新生成」卡片；draft=false → 聊天气泡（只读，不提供送入正文入口）
+//
+// draft 判定（draft_sentinel.classify_output）按可信度降序，默认偏非 draft：
+//   1. 首行声明哨兵 [[DRAFT|insert_after|N]] / [[DRAFT|replace_range|a|b]] → 成稿 + 落点
+//   2. preset ∈ {续写, 润色, 扩写} → 成稿
+//   3. preset = 生成设定 → 非成稿
+//   4. Router decision ∈ {chat, clarify} → 非成稿（不再被启发式翻盘）
+//   5. 无信号 → 非成稿
+// 非成稿就是非成稿：不再提供「把气泡内容塞进正文」的手动路径，需要正文请显式点续写/润色。
+// 已移除旧启发式（reads_work 单信号、400 字长度阈值）：审阅分析必须读稿且天然超长，
+// 会被误判成草稿卡并诱导写入正文。详见 docs/changes/261016-draft判定重构与首行成稿声明.md
 ```
 
 #### 引导页生成（无状态）
