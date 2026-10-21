@@ -203,13 +203,14 @@
 /* ---------- 气泡上方摘要（可折叠） ---------- */
 
 .agent-ws--bubble {
-  align-items: flex-end;
-  width: 100%;
+  /* 宽度随内容收缩（不拉出整行空白），整体由父级 column 布局贴右 */
+  align-items: flex-start;
+  width: auto;
   max-width: 88%; /* 与用户气泡 max-width 对齐 */
 }
 
 .agent-ws--bubble .agent-ws__row-wrap {
-  align-self: flex-end;
+  align-self: stretch;
 }
 
 .agent-ws__bundle-head {
