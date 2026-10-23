@@ -1,5 +1,7 @@
-import { useRef, useState } from 'react'
+import { useId, useRef, useState } from 'react'
 import {
+  ChevronDown,
+  ChevronUp,
   FileText,
   FileWarning,
   Image as ImageIcon,
@@ -214,7 +216,8 @@ export function AttachmentWorkspace({
 }
 
 /**
- * 用户消息气泡上方的附件摘要：与工作区同样的两行结构，完整展示并自动换行。
+ * 用户消息气泡上方的附件摘要：默认折叠，只留头行（`N 个引用` + 展开）；
+ * 展开后按设计稿（docs/Novel.pen 节点 p7oWsH）展示 chip 行 + 选中文本引用行。
  */
 export function AttachmentBundle({
   items = [],
@@ -222,17 +225,35 @@ export function AttachmentBundle({
 }) {
   const rowItems = sortRowItems(items)
   const text = pickText(selection)
+  const [open, setOpen] = useState(false)
+  const bodyId = useId()
+
   if (!rowItems.length && !text) return null
 
-  const totalCount = rowItems.length + (text ? 1 : 0)
+  // 统一计数：chip（图片 / 技能 / 文件）+ 选中文本，合并为「N 个引用」
+  const refCount = rowItems.length + (text ? 1 : 0)
 
   return (
     <div className="agent-ws agent-ws--bubble">
       <div className="agent-ws__bundle-head">
-        <span className="agent-ws__bundle-count">{totalCount} 个附件</span>
+        <span className="agent-ws__bundle-count">{refCount} 个引用</span>
+        <button
+          type="button"
+          className="agent-ws__bundle-toggle"
+          aria-expanded={open}
+          aria-controls={open ? bodyId : undefined}
+          onClick={() => setOpen((value) => !value)}
+        >
+          <span>{open ? '收起' : '展开'}</span>
+          {open ? <ChevronUp size={12} aria-hidden /> : <ChevronDown size={12} aria-hidden />}
+        </button>
       </div>
-      {rowItems.length ? <ChipRow items={rowItems} compact /> : null}
-      {text ? <QuoteRow text={text} compact /> : null}
+      {open ? (
+        <div className="agent-ws__bundle-body" id={bodyId}>
+          {rowItems.length ? <ChipRow items={rowItems} compact /> : null}
+          {text ? <QuoteRow text={text} compact /> : null}
+        </div>
+      ) : null}
     </div>
   )
 }

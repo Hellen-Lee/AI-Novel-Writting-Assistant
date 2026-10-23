@@ -1,5 +1,5 @@
 {
-  "version": "2.17",
+  "version": "2.21",
   "children": [
     {
       "type": "frame",
@@ -11967,224 +11967,6 @@
             },
             {
               "type": "frame",
-              "id": "O6oPk",
-              "name": "Msg/User-WithAttach",
-              "width": "fill_container",
-              "layout": "vertical",
-              "gap": 4,
-              "alignItems": "end",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "h6Gmi",
-                  "name": "StyleLabel",
-                  "fill": "#8A9A93",
-                  "content": "带附件 · 气泡上方",
-                  "fontFamily": "Inter",
-                  "fontSize": 9,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "frame",
-                  "id": "SXAMH",
-                  "name": "AttachBundle",
-                  "width": "fill_container",
-                  "layout": "vertical",
-                  "gap": 4,
-                  "alignItems": "end",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "CfmMe",
-                      "name": "AttachRow",
-                      "gap": 4,
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "frame",
-                          "id": "C3WbJ",
-                          "name": "Attach/Image",
-                          "height": 24,
-                          "fill": "#FFFFFF",
-                          "cornerRadius": 5,
-                          "stroke": "#D5DED9",
-                          "gap": 4,
-                          "padding": [
-                            0,
-                            7
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "knLvI",
-                              "width": 11,
-                              "height": 11,
-                              "icon": "image",
-                              "library": "Material Symbols Rounded",
-                              "fill": "#5A6B63"
-                            },
-                            {
-                              "type": "text",
-                              "id": "xnQij",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": 56,
-                              "content": "封面.jpg",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "OJbPv",
-                          "name": "Attach/File",
-                          "height": 24,
-                          "fill": "#FFFFFF",
-                          "cornerRadius": 5,
-                          "stroke": "#D5DED9",
-                          "gap": 4,
-                          "padding": [
-                            0,
-                            7
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "c61Muw",
-                              "width": 11,
-                              "height": 11,
-                              "icon": "description",
-                              "library": "Material Symbols Rounded",
-                              "fill": "#5A6B63"
-                            },
-                            {
-                              "type": "text",
-                              "id": "CnvN6",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": 60,
-                              "content": "设定资料…",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "gE0YD",
-                          "name": "Attach/Skill",
-                          "height": 24,
-                          "fill": "#FFFFFF",
-                          "cornerRadius": 5,
-                          "stroke": "#D5DED9",
-                          "gap": 4,
-                          "padding": [
-                            0,
-                            7
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "icon",
-                              "id": "BDK3L",
-                              "width": 11,
-                              "height": 11,
-                              "icon": "star",
-                              "library": "Material Symbols Rounded",
-                              "fill": "#5A6B63"
-                            },
-                            {
-                              "type": "text",
-                              "id": "Qa5vp",
-                              "fill": "#1A2E28",
-                              "textGrowth": "fixed-width",
-                              "width": 36,
-                              "content": "续写",
-                              "fontFamily": "Inter",
-                              "fontSize": 10,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "T0Kpwj",
-                      "name": "Attach/Quote",
-                      "width": 228,
-                      "height": 24,
-                      "fill": "#FFFFFF",
-                      "cornerRadius": 5,
-                      "stroke": "#D5DED9",
-                      "gap": 4,
-                      "padding": [
-                        0,
-                        7
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "i3dELP",
-                          "width": 11,
-                          "height": 11,
-                          "icon": "format_quote",
-                          "library": "Material Symbols Rounded",
-                          "fill": "#8A9A93"
-                        },
-                        {
-                          "type": "text",
-                          "id": "C9pWV6",
-                          "fill": "#5A6B63",
-                          "textGrowth": "fixed-width",
-                          "width": "fill_container",
-                          "content": "「雨停之后，青灯人仍未…」",
-                          "fontFamily": "Inter",
-                          "fontSize": 10,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "PoTLK",
-                  "name": "Bubble",
-                  "width": 228,
-                  "fill": "#2D5A4A",
-                  "cornerRadius": 12,
-                  "layout": "vertical",
-                  "padding": [
-                    10,
-                    12
-                  ],
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "XuMXV",
-                      "name": "Text",
-                      "fill": "#FFFFFF",
-                      "textGrowth": "fixed-width",
-                      "width": "fill_container",
-                      "content": "参考这些素材，按悬疑气氛续写一段",
-                      "lineHeight": 1.45,
-                      "fontFamily": "Inter",
-                      "fontSize": 12,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "M7s91A",
               "name": "Msg/User-Collapsed",
               "width": "fill_container",
@@ -12204,115 +11986,47 @@
                 },
                 {
                   "type": "frame",
-                  "id": "qRTJO",
-                  "name": "AttachBar/Collapsed",
+                  "id": "GZSh6",
+                  "name": "Header",
+                  "width": "fill_container",
                   "gap": 4,
+                  "justifyContent": "end",
                   "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "F3RttJ",
-                      "name": "Attach/Image",
-                      "height": 24,
-                      "fill": "#FFFFFF",
-                      "cornerRadius": 5,
-                      "stroke": "#D5DED9",
-                      "gap": 4,
-                      "padding": [
-                        0,
-                        7
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "y1vHqT",
-                          "width": 11,
-                          "height": 11,
-                          "icon": "image",
-                          "library": "Material Symbols Rounded",
-                          "fill": "#5A6B63"
-                        },
-                        {
-                          "type": "text",
-                          "id": "lMrFJ",
-                          "fill": "#1A2E28",
-                          "textGrowth": "fixed-width",
-                          "width": 56,
-                          "content": "场景.jpg",
-                          "fontFamily": "Inter",
-                          "fontSize": 10,
-                          "fontWeight": "normal"
-                        }
-                      ]
+                      "type": "text",
+                      "id": "ZzEjx",
+                      "fill": "#8A9A93",
+                      "content": "5 个附件",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
-                      "id": "QeAmL",
-                      "name": "Attach/File",
-                      "height": 24,
-                      "fill": "#FFFFFF",
-                      "cornerRadius": 5,
-                      "stroke": "#D5DED9",
-                      "gap": 4,
-                      "padding": [
-                        0,
-                        7
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon",
-                          "id": "CGgJd",
-                          "width": 11,
-                          "height": 11,
-                          "icon": "description",
-                          "library": "Material Symbols Rounded",
-                          "fill": "#5A6B63"
-                        },
-                        {
-                          "type": "text",
-                          "id": "N9Ca4",
-                          "fill": "#1A2E28",
-                          "textGrowth": "fixed-width",
-                          "width": 52,
-                          "content": "章1.docx",
-                          "fontFamily": "Inter",
-                          "fontSize": 10,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "w7j2k",
-                      "name": "MoreToggle",
-                      "height": 24,
-                      "fill": "#FFFFFF",
-                      "cornerRadius": 5,
-                      "stroke": "#D5DED9",
+                      "id": "ol7cG",
+                      "name": "CollapseToggle",
                       "gap": 2,
-                      "padding": [
-                        0,
-                        6
-                      ],
                       "alignItems": "center",
                       "children": [
                         {
                           "type": "text",
-                          "id": "t1MQx",
+                          "id": "zmNJY",
+                          "name": "展开",
                           "fill": "#8A9A93",
-                          "content": "+2",
+                          "content": "展开",
                           "fontFamily": "Inter",
                           "fontSize": 10,
                           "fontWeight": "normal"
                         },
                         {
                           "type": "icon",
-                          "id": "Upvha",
+                          "id": "L8fO1x",
+                          "rotation": 180,
+                          "flipX": true,
                           "width": 12,
                           "height": 12,
-                          "icon": "keyboard_arrow_down",
+                          "icon": "keyboard_arrow_up",
                           "library": "Material Symbols Rounded",
                           "fill": "#8A9A93"
                         }
@@ -12324,7 +12038,7 @@
                   "type": "frame",
                   "id": "fa055",
                   "name": "Bubble",
-                  "width": 228,
+                  "width": 144,
                   "fill": "#2D5A4A",
                   "cornerRadius": 12,
                   "layout": "vertical",
@@ -12384,6 +12098,7 @@
                       "name": "Header",
                       "width": "fill_container",
                       "gap": 4,
+                      "justifyContent": "end",
                       "alignItems": "center",
                       "children": [
                         {
@@ -12421,13 +12136,6 @@
                               "fill": "#8A9A93"
                             }
                           ]
-                        },
-                        {
-                          "type": "frame",
-                          "id": "iMdEK",
-                          "name": "Spacer",
-                          "width": "fill_container",
-                          "height": 1
                         }
                       ]
                     },
@@ -12442,6 +12150,7 @@
                           "type": "frame",
                           "id": "RMxMl",
                           "name": "Attach/Image",
+                          "width": 71,
                           "height": 24,
                           "fill": "#FFFFFF",
                           "cornerRadius": 5,
@@ -12479,6 +12188,7 @@
                           "type": "frame",
                           "id": "xJPTR",
                           "name": "Attach/Image-2",
+                          "width": 69,
                           "height": 24,
                           "fill": "#FFFFFF",
                           "cornerRadius": 5,
@@ -12516,6 +12226,7 @@
                           "type": "frame",
                           "id": "fIpp7",
                           "name": "Attach/File",
+                          "width": 72,
                           "height": 24,
                           "fill": "#FFFFFF",
                           "cornerRadius": 5,
@@ -12678,7 +12389,7 @@
                   "type": "frame",
                   "id": "sAaZS",
                   "name": "Bubble",
-                  "width": 228,
+                  "width": 144,
                   "fill": "#2D5A4A",
                   "cornerRadius": 12,
                   "layout": "vertical",
@@ -12826,44 +12537,6 @@
                       ]
                     }
                   ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "ZbpYc",
-              "name": "Msg/System",
-              "width": "fill_container",
-              "fill": "#F8EDE3",
-              "cornerRadius": 8,
-              "gap": 8,
-              "padding": [
-                8,
-                10
-              ],
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "nO6xG",
-                  "name": "SysIcon",
-                  "width": 14,
-                  "height": 14,
-                  "icon": "lightbulb",
-                  "library": "lucide",
-                  "fill": "#C4783A"
-                },
-                {
-                  "type": "text",
-                  "id": "V7SUjG",
-                  "name": "SysText",
-                  "fill": "#1A2E28",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "检测到新角色「青灯人」，可确认写入设定库。",
-                  "lineHeight": 1.4,
-                  "fontFamily": "Geist",
-                  "fontSize": 11,
-                  "fontWeight": "normal"
                 }
               ]
             }

@@ -200,11 +200,11 @@
   background: #e8eee9;
 }
 
-/* ---------- 气泡上方摘要（可折叠） ---------- */
+/* ---------- 气泡上方摘要（可折叠，docs/Novel.pen 节点 M7s91A / p7oWsH） ---------- */
 
 .agent-ws--bubble {
   /* 宽度随内容收缩（不拉出整行空白），整体由父级 column 布局贴右 */
-  align-items: flex-start;
+  align-items: flex-end;
   width: auto;
   max-width: 88%; /* 与用户气泡 max-width 对齐 */
 }
@@ -213,9 +213,25 @@
   align-self: stretch;
 }
 
+/* 展开态 chip 行按设计稿右侧堆叠 */
+.agent-ws--bubble .agent-ws__row {
+  justify-content: flex-end;
+}
+
+/* 展开态内容块：chip 行 + 引用行，右对齐纵向堆叠 */
+.agent-ws__bundle-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  align-self: stretch;
+  min-width: 0;
+}
+
 .agent-ws__bundle-head {
   display: flex;
   align-items: center;
+  justify-content: flex-end; /* 设计稿 justifyContent: end */
   gap: 4px;
   align-self: stretch;
   font-family: var(--font-sans);
@@ -223,3 +239,22 @@
   color: var(--color-text-muted);
 }
 
+.agent-ws__bundle-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-family: var(--font-sans);
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.agent-ws__bundle-toggle:hover {
+  color: var(--color-primary);
+}
