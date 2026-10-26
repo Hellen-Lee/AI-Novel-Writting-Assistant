@@ -43,6 +43,7 @@ data/projects/{project_id}/agent/
 
 - `session_id` 由服务端生成（`sess_...`）。
 - 会话字段：`summary`（对话摘要，默认 `""`）；旧文件缺省兼容。
+- 消息字段：`content` 只放可见正文/回答；`thinking` 是**独立思考副本**（原生 reasoning，≤20000 字，供刷新回显），不参与历史组装、摘要与字数统计。完整思考原文在 `agent/reasoning/{run_id}/step_*.txt.gz`。
 - **后续口子（本期不落键）**：`waiting_user`、`pending_run`（随 `ask`）。
 - 切换会话：前端改 `activeSessionId` 并拉取详情；若正在生成则**先 abort**。
 

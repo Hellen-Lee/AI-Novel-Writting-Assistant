@@ -342,6 +342,7 @@ def update_message(
     skill: Optional[str] = None,
     status: Optional[str] = None,
     tools: Optional[list[dict[str, Any]]] = None,
+    thinking: Optional[str] = None,
 ) -> dict[str, Any]:
     session = get_session(project_id, session_id)
     messages = session.get("messages") or []
@@ -362,6 +363,9 @@ def update_message(
             msg["skill"] = skill
         if tools is not None:
             msg["tools"] = tools
+        if thinking is not None:
+            # 独立思考字段：不参与 content、摘要与上下文组装
+            msg["thinking"] = thinking
         break
     if not found:
         raise FileNotFoundError(f"消息不存在: {message_id}")

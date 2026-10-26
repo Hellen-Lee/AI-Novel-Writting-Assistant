@@ -34,6 +34,8 @@ export function mapSessionDetail(detail, projectId = '') {
         skill: m.skill || '',
         pending: Boolean(m.pending),
         error: m.error || '',
+        // 后端落盘的思考文本（原生 reasoning）；空串时 ThinkingBlock 不渲染
+        thinking: m.thinking || '',
         // 历史消息：后端落盘 pending = draft，据此还原写作轮折叠态与字数
         phase: AGENT_PHASE.DONE,
         draftRound: Boolean(m.pending),

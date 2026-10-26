@@ -19,6 +19,7 @@ from app.routers import agent_viewer
 from app.services import (
     generation_service,
     project_store,
+    prompt_builder,
     reasoning_store,
     run_store,
     session_store,
@@ -345,15 +346,49 @@ class GenerationReasoningTest(unittest.TestCase):
         self.assertEqual(step["chars_est"]["response"], len(content))
 
         session = session_store.get_session(self.project_id, self.session_id)
-        session_text = json.dumps(session, ensure_ascii=False)
-        self.assertNotIn("先观察", session_text)
-        self.assertNotIn("再承接", session_text)
-        self.assertEqual(session["messages"][-1]["content"], content)
+        assistant = session["messages"][-1]
+        # 思考落到独立元字段，供刷新后回显；正文与字数统计不受影响。
+        self.assertEqual(assistant["thinking"], "先观察再承接")
+        self.assertEqual(assistant["content"], content)
+
+    def test_persisted_thinking_does_not_enter_history_or_summary(self) -> None:
+        self.run_turn(FakeClient(("内部推理线索",), "正文段落"))
+
+        session = session_store.get_session(self.project_id, self.session_id)
+        history = prompt_builder.build_history_block(session)
+        self.assertNotIn("内部推理线索", history)
+        self.assertIn("正文段落", history)
+        self.assertNotIn(
+            "内部推理线索", session_store.format_messages_for_summary(session["messages"])
+        )
 
     def test_non_reasoning_model_does_not_add_reasoning_field(self) -> None:
         self.run_turn(FakeClient((), "普通模型正文"))
 
         self.assertNotIn("reasoning", self.agent_step())
+        assistant = session_store.get_session(self.project_id, self.session_id)[
+            "messages"
+        ][-1]
+        self.assertNotIn("thinking", assistant)
+
+    def test_persisted_thinking_is_bounded_for_switch_session_payload(self) -> None:
+        long_reasoning = "思" * (generation_service.MESSAGE_THINKING_MAX_CHARS + 500)
+        self.run_turn(FakeClient((long_reasoning,), "正文"))
+
+        assistant = session_store.get_session(self.project_id, self.session_id)[
+            "messages"
+        ][-1]
+        self.assertEqual(
+            len(assistant["thinking"]),
+            generation_service.MESSAGE_THINKING_MAX_CHARS,
+        )
+        self.assertTrue(
+            assistant["thinking"].endswith(
+                generation_service.MESSAGE_THINKING_SUFFIX
+            )
+        )
+        # 正文不受思考长度影响
+        self.assertEqual(assistant["content"], "正文")
 
     def test_tool_round_replays_reasoning_content_in_follow_up_messages(self) -> None:
         client = ToolAwareFakeClient("工具结果正文")
@@ -376,6 +411,11 @@ class GenerationReasoningTest(unittest.TestCase):
             {"type": "thinking", "text": "工具决策思考", "phase": "tool_round"},
         )
         self.assertTrue(any(event["type"] == "tool_progress" for event in events))
+        assistant_message = session_store.get_session(self.project_id, self.session_id)[
+            "messages"
+        ][-1]
+        self.assertIn("工具决策思考", assistant_message["thinking"])
+        self.assertNotIn("工具决策思考", assistant_message["content"])
         tool_steps = [
             step
             for run in run_store.list_runs_for_session(self.project_id, self.session_id)

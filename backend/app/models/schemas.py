@@ -368,6 +368,8 @@ class AgentMessage(BaseModel):
     attachments: list[dict[str, Any]] = Field(default_factory=list)
     # user 消息发送时的选中文本快照
     selection: str = ""
+    # 本次生成模型返回的思考文本（原生 reasoning）；仅供刷新后回显
+    thinking: str = ""
 
 
 class SessionSummary(BaseModel):

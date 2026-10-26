@@ -381,7 +381,8 @@ $user_input
 ```jsonc
 // SessionCreateRequest { title: str = "新对话" }
 // AgentMessage { id, role: "user"|"assistant", content, pending?: bool,
-//                skill?: str, error?: str, status?: "generating"|"idle", created_at }
+//                skill?: str, error?: str, status?: "generating"|"idle", created_at,
+//                thinking?: str }   // 思考回显副本（≤20000 字，独立字段，不进 content/历史/摘要）
 // SessionDetail { id, title, messages: [AgentMessage], summary?, summary_at_round_count?, updated_at }
 
 // GenerateRequest（POST /api/projects/{id}/generate，返回 SSE 流）

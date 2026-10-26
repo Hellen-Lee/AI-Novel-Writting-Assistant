@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ChevronDown, ChevronUp, Sparkles } from 'lucide-react'
+import { ChevronDown, ChevronRight, Sparkles } from 'lucide-react'
 import { AGENT_PHASE } from '../../utils/constants'
 
 /**
@@ -41,7 +41,13 @@ export function ThinkingBlock({ messageId, phase, text }) {
           <Sparkles size={13} aria-hidden />
           <span>已深度思考</span>
         </span>
-        {open ? <ChevronUp size={14} aria-hidden /> : <ChevronDown size={14} aria-hidden />}
+        <span className="agent-panel__thinking-arrow">
+          {open ? (
+            <ChevronDown size={12} aria-hidden />
+          ) : (
+            <ChevronRight size={12} aria-hidden />
+          )}
+        </span>
       </button>
       {open ? (
         <div

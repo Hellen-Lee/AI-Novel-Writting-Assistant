@@ -83,6 +83,8 @@ SSE:
   # 已移除: {"type":"router_meta", ...}
 ```
 
+思考文本的两处落盘（区别见下方第 6 步）：SSE `thinking` 帧只用于实时展示；会话消息 `thinking` 字段（≤20000 字）供刷新回显；run_store sidecar 保存完整原文。
+
 编排：
 
 1. 校验项目 / 会话；解析 `preset = skill_name or None`。
@@ -95,7 +97,7 @@ SSE:
    - 无 tool_calls → 跳出；有 → `execute_tool` 逐条 append `{role:"tool",...}`，发 `tool_progress`；
    - 达轮上限 → 追加「请直接作答勿再调工具」再取一次。
 5. **最终流式**：`client.chat_stream(..., tools=None)`，逐 chunk 发 `content`；推理模型的 `reasoning` delta 转发为 `thinking` 帧（不进 parts、不参与判定链路）；非推理模型无该字段，输出与此前逐字节一致。
-6. 定稿：`_decide_draft` 出最终 `draft` → 再发一个 `meta`（携带解析后的 draft）→ 写助手消息（`pending = draft`）→ 摘要刷新 → `save_run` → `[DONE]`。run 的 reasoning 主 JSON 只保留预览和 sidecar 引用，完整内容写入 `agent/reasoning/{run_id}/step_{step_index}.txt.gz`，按单 step、单 run 和项目配额限制；删除会话时同步清理该会话的 runs 与 reasoning sidecar，Agent Viewer 仅允许本机访问。
+6. 定稿：`_decide_draft` 出最终 `draft` → 再发一个 `meta`（携带解析后的 draft）→ 写助手消息（`pending = draft`，`thinking` = 本次 turn 思考的回显副本，上限 20000 字）→ 摘要刷新 → `save_run` → `[DONE]`。run 的 reasoning 主 JSON 只保留预览和 sidecar 引用，完整内容写入 `agent/reasoning/{run_id}/step_{step_index}.txt.gz`，按单 step、单 run 和项目配额限制；删除会话时同步清理该会话的 runs 与 reasoning sidecar，Agent Viewer 仅允许本机访问。
 
 ### 4.1 执行层级与观测边界
 

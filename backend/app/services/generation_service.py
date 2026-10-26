@@ -45,6 +45,19 @@ ROUTER_MAX_TOKENS = 1024
 SUMMARY_MAX_TOKENS = 2048
 # 最终流式返回空内容时给用户的提示
 EMPTY_RESULT_MESSAGE = "模型未返回任何内容，请重试或调整输入"
+# 思考文本随会话消息落盘时的长度上限。会话详情（含全部消息）在切换会话时
+# 整体加载，不设上限会让单条会话 JSON 膨胀到数百 KB；完整原文仍在 run_store
+# 的 reasoning sidecar 里（Agent Viewer 可回看）。
+MESSAGE_THINKING_MAX_CHARS = 20_000
+MESSAGE_THINKING_SUFFIX = "…（思考过程已截断）"
+
+
+def _bound_message_thinking(value: str) -> str:
+    text = str(value or "")
+    if len(text) <= MESSAGE_THINKING_MAX_CHARS:
+        return text
+    keep = MESSAGE_THINKING_MAX_CHARS - len(MESSAGE_THINKING_SUFFIX)
+    return text[:keep] + MESSAGE_THINKING_SUFFIX
 
 
 def _attachment_summary(record: dict[str, Any]) -> dict[str, Any]:
@@ -386,6 +399,14 @@ def iter_generate(
     tool_steps: list[dict[str, Any]] = []
     # 跨所有工具轮累积的工具调用（[{name, arguments(dict)}]），随消息落盘保留
     tools_called: list[dict[str, Any]] = []
+    # 本次 turn 的全部思考（工具决策轮 + 最终流），按到达顺序拼接后写入
+    # assistant 消息的 `thinking` 元字段，供刷新/切换会话后回显。
+    # 它不参与 content、摘要、词数与 draft 判定。
+    message_thinking: list[str] = []
+
+    def _message_thinking() -> Optional[str]:
+        value = "".join(message_thinking)
+        return _bound_message_thinking(value) if value else None
 
     # 工具决策轮的 reasoning 也按稳定 step index 写入同一个 sidecar writer。
     # 这样流式中断时，已经收到的思考仍能和 agent_tool step 一起落盘。
@@ -479,6 +500,7 @@ def iter_generate(
                             reasoning_text = str(delta.get("text") or "")
                             if reasoning_text:
                                 pending_tool_reasoning.append(reasoning_text)
+                                message_thinking.append(reasoning_text)
                                 yield _sse(
                                     {
                                         "type": "thinking",
@@ -552,6 +574,7 @@ def iter_generate(
                         fallback_reasoning = assistant.get("reasoning_content")
                         if fallback_reasoning:
                             pending_tool_reasoning.append(str(fallback_reasoning))
+                            message_thinking.append(str(fallback_reasoning))
 
                 tool_calls = assistant.get("tool_calls") or []
                 flush_pending_tool_step(
@@ -643,6 +666,7 @@ def iter_generate(
                 error="已中断",
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -683,6 +707,7 @@ def iter_generate(
                     error=err_text,
                     status="idle",
                     tools=tools_called,
+                    thinking=_message_thinking(),
                 )
             except (FileNotFoundError, OSError):
                 pass
@@ -718,6 +743,7 @@ def iter_generate(
                 # 锚哨兵解析/字数统计（计划书 0.3 总原则 2）。
                 reasoning_text = delta.get("text") or ""
                 reasoning_writer.append(agent_step_index, reasoning_text)
+                message_thinking.append(reasoning_text)
                 yield _sse({"type": "thinking", "text": reasoning_text})
                 continue
             if delta.get("type") == "content":
@@ -753,6 +779,7 @@ def iter_generate(
                 error=err_text,
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -769,6 +796,7 @@ def iter_generate(
                 error="已中断" if not partial else "",
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -815,6 +843,7 @@ def iter_generate(
                 error=err_text,
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -844,6 +873,7 @@ def iter_generate(
                 error=err_text,
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -902,6 +932,7 @@ def iter_generate(
                 skill=skill_label,
                 status="idle",
                 tools=tools_called,
+                thinking=_message_thinking(),
             )
         except (FileNotFoundError, OSError):
             pass
@@ -915,8 +946,8 @@ def iter_generate(
     }
     reasoning_ref = reasoning_writer.finalize(agent_step_index)
     if reasoning_ref:
-        # A3：思考文本只进 run_store（Agent Viewer 可回看），
-        # 不进 session_store 消息（原则 0.3-1）。非推理模型无该字段。
+        # 完整思考原文进 run_store sidecar（Agent Viewer 可回看）；会话消息只存
+        # 首尾预览以控制 JSON 体积。非推理模型无该字段。
         final_extra["reasoning"] = reasoning_ref["preview"]
         final_extra["reasoning_ref"] = reasoning_ref
     steps.append(
