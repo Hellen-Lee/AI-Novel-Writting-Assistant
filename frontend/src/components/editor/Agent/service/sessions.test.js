@@ -20,7 +20,7 @@ describe('mapSessionDetail', () => {
     expect(mapped.messages[0].thinking).toBe('先观察再承接')
     expect(mapped.messages[0].content).toBe('正文内容')
     expect(mapped.messages[0].charCount).toBe(4)
-    // 旧消息没有该字段 → 空串，ThinkingBlock 不渲染
+    // 旧消息没有该字段 → 空串，过程容器不渲染思考段
     expect(mapped.messages[1].thinking).toBe('')
   })
 })

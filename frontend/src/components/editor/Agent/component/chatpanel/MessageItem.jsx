@@ -1,10 +1,8 @@
 import { Markdown } from '../../../../ui/Markdown'
 import { AGENT_PHASE } from '../../utils/constants'
-import { isToolCalling } from '../../utils/phase'
 import { AssistantPhase } from './AssistantPhase'
 import { DraftNotice } from './DraftNotice'
-import { ThinkingBlock } from './ThinkingBlock'
-import { ToolCallList } from './toolcall'
+import { AgentTrace } from './AgentTrace'
 import { AttachmentBundle } from '../inputbar/workspace'
 
 export function MessageItem({ message }) {
@@ -48,12 +46,12 @@ export function MessageItem({ message }) {
       </div>
       <div className="agent-panel__bubble agent-panel__bubble--ai">
         <AssistantPhase phase={message.phase} />
-        <ThinkingBlock
+        <AgentTrace
           messageId={message.id}
           phase={message.phase}
-          text={message.thinking}
+          thinking={message.thinking}
+          tools={message.tools || []}
         />
-        <ToolCallList tools={message.tools} running={isToolCalling(message.phase)} />
         {body}
         {streaming && !collapsed && hasBody ? (
           <i className="agent-panel__cursor" aria-hidden />

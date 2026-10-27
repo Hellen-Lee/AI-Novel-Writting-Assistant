@@ -6,8 +6,12 @@ export const isInFlight = (phase) =>
   phase === AGENT_PHASE.TOOL_CALL ||
   phase === AGENT_PHASE.STREAMING
 
-/** 工具调用进行中（ing）：阶段停在 tool_call 时，工具名文案呈波浪态 */
+/** 工具调用进行中（ing）：阶段停在 tool_call 时，顶部状态行显示「正在调用工具」 */
 export const isToolCalling = (phase) => phase === AGENT_PHASE.TOOL_CALL
+
+/** 思考文本已产出（思考阶段或工具决策轮），过程容器据此渲染思考子块 */
+export const hasThinkingPhase = (phase) =>
+  phase === AGENT_PHASE.THINKING || phase === AGENT_PHASE.TOOL_CALL
 
 export const toolLabel = (name) => TOOL_LABELS[name] || name || '工具'
 

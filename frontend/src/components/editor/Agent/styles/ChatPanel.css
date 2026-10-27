@@ -160,55 +160,86 @@
   }
 }
 
-/* --- 原生思考折叠块 --- */
-.agent-panel__thinking {
+/* --- 过程容器（思考 + 工具调用） ---
+   二者合并为一个折叠块：收起态只有一行静态汇总，展开态先思考后工具。
+   工具在 tool_progress 到达时已执行完毕，故此处不做「进行中」动画；
+   全屏唯一的动效是顶部的 AssistantPhase 状态行。 */
+.agent-panel__trace {
   margin: 0 0 8px;
-  border-radius: 8px;
-  overflow: hidden;
 }
-.agent-panel__thinking-toggle {
+.agent-panel__trace-toggle {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 30px;
+  min-height: 26px;
   gap: 6px;
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: var(--text-caption);
   line-height: 1.4;
   text-align: left;
   cursor: pointer;
 }
-.agent-panel__thinking-toggle:hover {
+.agent-panel__trace-toggle:hover {
   color: var(--color-text-secondary);
 }
-.agent-panel__thinking-label {
+.agent-panel__trace-label {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   min-width: 0;
 }
-/* 折叠箭头与工具调用行一致：收起向右、展开向下 */
-.agent-panel__thinking-arrow {
+.agent-panel__trace-icon {
+  flex-shrink: 0;
+}
+.agent-panel__trace-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agent-panel__trace-arrow {
   color: var(--color-text-muted);
   display: inline-flex;
   flex-shrink: 0;
 }
-.agent-panel__thinking-body {
-  max-height: 160px;
-  padding: 0 8px 8px;
+.agent-panel__trace-body {
+  max-height: 200px;
+  padding: 2px 0 0 18px;
   overflow-y: auto;
   color: var(--color-text-muted);
-  font-size: 11px;
+  font-size: var(--text-caption);
   line-height: 1.55;
 }
-.agent-panel__thinking-body pre {
+.agent-panel__trace-thinking pre {
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
   font: inherit;
+}
+.agent-panel__trace-tools {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.agent-panel__trace-tools > li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+.agent-panel__trace-tool-name {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+.agent-panel__trace-tool-args {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 流式光标（非折叠写作轮气泡尾部） */
