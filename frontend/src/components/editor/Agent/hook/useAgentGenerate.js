@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { getErrorMessage } from '../../../../api/client'
 import { countWords } from '../../../../utils/format'
 import {
@@ -39,16 +39,27 @@ export function useAgentGenerate({
     setNotice(text)
   }
 
-  const handleStop = () => {
-    abortRef.current?.abort()
-    abortRef.current = null
-    setGenerating(false)
-    showNotice('已终止生成。')
-    setAiDraft?.((d) => {
-      if (!d || d.status !== 'streaming') return d
-      return { ...d, status: 'ready', stopped: true, phase: AGENT_PHASE.STOPPED }
-    })
-  }
+  // 稳定引用：调用方（useAgentPanel）会把它放进 effect / 会话切换回调
+  const stopGeneration = useCallback(
+    ({ silent = false } = {}) => {
+      abortRef.current?.abort()
+      abortRef.current = null
+      setGenerating(false)
+      if (!silent) setNotice('已终止生成。')
+      setAiDraft?.((d) => {
+        if (!d || d.status !== 'streaming') return d
+        return {
+          ...d,
+          status: 'ready',
+          stopped: true,
+          phase: AGENT_PHASE.STOPPED,
+        }
+      })
+    },
+    [setAiDraft],
+  )
+
+  const handleStop = () => stopGeneration()
   /**
    * @param {string|null|undefined} skillId - null/undefined → unified agentic path
    * @param {string} userText
@@ -446,6 +457,6 @@ export function useAgentGenerate({
     handleTriggerGenerate,
     handleStop,
     handleRetry,
-    abortGenerate: handleStop,
+    stopGeneration,
   }
 }

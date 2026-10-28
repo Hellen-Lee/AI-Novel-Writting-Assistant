@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { getErrorMessage } from '../../../../api/client'
 import {
+  clearRemoteSessions,
   createRemoteSession,
   ensureActiveSession,
   loadSessionDetail,
+  removeRemoteSession,
+  renameRemoteSession,
 } from '../service/sessions'
 
 /**
@@ -14,6 +17,8 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
   const [activeSessionId, setActiveSessionId] = useState('')
   const [loading, setLoading] = useState(Boolean(projectId))
   const [loadError, setLoadError] = useState('')
+  // 历史面板内联错误：历史视图不渲染 InputBar 通知条，需就地提示
+  const [historyError, setHistoryError] = useState('')
   const activeIdRef = useRef('')
 
   useEffect(() => {
@@ -57,6 +62,7 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
     let cancelled = false
     setLoading(true)
     setLoadError('')
+    setHistoryError('')
 
     ;(async () => {
       try {
@@ -80,13 +86,13 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
     }
   }, [projectId])
 
-  const handleNewChat = async () => {
+  const handleNewChat = async (title) => {
     if (!projectId) return null
     onBeforeSwitch?.()
     try {
       const created = await createRemoteSession(
         projectId,
-        `对话 ${sessions.length + 1}`,
+        title || `对话 ${sessions.length + 1}`,
       )
       setSessions((prev) => [
         {
@@ -107,6 +113,17 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
     }
   }
 
+  const loadDetailInto = useCallback(
+    async (id) => {
+      const detail = await loadSessionDetail(projectId, id)
+      setSessions((prev) =>
+        prev.map((s) => (s.id === detail.id ? { ...s, ...detail } : s)),
+      )
+      return detail
+    },
+    [projectId],
+  )
+
   const handleSelectSession = async (id) => {
     if (!projectId || !id || id === activeSessionId) {
       setActiveSessionId(id)
@@ -118,13 +135,78 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
     if (cached?.messages?.length) return
 
     try {
-      const detail = await loadSessionDetail(projectId, id)
-      setSessions((prev) =>
-        prev.map((s) => (s.id === detail.id ? { ...s, ...detail } : s)),
-      )
+      await loadDetailInto(id)
     } catch (err) {
       setLoadError(getErrorMessage(err, '加载会话失败'))
     }
+  }
+
+  /** 重命名：只改标题，不动 updated_at，因此归档位置与顺序保持不变 */
+  const handleRenameSession = async (id, title) => {
+    const clean = String(title || '').trim()
+    if (!projectId || !id || !clean) return false
+    setHistoryError('')
+    try {
+      const summary = await renameRemoteSession(projectId, id, clean)
+      setSessions((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, title: summary.title } : s)),
+      )
+      return true
+    } catch (err) {
+      setHistoryError(getErrorMessage(err, '重命名会话失败'))
+      return false
+    }
+  }
+
+  /** 删除会话；若删掉的是当前会话，自动切到下一条，全部删空则新建一条 */
+  const handleDeleteSession = async (id) => {
+    if (!projectId || !id) return false
+    setHistoryError('')
+    if (id === activeIdRef.current) onBeforeSwitch?.()
+    try {
+      await removeRemoteSession(projectId, id)
+    } catch (err) {
+      setHistoryError(getErrorMessage(err, '删除会话失败'))
+      return false
+    }
+
+    const remaining = sessions.filter((s) => s.id !== id)
+    setSessions(remaining)
+    if (id !== activeIdRef.current) return true
+
+    const next = remaining[0]
+    if (!next) {
+      // 全部删空时补一条空会话，保证生成链路随时可用
+      setActiveSessionId('')
+      await handleNewChat('新对话')
+      return true
+    }
+    setActiveSessionId(next.id)
+    if (!next.messages?.length) {
+      try {
+        await loadDetailInto(next.id)
+      } catch (err) {
+        setHistoryError(getErrorMessage(err, '加载会话失败'))
+      }
+    }
+    return true
+  }
+
+  /** 清空历史：后端删除全部会话后立即新建一条空会话 */
+  const handleClearSessions = async () => {
+    if (!projectId) return false
+    setHistoryError('')
+    onBeforeSwitch?.()
+    try {
+      await clearRemoteSessions(projectId)
+    } catch (err) {
+      setHistoryError(getErrorMessage(err, '清空会话失败'))
+      return false
+    }
+    setSessions([])
+    setActiveSessionId('')
+    await handleNewChat('新对话')
+    return true
   }
 
   return {
@@ -133,10 +215,15 @@ export function useAgentSessions({ projectId, onBeforeSwitch } = {}) {
     activeSession,
     loading,
     loadError,
+    historyError,
+    setHistoryError,
     updateActiveSession,
     updateSessionById,
     handleNewChat,
     handleSelectSession,
+    handleRenameSession,
+    handleDeleteSession,
+    handleClearSessions,
     setLoadError,
   }
 }

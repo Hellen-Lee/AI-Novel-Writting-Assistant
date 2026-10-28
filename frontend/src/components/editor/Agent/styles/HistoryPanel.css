@@ -14,14 +14,15 @@
   justify-content: space-between;
   height: 48px;
   padding: 0 14px;
-  border-bottom: 1px solid var(--color-border-default);
+  background: var(--color-bg-page);
   flex-shrink: 0;
 }
 
 .agent-panel__history-head-left {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+  min-width: 0;
 }
 
 .agent-panel__history-head-left h3 {
@@ -31,6 +32,8 @@
   color: var(--color-text-primary);
 }
 
+/* --- TopBar / 搜索 --- */
+
 .agent-panel__history-body {
   flex: 1;
   min-height: 0;
@@ -39,17 +42,25 @@
   overflow: hidden;
 }
 
+.agent-panel__history-topbar {
+  padding: 8px 14px;
+  flex-shrink: 0;
+}
+
 .agent-panel__history-search {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 12px 14px 0;
-  padding: 8px 12px;
+  height: 34px;
+  padding: 0 10px;
   border-radius: var(--radius-md);
   background: var(--color-bg-surface);
   border: 1px solid var(--color-border-default);
   color: var(--color-text-muted);
-  flex-shrink: 0;
+}
+
+.agent-panel__history-search:focus-within {
+  border-color: var(--color-primary);
 }
 
 .agent-panel__history-search-input {
@@ -62,35 +73,42 @@
   color: var(--color-text-primary);
 }
 
-.agent-panel__history-search-input:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+.agent-panel__history-search-input::placeholder {
+  color: var(--color-text-muted);
 }
+
+.agent-panel__history-error {
+  margin: 0 14px 6px;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: #fdecea;
+  color: var(--color-error);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+}
+
+/* --- 分组列表 --- */
 
 .agent-panel__history-groups {
   flex: 1;
   min-height: 0;
   overflow: auto;
-  padding: 12px 8px 8px;
+  padding: 0 8px 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
 }
 
 .agent-panel__history-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 0 6px;
-}
-
-.agent-panel__history-group--placeholder {
-  opacity: 0.55;
-  pointer-events: none;
+  gap: 2px;
+  padding: 8px 0 4px;
 }
 
 .agent-panel__history-group-label {
   margin: 0;
+  padding: 0 8px;
   font-size: var(--text-caption);
   font-weight: 600;
   color: var(--color-text-muted);
@@ -98,8 +116,8 @@
 
 .agent-panel__history-empty {
   margin: 0;
-  padding: 6px 4px;
-  font-size: var(--text-caption);
+  padding: 12px 8px;
+  font-size: var(--text-body-sm);
   color: var(--color-text-muted);
 }
 
@@ -112,30 +130,51 @@
   gap: 4px;
 }
 
-.agent-panel__session {
-  width: 100%;
-  text-align: left;
-  padding: 8px 12px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
+/* --- 会话行 --- */
+
+.agent-panel__session-row {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  gap: 8px;
+  /* 固定行高：hover 出现「⋯」时不再撑高，避免列表跳动 */
+  min-height: 36px;
+  padding: 6px 8px;
+  border-radius: var(--radius-md);
 }
 
-.agent-panel__session:hover {
+.agent-panel__session-row:hover {
   background: var(--color-bg-surface);
 }
 
-.agent-panel__session.is-active {
-  background: #e4efe9;
-  border-left: 3px solid var(--color-primary);
-  padding-left: 9px;
+.agent-panel__session-row.is-active {
+  background: var(--color-primary-soft);
+}
+
+.agent-panel__session-accent {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 2px;
+  background: var(--color-primary);
+}
+
+.agent-panel__session {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 
 .agent-panel__session-title {
-  font-size: var(--text-body-sm);
+  display: block;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text-primary);
   overflow: hidden;
@@ -143,17 +182,116 @@
   white-space: nowrap;
 }
 
-.agent-panel__session-meta {
-  font-size: var(--text-caption);
-  color: var(--color-text-muted);
+.agent-panel__session-row.is-active .agent-panel__session-title {
+  font-weight: 600;
 }
+
+.agent-panel__session-rename {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-surface);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--color-text-primary);
+  outline: none;
+}
+
+/* --- 「⋯」与下拉菜单（hover 才显示） --- */
+
+.agent-panel__session-more {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.agent-panel__session-row:hover .agent-panel__session-more,
+.agent-panel__session-more.is-open,
+.agent-panel__session-more:focus-visible {
+  display: inline-flex;
+}
+
+.agent-panel__session-more.is-open {
+  background: var(--color-bg-surface);
+}
+
+.agent-panel__session-more:hover {
+  color: var(--color-text-primary);
+}
+
+.agent-panel__session-menu {
+  position: absolute;
+  top: calc(100% - 2px);
+  right: 8px;
+  z-index: 3;
+  width: 128px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 12px #1a2e281a;
+}
+
+/* 行贴近面板底部时向上展开，避免被列表滚动容器裁掉 */
+.agent-panel__session-menu.is-up {
+  top: auto;
+  bottom: calc(100% - 2px);
+}
+
+.agent-panel__session-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-size: var(--text-body-sm);
+  font-family: inherit;
+  color: var(--color-text-primary);
+  text-align: left;
+  cursor: pointer;
+}
+
+.agent-panel__session-menu-item:hover {
+  background: var(--color-bg-sidebar);
+}
+
+.agent-panel__session-menu-item svg {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+}
+
+.agent-panel__session-menu-item--danger,
+.agent-panel__session-menu-item--danger svg {
+  color: var(--color-error);
+}
+
+/* --- Footer --- */
 
 .agent-panel__history-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 46px;
-  padding: 0 14px;
+  gap: 8px;
+  padding: 10px 14px 12px;
   border-top: 1px solid var(--color-border-default);
   flex-shrink: 0;
 }
@@ -161,17 +299,29 @@
 .agent-panel__history-count {
   font-size: var(--text-caption);
   color: var(--color-text-muted);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .agent-panel__history-clear {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  padding: 4px 8px;
   border: none;
+  border-radius: 6px;
   background: transparent;
   color: var(--color-text-muted);
   font-size: var(--text-caption);
-  padding: 4px 0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.agent-panel__history-clear:hover:not(:disabled) {
+  background: var(--color-bg-surface);
+  color: var(--color-error);
 }
 
 .agent-panel__history-clear:disabled {

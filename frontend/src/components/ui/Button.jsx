@@ -5,6 +5,7 @@ const VARIANTS = {
   primary: 'btn btn--primary',
   secondary: 'btn btn--secondary',
   ghost: 'btn btn--ghost',
+  danger: 'btn btn--danger',
 }
 
 export function Button({

@@ -82,6 +82,11 @@ export function useAgentPanel({
     updateSessionById,
     handleNewChat: newChat,
     handleSelectSession: selectSession,
+    handleRenameSession: renameSession,
+    handleDeleteSession: deleteSession,
+    handleClearSessions: clearSessions,
+    historyError,
+    setHistoryError,
     setLoadError,
   } = sessionsApi
 
@@ -175,12 +180,13 @@ export function useAgentPanel({
     handleTriggerGenerate,
     handleStop,
     handleRetry,
-    abortGenerate,
+    stopGeneration,
   } = generateApi
 
   useEffect(() => {
-    abortRef.current = abortGenerate
-  }, [abortGenerate])
+    // 切换/删除会话前静默中断当前生成：不再弹「已终止生成」的误导提示
+    abortRef.current = () => stopGeneration({ silent: true })
+  }, [stopGeneration])
 
   const selectedModel =
     modelOptions.find((m) => m.id === modelId) ||
@@ -227,12 +233,27 @@ export function useAgentPanel({
     setPanelMode('chat')
     setNotice('')
     setLoadError('')
+    setHistoryError('')
   }
 
   const handleSelectSession = async (id) => {
     await selectSession(id)
     setPanelMode('chat')
+    setHistoryError('')
   }
+
+  // 每次进入历史视图都清掉上一轮的内联错误，避免旧提示滞留
+  const openHistory = () => {
+    setHistoryError('')
+    setPanelMode('history')
+  }
+
+  // 重命名 / 删除 / 清空都停留在历史列表，方便连续整理
+  const handleRenameSession = async (id, title) => renameSession(id, title)
+
+  const handleDeleteSession = async (id) => deleteSession(id)
+
+  const handleClearSessions = async () => clearSessions()
 
   const handleUploadFiles = async (fileList) => {
     const files = Array.from(fileList || [])
@@ -396,10 +417,12 @@ export function useAgentPanel({
   return {
     panelMode,
     setPanelMode,
+    openHistory,
     sessions,
     activeSessionId,
     activeSession,
     sessionsLoading,
+    historyError,
     messagesEndRef,
     selectedSkill,
     input,
@@ -416,6 +439,9 @@ export function useAgentPanel({
     selectedModel,
     handleNewChat,
     handleSelectSession,
+    handleRenameSession,
+    handleDeleteSession,
+    handleClearSessions,
     handleSend,
     handleStop,
     handleRetry,

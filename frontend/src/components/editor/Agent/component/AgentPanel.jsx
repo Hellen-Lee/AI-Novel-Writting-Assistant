@@ -31,16 +31,17 @@ export function AgentPanel({
   const {
     panelMode,
     setPanelMode,
+    openHistory,
     sessions,
     activeSessionId,
     activeSession,
     sessionsLoading,
+    historyError,
     messagesEndRef,
     input,
     setInput,
     notice,
     setNotice,
-    showNotice,
     generating,
     sendDisabled,
     modelId,
@@ -49,6 +50,9 @@ export function AgentPanel({
     selectedModel,
     handleNewChat,
     handleSelectSession,
+    handleRenameSession,
+    handleDeleteSession,
+    handleClearSessions,
     handleSend,
     handleStop,
     handleRetry,
@@ -89,9 +93,7 @@ export function AgentPanel({
             className={`agent-panel__icon-btn${panelMode === 'history' ? ' is-active' : ''}`}
             aria-label="历史会话"
             title="历史会话"
-            onClick={() =>
-              setPanelMode((m) => (m === 'history' ? 'chat' : 'history'))
-            }
+            onClick={() => (panelMode === 'history' ? setPanelMode('chat') : openHistory())}
           >
             <History size={15} />
           </button>
@@ -120,11 +122,14 @@ export function AgentPanel({
         <HistoryPanel
           sessions={sessions}
           activeSessionId={activeSessionId}
+          error={historyError}
           onClose={() => setPanelMode('chat')}
           onSelectSession={handleSelectSession}
           onNewChat={handleNewChat}
           onCollapse={onCollapse}
-          onShowNotice={showNotice}
+          onRenameSession={handleRenameSession}
+          onDeleteSession={handleDeleteSession}
+          onClearSessions={handleClearSessions}
         />
       ) : (
         <>

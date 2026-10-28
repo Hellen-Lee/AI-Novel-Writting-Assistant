@@ -58,7 +58,9 @@ API_INDEX: list[tuple[str, str, str]] = [
     ("GET", "/api/projects/{id}/agent/sessions", "Agent 会话列表"),
     ("POST", "/api/projects/{id}/agent/sessions", "新建 Agent 会话"),
     ("GET", "/api/projects/{id}/agent/sessions/{sid}", "会话详情（含消息）"),
+    ("PUT", "/api/projects/{id}/agent/sessions/{sid}", "重命名会话"),
     ("DELETE", "/api/projects/{id}/agent/sessions/{sid}", "删除会话"),
+    ("DELETE", "/api/projects/{id}/agent/sessions", "清空项目全部会话"),
     # agent attachments
     ("POST", "/api/projects/{id}/agent/attachments", "上传附件（multipart 批量，逐项返回 record）"),
     ("GET", "/api/projects/{id}/agent/attachments/{att_id}", "读取附件原件（需 session_id 查询参数）"),

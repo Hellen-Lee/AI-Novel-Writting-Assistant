@@ -16,7 +16,8 @@
 | 做 | 不做 / 另案 |
 | --- | --- |
 | `POST .../generate` HTTP SSE 流式生成 | 全双工 WebSocket |
-| 按项目落盘多会话；列表 / 新建 / 切换 / 删除 | 历史搜索、按日分组、重命名 |
+| 按项目落盘多会话；列表 / 新建 / 切换 / 删除 | 会话内容全文搜索（现只按标题前端过滤） |
+| 重命名（不改 `updated_at`，落 `title_locked`，返回摘要）与清空历史（整目录回收附件/run/reasoning） | 归档自定义分组、多选批量操作 |
 | 生成请求带 `session_id`；可选 `skill_name` | 开放式 tool loop |
 | 显式 `skill_name` → skill；省略 → Router → chat / 可自动 skill | Router 与执行不共用一份巨包上下文 |
 | 会话 `summary` + 最近轮次注入模型（chat / Router） | 确认卡片 `ask`（契约预留） |
@@ -43,6 +44,9 @@ data/projects/{project_id}/agent/
 
 - `session_id` 由服务端生成（`sess_...`）。
 - 会话字段：`summary`（对话摘要，默认 `""`）；旧文件缺省兼容。
+- `title_locked`：用户显式重命名后置 `true`，空会话发出首条消息时不再被 `title_if_empty` 自动覆盖。
+- 重命名只写 `title`，**不刷新 `updated_at`**，因此历史列表的时间归档与排序保持稳定；接口返回 `SessionSummary`（不含 `messages`），避免每次改名重传整份会话正文。
+- `delete_session` 用 `_cleanup_session_assets`（附件目录 + run/reasoning 账本）；`clear_sessions` 用 `_purge_session_assets` 整目录回收 `agent/{attachments,runs,reasoning}`，再统一删 `agent/sessions/*.json` 并清空索引。整目录回收既避免逐会话扫描 run 目录，也覆盖会话文件已丢失的孤儿数据。
 - 消息字段：`content` 只放可见正文/回答；`thinking` 是**独立思考副本**（原生 reasoning，≤20000 字，供刷新回显），不参与历史组装、摘要与字数统计。完整思考原文在 `agent/reasoning/{run_id}/step_*.txt.gz`。
 - **后续口子（本期不落键）**：`waiting_user`、`pending_run`（随 `ask`）。
 - 切换会话：前端改 `activeSessionId` 并拉取详情；若正在生成则**先 abort**。

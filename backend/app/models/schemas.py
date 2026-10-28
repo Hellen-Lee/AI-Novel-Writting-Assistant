@@ -396,9 +396,21 @@ class SessionCreateRequest(BaseModel):
     title: str = "新对话"
 
 
+class SessionUpdateRequest(BaseModel):
+    """重命名会话：仅改标题，不影响 updated_at 与归档位置。"""
+
+    title: str = Field(..., min_length=1)
+
+    _check_title = non_blank("title")
+
+
 class SessionListResponse(BaseModel):
     sessions: list[SessionSummary] = Field(default_factory=list)
     count: int = 0
+
+
+class SessionClearResponse(BaseModel):
+    deleted: int = 0
 
 
 class GenerateRequest(BaseModel):

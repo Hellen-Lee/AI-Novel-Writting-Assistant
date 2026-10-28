@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
@@ -78,7 +79,8 @@ def _new_message_id(prefix: str = "m") -> str:
     return f"{prefix}_{uuid.uuid4().hex[:12]}"
 
 
-def _summary_from_session(session: dict[str, Any]) -> dict[str, Any]:
+def summarize_session(session: dict[str, Any]) -> dict[str, Any]:
+    """会话 → 索引摘要（不含消息正文）。"""
     messages = session.get("messages") or []
     return {
         "id": session["id"],
@@ -99,7 +101,7 @@ def _touch_index_entry(
     sessions = [s for s in index["sessions"] if isinstance(s, dict)]
     sessions = [s for s in sessions if s.get("id") != session["id"]]
     if not remove:
-        sessions.insert(0, _summary_from_session(session))
+        sessions.insert(0, summarize_session(session))
     sessions.sort(key=lambda s: int(s.get("updated_at") or 0), reverse=True)
     _save_index(project_id, {"sessions": sessions})
 
@@ -156,10 +158,7 @@ def delete_session(project_id: str, session_id: str) -> None:
         raise FileNotFoundError(f"会话不存在: {session_id}")
     # G2：先清理附件目录，再删除会话 JSON。清理失败时保留会话，
     # 避免产生「无会话的附件」孤儿文件。
-    from app.services import attachment_store, run_store
-
-    attachment_store.delete_session_attachments(project_id, session_id)
-    run_store.delete_runs_for_session(project_id, session_id)
+    _cleanup_session_assets(project_id, session_id)
     path.unlink(missing_ok=True)
     index = _load_index(project_id)
     index["sessions"] = [
@@ -168,6 +167,67 @@ def delete_session(project_id: str, session_id: str) -> None:
         if isinstance(s, dict) and s.get("id") != session_id
     ]
     _save_index(project_id, index)
+
+
+def _cleanup_session_assets(project_id: str, session_id: str) -> None:
+    """级联删除会话附属数据（附件目录 + run/reasoning 账本）。"""
+    from app.services import attachment_store, run_store
+
+    attachment_store.delete_session_attachments(project_id, session_id)
+    run_store.delete_runs_for_session(project_id, session_id)
+
+
+def _purge_session_assets(project_id: str) -> None:
+    """整目录回收会话附属数据（附件 / run 账本 / reasoning sidecar）。
+
+    这三类数据都以会话为单位组织，清空历史后没有需要保留的条目；
+    整目录删除同时覆盖索引与会话文件都已丢失的孤儿数据。
+    """
+    from app.services import reasoning_store
+
+    agent_dir = _agent_dir(project_id)
+    for name in ("attachments", "runs", reasoning_store.REASONING_DIR_NAME):
+        shutil.rmtree(agent_dir / name, ignore_errors=True)
+
+
+def rename_session(project_id: str, session_id: str, title: str) -> dict[str, Any]:
+    """只改标题：不刷新 updated_at，避免重命名改变时间归档与列表顺序。"""
+    session = get_session(project_id, session_id)
+    clean = (title or "").strip()
+    if not clean:
+        raise ValueError("title 不能为空")
+    session["title"] = clean[:64]
+    # 用户显式命名后，空会话发出首条消息时不应再被自动标题覆盖
+    session["title_locked"] = True
+    _write_json(_session_path(project_id, session_id), session)
+    _touch_index_entry(project_id, session)
+    return session
+
+
+def clear_sessions(project_id: str) -> int:
+    """清空项目下全部会话（连同附件与 run 账本），返回删除条数。"""
+    _ensure_project(project_id)
+    index = _load_index(project_id)
+    indexed_ids = {
+        str(s.get("id"))
+        for s in index["sessions"]
+        if isinstance(s, dict) and s.get("id")
+    }
+
+    deleted = 0
+    sessions_dir = _agent_dir(project_id) / "sessions"
+    if sessions_dir.exists():
+        for path in sessions_dir.glob("*.json"):
+            path.unlink(missing_ok=True)
+            # 索引缺失但会话文件仍在时也要计入删除条数
+            if path.stem not in indexed_ids:
+                deleted += 1
+    deleted += len(indexed_ids)
+
+    # 附属数据整目录回收：无需逐个会话扫描 run 目录，也一并清掉孤儿条目
+    _purge_session_assets(project_id)
+    _save_index(project_id, _empty_index())
+    return deleted
 
 
 def save_session(project_id: str, session: dict[str, Any]) -> dict[str, Any]:
@@ -193,7 +253,7 @@ def append_messages(
     existing = session.get("messages")
     if not isinstance(existing, list):
         existing = []
-    if title_if_empty and not existing:
+    if title_if_empty and not existing and not session.get("title_locked"):
         text = (title_if_empty or "").strip()
         if text:
             session["title"] = text[:64]

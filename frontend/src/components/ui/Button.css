@@ -44,6 +44,15 @@
   color: var(--color-text-primary);
 }
 
+.btn--danger {
+  background: var(--color-error);
+  color: var(--color-text-inverse);
+}
+
+.btn--danger:hover {
+  background: #961d12;
+}
+
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;

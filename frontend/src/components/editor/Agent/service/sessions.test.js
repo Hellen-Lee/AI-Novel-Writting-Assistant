@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { mapSessionDetail } from './sessions'
+import { mapSessionDetail, mapSessionSummary } from './sessions'
 
 describe('mapSessionDetail', () => {
   it('保留后端落盘的 thinking，供刷新后回显思考块', () => {
@@ -22,5 +22,22 @@ describe('mapSessionDetail', () => {
     expect(mapped.messages[0].charCount).toBe(4)
     // 旧消息没有该字段 → 空串，过程容器不渲染思考段
     expect(mapped.messages[1].thinking).toBe('')
+  })
+})
+
+describe('mapSessionSummary', () => {
+  it('重命名返回的摘要不覆盖已加载的消息，仅取标题等元数据', () => {
+    const summary = mapSessionSummary({
+      id: 'sess_test',
+      title: '新标题',
+      updated_at: 1_700_000_000_000,
+      message_count: 6,
+      status: 'idle',
+    })
+
+    expect(summary.title).toBe('新标题')
+    expect(summary.updatedAt).toBe(1_700_000_000_000)
+    // 摘要没有 messages，调用方只能拿它改标题
+    expect(summary.messages).toEqual([])
   })
 })

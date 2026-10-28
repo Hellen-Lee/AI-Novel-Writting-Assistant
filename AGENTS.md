@@ -95,8 +95,8 @@ AINovel/
             ├── memory.json
             ├── outline.json
             ├── agent/                # Agent 会话
-            │   ├── sessions.json
-            │   └── sessions/{sid}.json
+            │   ├── sessions.json     # 索引：title / updated_at / message_count
+            │   └── sessions/{sid}.json  # 含 title_locked（用户重命名后不再自动改名）
             └── chapters/
                 └── chapter_01.md
 ```
@@ -242,6 +242,7 @@ $user_input
 - **单页引导**：题材/内核/人物/大纲同一页；支持 AI 一键生成全部；卡片可模态展开编辑。
 - **设定库**：侧栏四类（世界观 / 故事内核 / 人物 / 全本大纲）+ 卡片工作区；点卡片展开编辑；布局约束见 `frontend/AGENT.md` §5。
 - **编辑页**：正文区右上角工具栏切换 **Agent 对话 / 规则 / 导出（占位）**；右侧整栏在 Agent 与「创作规则」间切换（规则不再嵌在 Agent 遮罩内）。Agent 头栏为历史会话、新建对话、收起。
+- **历史会话**（设计稿 `OckRz`）：搜索按标题即时过滤；列表按**今天 / 近 7 天 / 更早**归档（空组不渲染）；行内「⋯」提供重命名（行内输入，Enter 提交 / Esc 取消）与删除，下拉会按滚动容器上下边界择向展开；会话行 `min-height: 36px`、行间距 4，hover 出「⋯」或进入行内重命名都不改变行高；底部计数 + 清空历史。删除/清空走 `ConfirmDialog` 二次确认，并级联清理附件与 run 账本（清空为整目录回收，兼容会话已丢失的孤儿数据）。每次进入历史视图会清掉上一轮内联错误。
 - **快捷指令**：对话栏底栏按钮或 `/name`，与 SKILL.md 对应。
 - **全局设置**：首页右上角「设置」进入；侧栏三栏为**通用 / API / skill**（API = 原模型配置，skill = 原技能库管理）。详见 `docs/build/05-全局设置面板.md`。
 
@@ -283,7 +284,9 @@ $user_input
 | GET | `/api/projects/{id}/agent/sessions` | Agent 会话列表 | — |
 | POST | `/api/projects/{id}/agent/sessions` | 新建会话 | `SessionCreateRequest` |
 | GET | `/api/projects/{id}/agent/sessions/{sid}` | 会话详情（含消息） | — |
+| PUT | `/api/projects/{id}/agent/sessions/{sid}` | 重命名会话（不改 `updated_at`；返回 `SessionSummary`） | `SessionUpdateRequest` |
 | DELETE | `/api/projects/{id}/agent/sessions/{sid}` | 删除会话（204） | — |
+| DELETE | `/api/projects/{id}/agent/sessions` | 清空项目全部会话（含附件与 run/reasoning） | — |
 | POST | `/api/projects/{id}/generate` | Agent 流式生成（SSE；可带 `skill_name` 或走 Router） | `GenerateRequest` |
 | POST | `/api/onboarding/generate` | 引导页 AI 一键生成设定（无状态，JSON 响应） | `OnboardingGenerateRequest` |
 | GET | `/api/dev/projects/{id}/agent/runs` | Agent Viewer：run 列表（无 prompt 正文） | — |
@@ -380,6 +383,9 @@ $user_input
 
 ```jsonc
 // SessionCreateRequest { title: str = "新对话" }
+// SessionUpdateRequest { title: str }     // 重命名；空白 → 422，超 64 字截断，不改 updated_at
+// 响应：PUT 返回 SessionSummary（不含 messages，避免传输整份会话正文）
+// SessionClearResponse { deleted: int }   // 清空历史返回删除条数（幂等，已空则 0）
 // AgentMessage { id, role: "user"|"assistant", content, pending?: bool,
 //                skill?: str, error?: str, status?: "generating"|"idle", created_at,
 //                thinking?: str }   // 思考回显副本（≤20000 字，独立字段，不进 content/历史/摘要）

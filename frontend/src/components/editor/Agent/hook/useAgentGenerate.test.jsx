@@ -147,3 +147,31 @@ describe('useAgentGenerate thinking 透传', () => {
     expect(drafts.at(-1)).toBeNull()
   })
 })
+
+describe('stopGeneration', () => {
+  it('silent 中断不写提示，且 stopGeneration 引用保持稳定', async () => {
+    // setAiDraft 来自 useState setter，真实调用中引用稳定
+    const setAiDraft = vi.fn()
+    const { result, rerender } = renderHook(() =>
+      useAgentGenerate({
+        projectId: 'project_test',
+        getSessionId: () => 'session_test',
+        getModelId: () => 'model_test',
+        updateSessionById: vi.fn(),
+        setAiDraft,
+        onInputClear: vi.fn(),
+      }),
+    )
+
+    const first = result.current.stopGeneration
+    rerender()
+    // 稳定引用：调用方把它放进 effect / 会话切换回调，不应每次渲染重建
+    expect(result.current.stopGeneration).toBe(first)
+
+    act(() => result.current.stopGeneration({ silent: true }))
+    expect(result.current.notice).toBe('')
+
+    act(() => result.current.stopGeneration())
+    expect(result.current.notice).toBe('已终止生成。')
+  })
+})

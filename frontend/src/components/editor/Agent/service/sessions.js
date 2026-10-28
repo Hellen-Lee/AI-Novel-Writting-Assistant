@@ -1,8 +1,10 @@
 import {
+  clearSessions as apiClearSessions,
   createSession as apiCreateSession,
   deleteSession as apiDeleteSession,
   getSession as apiGetSession,
   listSessions as apiListSessions,
+  updateSession as apiUpdateSession,
 } from '../../../../api/sessions'
 import { attachmentThumbUrl } from '../../../../api/attachments'
 import { countWords } from '../../../../utils/format'
@@ -119,4 +121,16 @@ export async function createRemoteSession(projectId, title = '新对话') {
 
 export async function removeRemoteSession(projectId, sessionId) {
   await apiDeleteSession(projectId, sessionId)
+}
+
+/** 重命名后端只返回会话摘要（title / updated_at 等），不含消息正文 */
+export async function renameRemoteSession(projectId, sessionId, title) {
+  const summary = await apiUpdateSession(projectId, sessionId, title)
+  return mapSessionSummary(summary)
+}
+
+/** 清空全部会话，返回后端删除条数 */
+export async function clearRemoteSessions(projectId) {
+  const data = await apiClearSessions(projectId)
+  return Number(data?.deleted) || 0
 }
